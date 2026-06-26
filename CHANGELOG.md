@@ -1,0 +1,21 @@
+# Changelog
+
+All notable changes to this marketplace are documented here. The format is based
+on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Individual plugins
+carry their own versions (shown in the [Crew table](README.md#-the-crew)); this
+file tracks the marketplace as a whole.
+
+## [Unreleased]
+
+### Added
+- Community health files: contributing guide, code of conduct, security policy, issue forms, and PR template.
+- Expanded README: status badges, table of contents, per-crew deep-dives, and a "which crew member do I need?" picker.
+
+## [0.1.0] — 2026-06-26
+
+### Added
+- Initial public release of the **The Tavern** marketplace with all eight crew members:
+  Sage, Smith, Warden, Sellsword, Cleric, Scout, Tactician, and Seer.
+
+[Unreleased]: https://github.com/gshepptech/the-tavern/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/gshepptech/the-tavern/releases/tag/v0.1.0
