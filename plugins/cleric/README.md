@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="cleric.svg" alt="Cleric — the sweep" width="100%"/>
+
 # Cleric
 
 **The crew member who sweeps the site clean — careful, low-risk codebase cleanup across 7 focused tracks.**

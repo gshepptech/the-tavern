@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="seer.svg" alt="Seer — the surveyor" width="100%"/>
+
 # Seer
 
 **Macro-architecture review — is this shaped right, or accreted?**

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="sellsword.svg" alt="Sellsword — the general contractor" width="100%"/>
+
 # Sellsword
 
 **Hand Sellsword a gnarly problem — he owns the outcome end to end.**

@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="scout.svg" alt="Scout — the inspector" width="100%"/>
+
 # Scout
 
 **Describe the flow. Scout walks every room. The spec writes itself.**

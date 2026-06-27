@@ -1,5 +1,7 @@
 <div align="center">
 
+<img src="tactician.svg" alt="Tactician — the rigger" width="100%"/>
+
 # Tactician
 
 **You name the task. Tactician picks the topology, rigs up the script, and validates it.**

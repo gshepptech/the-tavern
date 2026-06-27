@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="warden.png" alt="Warden — the crew member who keeps every job plumb, level, and true" width="220"/>
+<img src="warden.svg" alt="Warden — keeps every job plumb, level, and true" width="100%"/>
 
 # Warden
 
