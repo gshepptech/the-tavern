@@ -84,6 +84,29 @@ Then, from inside your project:
 
 **Sage draws it. Smith builds it.** The rest of the crew covers the work around the edges.
 
+<div align="center">
+
+<table>
+<tr>
+<td width="50%"><a href="plugins/sage/README.md"><img src="plugins/sage/sage.svg" alt="Sage — the draftsman" width="100%"/></a></td>
+<td width="50%"><a href="plugins/smith/README.md"><img src="plugins/smith/smith.svg" alt="Smith — the builder" width="100%"/></a></td>
+</tr>
+<tr>
+<td width="50%"><a href="plugins/warden/README.md"><img src="plugins/warden/warden.svg" alt="Warden — keeps it plumb" width="100%"/></a></td>
+<td width="50%"><a href="plugins/sellsword/README.md"><img src="plugins/sellsword/sellsword.svg" alt="Sellsword — the general contractor" width="100%"/></a></td>
+</tr>
+<tr>
+<td width="50%"><a href="plugins/cleric/README.md"><img src="plugins/cleric/cleric.svg" alt="Cleric — the sweep" width="100%"/></a></td>
+<td width="50%"><a href="plugins/scout/README.md"><img src="plugins/scout/scout.svg" alt="Scout — the inspector" width="100%"/></a></td>
+</tr>
+<tr>
+<td width="50%"><a href="plugins/tactician/README.md"><img src="plugins/tactician/tactician.svg" alt="Tactician — the rigger" width="100%"/></a></td>
+<td width="50%"><a href="plugins/seer/README.md"><img src="plugins/seer/seer.svg" alt="Seer — the surveyor" width="100%"/></a></td>
+</tr>
+</table>
+
+</div>
+
 <details>
 <summary><b>📋 Meet each tradesperson (click to expand the full job description)</b></summary>
 
