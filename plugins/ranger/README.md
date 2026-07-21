@@ -106,13 +106,19 @@ plugins/ranger/scripts/ranger-run.sh "make the dashboard genuinely good"
 
 Same agents, same `.ranger/` state, but each cycle is a fresh `claude -p` process — nothing accumulates. `/ranger:stop` from any session ends it.
 
+> [!WARNING]
+> **Run unattended mode in a sandbox.** Because no human is present to answer permission prompts, Ranger runs with permissions bypassed — the `ranger-run.sh` runner and every agent it spawns execute tools without asking. The `PreToolUse` hook hard-blocks `git push`, remote mutation and PR creation, and that block holds even in bypass mode — but **only git is guarded. Everything else runs unprompted**: file writes, shell commands, network calls. That is the cost of an unattended loop, not a defect, and it is standard for this class of tool.
+>
+> So run overnight/headless mode somewhere a bad command can't hurt you: a container or devcontainer, a VM, or a throwaway clone of the repo. Do **not** point unattended mode at a machine you care about and walk away. The in-session `/ranger:run` you watch is lower-risk because you are right there — but it bypasses prompts too.
+
 ---
 
 ## 🛡️ Guardrails
 
 | risk | guard |
 |---|---|
-| publishing unattended | `PreToolUse` hook denies `git push`, remote mutation, `gh pr create` — always |
+| publishing unattended | `PreToolUse` hook denies `git push`, remote mutation, `gh pr create` — always, even under bypassed permissions |
+| everything that isn't git | **not guarded** — permissions are bypassed for unattended operation; run in a sandbox (see Overnight above) |
 | scope creep | an item past ~12 files / ~600 lines unplanned is stashed and split |
 | grinding on the impossible | 3 cycles with no commit → the item is quarantined, rotation advances |
 | a bad change compounding | revert, don't pile on — one commit per item, one `git revert` away |
@@ -141,6 +147,8 @@ All of it is on disk, not in the context window. That is why a compaction mid-ru
 ## ⚠️ Honest Caveats
 
 An unbounded run consumes tokens for as long as it runs. Watch the first few cycles before you trust it overnight — the attended-to-unattended transition is the whole skill. `--max-hours` exists even though it defaults to off; use it the first night.
+
+Unattended mode runs with permissions bypassed, so only `git push` is genuinely blocked — everything else runs without asking. Run it in a sandbox, not on a machine you care about. See **Overnight** above.
 
 Ranger is deliberately conservative about what counts as work. If you want him building features rather than sweeping domains, put that in the brief — the brief biases the scout's ranking.
 

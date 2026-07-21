@@ -57,6 +57,8 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 
 Same agents, same state files, but each cycle is a fresh `claude -p` process — nothing accumulates, so it runs indefinitely. `/ranger:stop` from any session ends it.
 
+**Run unattended mode in a sandbox.** With no human to answer permission prompts, Ranger runs with permissions bypassed — the runner and every agent execute tools without asking. `git push`, remote mutation and PR creation are hard-blocked even in that mode, but **only git is guarded — everything else (file writes, shell, network) runs unprompted.** That is the cost of an unattended loop, not a defect. Run overnight/headless mode in a container, VM, or throwaway clone — never on a machine you care about while you walk away.
+
 ## Guardrails
 
 - **Blast radius** — an item touching more than ~12 files or ~600 lines unplanned is stashed and split, not merged.
@@ -67,3 +69,5 @@ Same agents, same state files, but each cycle is a fresh `claude -p` process —
 ## Honest caveats
 
 An unbounded run consumes tokens for as long as it runs. Watch the first few cycles before trusting it overnight — that attended-to-unattended transition is the whole game. And `--max-hours` exists even though it defaults to off; use it the first night.
+
+Unattended mode runs with permissions bypassed — only `git push` is genuinely blocked, everything else runs without asking. Run it in a sandbox, not on a machine you care about.
