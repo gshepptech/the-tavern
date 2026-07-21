@@ -3,7 +3,7 @@
 <img src=".github/assets/banner.svg" alt="The Tavern — a crew of AI builders for Claude Code" width="100%"/>
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-2E7D32?style=flat-square)](LICENSE)
-[![Plugins](https://img.shields.io/badge/crew-8-1E88E5?style=flat-square)](#-the-crew)
+[![Plugins](https://img.shields.io/badge/crew-9-1E88E5?style=flat-square)](#-the-crew)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin%20marketplace-8E44AD?style=flat-square&logo=anthropic&logoColor=white)](https://docs.claude.com/en/docs/claude-code)
 [![PRs welcome](https://img.shields.io/badge/PRs-welcome-43A047?style=flat-square)](CONTRIBUTING.md)
 [![Last commit](https://img.shields.io/github/last-commit/gshepptech/the-tavern?style=flat-square&color=607D8B)](https://github.com/gshepptech/the-tavern/commits/main)
@@ -82,7 +82,7 @@ Then, from inside your project:
 | **Scout** `v0.2.0` | The inspector — end-to-end Playwright test authoring and maintenance via Playwright MCP | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **Tactician** `v0.2.0` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | `/tactician:make` |
 | **Seer** `v0.1.0` | The surveyor — macro-architecture / design-cohesion review; is this shaped right, or accreted? | `/seer:review` |
-| **Ranger** `v0.1.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
+| **Ranger** `v0.2.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
 
 **Sage draws it. Smith builds it.** The rest of the crew covers the work around the edges.
 

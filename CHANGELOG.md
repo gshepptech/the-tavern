@@ -8,7 +8,7 @@ file tracks the marketplace as a whole.
 ## [Unreleased]
 
 ### Added
-- **Ranger** `v0.1.0` — the ninth crew member: a self-directing, unattended senior-engineering loop. A thin lead drives five Opus sub-agents (scout, planner, implementer, reviewer, assessor) through survey → plan → plan-review → build → review → verify → commit, one local commit per item. `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status`, `/ranger:help`.
+- **Ranger** `v0.2.0` — the ninth crew member: a self-directing, unattended senior-engineering loop. A thin lead drives five Opus sub-agents (scout, planner, implementer, reviewer, assessor) through survey → plan → plan-review → build → review → verify → commit, one local commit per item. `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status`, `/ranger:help`.
   - Each `/ranger:run` runs one idempotent cycle and returns; continuous operation is driven by `/loop /ranger:run` (watched) or the bundled headless runner (overnight) — no Stop-hook trapping or transcript spam.
   - `--preset` curated, applicability-gated briefs (ui, ux, a11y, harden, perf) that skip anything the app lacks; `--dry-run` preview; first-run safety cap (5 items, overridable with `--unlimited`); `/ranger:resume`; `--branch` / `--merge-dev` / `--ask` default off.
   - A `PreToolUse` hook hard-denies `git push`, remote mutation, and PR creation regardless of the model's decision. Subprocess tests cover the guard.
