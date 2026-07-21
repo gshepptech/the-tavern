@@ -6,10 +6,9 @@ If you discover a security issue in The Tavern — a plugin that executes
 unintended commands, a hook that leaks data, an injection in a workflow script,
 or anything else with a security impact — please report it privately.
 
-**Preferred:** open a [GitHub Security Advisory](https://github.com/gshepptech/the-tavern/security/advisories/new)
-(Security → Advisories → *Report a vulnerability*).
-
-**Alternative:** email **the maintainers** with the details.
+Please open a [GitHub Security Advisory](https://github.com/gshepptech/the-tavern/security/advisories/new)
+(Security → Advisories → *Report a vulnerability*). This keeps your report
+private until a fix is available.
 
 Please do **not** open a public issue for a vulnerability before it has been
 addressed.
