@@ -31,8 +31,10 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 
 ## Commands
 
+- `/ranger:run <brief> --dry-run` — **preview.** See the ranked backlog and the top item's plan without changing anything. The recommended first contact.
 - `/ranger:run <brief> [flags]` — start. One prompt, then walk away.
-- `/ranger:stop` — down tools. The only clean exit.
+- `/ranger:stop` — down tools. The clean exit.
+- `/ranger:resume [run-id]` — pick a stopped run back up: same backlog, rotation, and flags.
 - `/ranger:status` — what he's on right now. Read-only, safe mid-run.
 - `/ranger:help` — this.
 
@@ -41,11 +43,15 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 | flag | default | with the flag |
 |---|---|---|
 | *(none)* | commits locally to the **current branch** | — |
+| `--dry-run` | executes | previews only — survey + top plan, no writes, no commit |
 | `--branch` | one branch for everything | a local branch per item |
 | `--merge-dev` | leaves integration to you | merges verified items into `dev` |
 | `--ask` | **never asks you anything** | may ask when genuinely blocked |
-| `--max-cycles=N` | unlimited | stops after N items |
-| `--max-hours=N` | unlimited | stops after N hours |
+| `--max-cycles=N` | see first-run cap | stops after N items (`0` = unlimited) |
+| `--max-hours=N` | see first-run cap | stops after N hours (`0` = unlimited) |
+| `--unlimited` | see first-run cap | removes the first-run cap; no limits |
+
+**First-run safety cap.** The *first* run in a repo defaults to **5 items, then stands down** so you can review before trusting it longer — even though "never stops" is the design. Pass `--unlimited` (or any explicit `--max-*`) to override; later runs in the same repo default to unlimited.
 
 **`git push` is blocked for the entire run and no flag enables it.** A `PreToolUse` hook denies pushes, remote mutation and PR creation outright — instructions are a request, a hook is a guarantee.
 

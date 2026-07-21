@@ -82,7 +82,7 @@ Then, from inside your project:
 | **Scout** `v0.2.0` | The inspector — end-to-end Playwright test authoring and maintenance via Playwright MCP | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **Tactician** `v0.2.0` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | `/tactician:make` |
 | **Seer** `v0.1.0` | The surveyor — macro-architecture / design-cohesion review; is this shaped right, or accreted? | `/seer:review` |
-| **Ranger** `v0.1.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | `/ranger:run`, `/ranger:stop`, `/ranger:status` |
+| **Ranger** `v0.1.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
 
 **Sage draws it. Smith builds it.** The rest of the crew covers the work around the edges.
 

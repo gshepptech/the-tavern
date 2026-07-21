@@ -1,6 +1,6 @@
 ---
 description: "Hand Ranger one brief and walk away — a self-directing senior-engineering loop that never stops and never runs out of work"
-argument-hint: "<brief> [--branch] [--merge-dev] [--ask] [--max-cycles=N] [--max-hours=N]"
+argument-hint: "<brief> [--dry-run] [--branch] [--merge-dev] [--ask] [--max-cycles=N] [--max-hours=N] [--unlimited]"
 allowed-tools: ["Bash(mkdir:*)", "Bash(cat:*)", "Bash(ls:*)", "Bash(date:*)", "Bash(test:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(echo:*)", "Bash(printf:*)", "Bash(pwd:*)", "Bash(git:*)", "Bash(osascript:*)", "Read", "Write", "Edit", "Glob", "Grep", "Agent"]
 ---
 
@@ -21,17 +21,32 @@ Parse `$ARGUMENTS` into:
 - `flags.branch`: true if `--branch` appears — create a local branch per item. Default **false**: commit to the current branch.
 - `flags.merge_dev`: true if `--merge-dev` appears — merge verified items into `dev`. Default **false**.
 - `flags.ask`: true if `--ask` appears — permits `AskUserQuestion`. Default **false**: never ask the user anything, ever.
-- `flags.max_cycles`: integer after `--max-cycles=` (default **0** = unlimited)
-- `flags.max_hours`: number after `--max-hours=` (default **0** = unlimited)
+- `flags.dry_run`: true if `--dry-run` appears — **preview only.** Survey, rank, and plan the top item, print what Ranger *would* do, then stop. No code, no commit, hooks never armed. The safe way to judge the loop before trusting it. See PHASE 0d.
+- `flags.max_cycles`: integer after `--max-cycles=` if present, else unset. `0` means unlimited.
+- `flags.max_hours`: number after `--max-hours=` if present, else unset. `0` means unlimited.
+- `flags.unlimited`: true if `--unlimited` appears — opt out of the first-run safety cap and run with no caps.
 - `flags.headless`: true if `--headless` appears — set up the run, then stop without looping (`scripts/ranger-run.sh` drives the cycles).
 
 If `brief` is empty, use `improve this codebase` and say so.
+
+### Resolving the caps — first-run safety
+
+"Never stops" is the engine, but an unattended tool must not hand a newcomer a surprise bill on their first run. Resolve `max_cycles` / `max_hours` in this order:
+
+1. If the user passed `--max-cycles=` or `--max-hours=` (any value, `0` included), honour it exactly — `0` is unlimited. The user is in control.
+2. Else if `--unlimited` was passed, run with no caps.
+3. Else if this is the **first run in this repo** — no `.ranger/runs/` directory exists yet — default `max_cycles = 5`. Tell the user plainly: *"First run — I'll ship up to 5 items then stand down so you can review before trusting me longer. Add `--unlimited` (or `--max-cycles=0`) to remove the cap."*
+4. Else (a prior run exists in this repo) default to unlimited — you've seen it work.
+
+Record `cap_source` in `state.json` (`user` / `unlimited` / `first-run-default` / `returning-default`) so the debrief can explain why it stopped.
 
 ---
 
 ## PHASE 0 — preflight + initialise
 
 ### 0a. Preflight
+
+**Already running?** If `.ranger/active-run.json` is armed (non-empty and its run's `state.json` is `status: active`), a run is already in progress. Do not start a second one over it — tell the user (`/ranger:status` to see it, `/ranger:stop` to end it) and stop. To continue a *stopped* run instead of starting fresh, that is `/ranger:resume`.
 
 An unattended run cannot survive an interactive block. The `warden` plugin's strict gates HARD-block and need an interactive `/warden:trust-me` to clear — that would **deadlock** this run.
 
@@ -52,7 +67,33 @@ git rev-parse --show-toplevel && git status --porcelain | head -20
 
 Not a repo → stop and tell the user; Ranger's safety model is one commit per item, and without git there is no undo. Pre-existing uncommitted changes are fine — note them in the journal so a later revert never blames the user's work on an item.
 
-### 0b. Initialise
+### 0b. Dry-run preview — if `flags.dry_run`
+
+A dry run is a preview, watched by the user. It must change nothing and must be able to stop, so **do not arm the hooks** (do not write `.ranger/active-run.json`).
+
+1. Generate `RUN_ID` (as in 0c) and `mkdir -p "$RUN_DIR/items"`. Write `state.json` as in 0c but with `status: "dry_run"`.
+2. Spawn `ranger:scout` once (same inputs as 1a) and write its ranked items to `backlog.json`.
+3. For the single top-`score` item, spawn `ranger:planner`, then `ranger:reviewer` in `mode: "plan"`.
+4. Print the preview and **stop** — no build, no commit, hooks never armed:
+
+```markdown
+**Ranger dry run — preview only, nothing changed.**
+
+**What I'd work on (top of a <N>-item backlog):**
+1. [<score>] <title> — <domain>/<lens>
+2. …
+
+**Plan for #1 — <title>**
+<planner's approach, 2-4 lines> · reviewer verdict: <approve/revise/split/drop>
+
+**Domains I'd rotate through:** <list>
+
+Run without `--dry-run` to execute. First real run is capped at 5 items unless you pass `--unlimited`.
+```
+
+Because the scout, planner and reviewer only read code and run read-only commands, a dry run cannot modify your repo. This is the recommended first contact with Ranger. **Stop here.**
+
+### 0c. Initialise
 
 1. Generate a run ID:
 
@@ -74,9 +115,10 @@ Save as `RUN_ID`. Compute `RUN_DIR=.ranger/runs/$RUN_ID`, then `mkdir -p "$RUN_D
   "cycle": 0,
   "item": null,
   "stall_count": 0,
-  "flags": { "branch": <bool>, "merge_dev": <bool>, "ask": <bool> },
-  "max_cycles": <int>,
-  "max_seconds": <round(max_hours * 3600)>,
+  "flags": { "branch": <bool>, "merge_dev": <bool>, "ask": <bool>, "dry_run": <bool>, "unlimited": <bool> },
+  "max_cycles": <resolved int, 0 = unlimited>,
+  "max_seconds": <resolved round(max_hours * 3600), 0 = unlimited>,
+  "cap_source": "<user | unlimited | first-run-default | returning-default>",
   "started_at": "<ISO-8601 UTC>",
   "session_id": "<this session's id, or null>",
   "domain_rotation": { "domains": [], "pointer": 0, "swept": {} },
@@ -97,8 +139,13 @@ Save as `RUN_ID`. Compute `RUN_DIR=.ranger/runs/$RUN_ID`, then `mkdir -p "$RUN_D
 ```
 Ranger is on site — <RUN_ID>.
 Brief: <brief>
-Local commits on <current branch>. <caps or "No caps — /ranger:stop when you want me to down tools.">
+Local commits on <current branch>. <cap line>
 ```
+
+The `<cap line>` depends on `cap_source`:
+- `first-run-default` → `First run — I'll ship up to 5 items then stand down so you can review. Add --unlimited to remove the cap.`
+- `user` → `Cap: <max_cycles or ∞> items / <max_hours or ∞>h.`
+- `unlimited` / `returning-default` → `No caps — /ranger:stop when you want me to down tools.`
 
 If `flags.headless`, stop here. Otherwise continue to PHASE 1.
 
@@ -202,7 +249,7 @@ Any cycle that ends without a commit increments `stall_count`. At `stall_count >
 
 ## PHASE 2 — terminal
 
-You reach this **only** when `/ranger:stop` sets `status` to `stopped`, or a cap you were given is hit (`cycle >= max_cycles`, or elapsed >= `max_seconds`).
+You reach this **only** when `/ranger:stop` sets `status` to `stopped`, or a cap is hit (`cycle >= max_cycles`, or elapsed >= `max_seconds`). When a cap stops the run, the debrief names *why* using `cap_source` — a `first-run-default` stop should tell the user how to continue: `/ranger:run <brief> --unlimited` (or a larger `--max-cycles`).
 
 1. Set the final `status` and `ended_at` in `state.json`.
 2. **Disarm the hooks** — overwrite `.ranger/active-run.json` with `{}`. This must happen on every exit path; never leave the marker armed.

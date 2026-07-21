@@ -27,7 +27,7 @@ End the active run. This is the intended exit — the Stop hook blocks everythin
 Ranger stood down — <run_id>
 <cycle> item(s) committed · <elapsed>
 Last: <final line of journal.md>
-Backlog and journal kept at .ranger/runs/<run_id>/ — /ranger:run picks up where this left off.
+Backlog and journal kept at .ranger/runs/<run_id>/ — /ranger:resume picks up exactly where this left off.
 ```
 
 Nothing is reverted and nothing is cleaned up. Every item Ranger finished is already its own local commit.

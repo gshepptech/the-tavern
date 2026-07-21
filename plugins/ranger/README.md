@@ -36,14 +36,20 @@ claude plugin marketplace add gshepptech/the-tavern
 claude plugin install ranger@the-tavern
 ```
 
-Then hand him the site:
+First, see what he'd do — this previews the ranked work and the top plan, and changes nothing:
+
+```
+/ranger:run make the dashboard genuinely good --dry-run
+```
+
+Happy with it? Hand him the site:
 
 ```
 /warden:strict-off          # once, so nothing interactive can deadlock the run
 /ranger:run make the dashboard genuinely good
 ```
 
-That is the whole interaction. He will not ask you anything.
+That is the whole interaction. He will not ask you anything. Your **first run in a repo is capped at 5 items** so you can review before trusting him longer — pass `--unlimited` to let him run without a limit.
 
 ---
 
@@ -86,11 +92,15 @@ If `cleric`, `seer` or `scout` are installed, the scout dispatches to them for t
 
 | flag | default behaviour | with the flag |
 |---|---|---|
+| `--dry-run` | executes for real | previews only — survey + top plan, no writes, no commit |
 | `--branch` | commits to the current branch | a local branch per item |
 | `--merge-dev` | leaves integration to you | merges verified items into `dev` |
 | `--ask` | **never asks you anything** | may ask when genuinely blocked |
-| `--max-cycles=N` | unlimited | stops after N items |
-| `--max-hours=N` | unlimited | stops after N hours |
+| `--max-cycles=N` | first run 5, then unlimited | stops after N items (`0` = unlimited) |
+| `--max-hours=N` | first run 5 items | stops after N hours (`0` = unlimited) |
+| `--unlimited` | first run 5, then unlimited | removes the first-run cap |
+
+The **first run in a repo is capped at 5 items** and then stands down, so a newcomer can review before trusting it longer; later runs default to unlimited. Any explicit `--max-*` or `--unlimited` overrides this.
 
 There is no `--push`. Pushing is blocked for the entire run.
 

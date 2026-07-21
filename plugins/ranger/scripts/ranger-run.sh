@@ -40,7 +40,10 @@ if ! command -v claude >/dev/null 2>&1; then
   exit 1
 fi
 
-if [[ $RESUME -eq 0 ]]; then
+if [[ $RESUME -eq 1 ]]; then
+  echo "ranger: re-arming the last stopped run…"
+  claude -p "/ranger:resume --headless" --permission-mode bypassPermissions
+else
   if [[ -z "$BRIEF" ]]; then
     echo "ranger: give me a brief, or pass --resume to continue an existing run." >&2
     exit 1
