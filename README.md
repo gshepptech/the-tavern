@@ -52,6 +52,7 @@
 /plugin install scout@the-tavern
 /plugin install tactician@the-tavern
 /plugin install seer@the-tavern
+/plugin install ranger@the-tavern
 ```
 
 > [!TIP]
@@ -81,6 +82,7 @@ Then, from inside your project:
 | **Scout** `v0.2.0` | The inspector — end-to-end Playwright test authoring and maintenance via Playwright MCP | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **Tactician** `v0.2.0` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | `/tactician:make` |
 | **Seer** `v0.1.0` | The surveyor — macro-architecture / design-cohesion review; is this shaped right, or accreted? | `/seer:review` |
+| **Ranger** `v0.1.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | `/ranger:run`, `/ranger:stop`, `/ranger:status` |
 
 **Sage draws it. Smith builds it.** The rest of the crew covers the work around the edges.
 
@@ -102,6 +104,10 @@ Then, from inside your project:
 <tr>
 <td width="50%"><a href="plugins/tactician/README.md"><img src="plugins/tactician/tactician.svg" alt="Tactician — the rigger" width="100%"/></a></td>
 <td width="50%"><a href="plugins/seer/README.md"><img src="plugins/seer/seer.svg" alt="Seer — the surveyor" width="100%"/></a></td>
+</tr>
+<tr>
+<td width="50%"><a href="plugins/ranger/README.md"><img src="plugins/ranger/ranger.svg" alt="Ranger — the foreman" width="100%"/></a></td>
+<td width="50%"></td>
 </tr>
 </table>
 
@@ -131,6 +137,9 @@ End-to-end test authoring and maintenance via Playwright + Playwright MCP. Drive
 ### 🔧 Tactician — the rigger
 Generates really good dynamic **Workflow** scripts on demand. `/tactician:make <task>` classifies the task into an orchestration archetype, picks the right fan-out topology (pipeline by default, barrier only when a stage needs all prior results), and authors a self-contained, `node --check`-validated Workflow script — schema'd agent returns, `.filter(Boolean)` after fan-out, adversarial-verify for findings, loop-until-dry for unknown-size work.
 
+### 🦺 Ranger — the foreman
+Hand him one prompt and walk away. `/ranger:run <brief>` starts a **self-directing senior-engineering loop that never stops and never runs out of work** — a thin lead (reads state files, never code) drives five Opus sub-agents through *survey → plan → plan-review → build → review → verify → commit*, one local commit per item. Plan review comes before implementation on purpose; verification is fresh-eyes and drives UI in a real browser. When the backlog empties, the scout steps back and rotates a lens across the app's domains, so an empty backlog is a survey trigger rather than a finish line. A Stop hook makes stopping impossible; a PreToolUse hook hard-denies `git push`. Local commits only — branches and dev merges need explicit flags, and it never asks you anything.
+
 ### 🕵️ Seer — the surveyor
 Macro-architecture / design-cohesion review — the senior-engineer *"is this shaped right or accreted?"* critique, not bug-hunting or lint. `/seer:review <target>` runs **8 blind design lenses** (proliferation, missed reuse, helper sprawl, layering, cohesion, naming, accretion markers, boundary direction), each a separate agent. Findings are adversarially cross-examined by a skeptic, then synthesized into a per-subsystem *deliberate / mixed / accreted* verdict with `file:line` evidence and a concrete reshaping plan. Report only — never edits code.
 
@@ -150,6 +159,7 @@ Macro-architecture / design-cohesion review — the senior-engineer *"is this sh
 | Write & maintain browser end-to-end tests | **Scout** | Smith |
 | Generate a custom multi-agent workflow script | **Tactician** | — |
 | Find out if a design is intentional or accreted | **Seer** | Cleric |
+| Hand over one prompt and let it work unattended | **Ranger** | the whole crew |
 
 > [!TIP]
 > New here? Start with **Sage + Smith + Warden**. That trio covers spec → build → discipline, and it's the spine everything else hangs off.
@@ -218,6 +228,7 @@ The rest of the crew picks up the surrounding work: **Sellsword** throws a multi
 - [Scout](./plugins/scout/README.md) — Playwright e2e tests
 - [Tactician](./plugins/tactician/README.md) — Workflow-script generator
 - [Seer](./plugins/seer/README.md) — design-cohesion review
+- [Ranger](./plugins/ranger/README.md) — the unattended foreman loop
 
 ---
 

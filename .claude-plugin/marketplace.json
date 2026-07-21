@@ -85,6 +85,16 @@
       "author": {
         "name": "gshepptech"
       }
+    },
+    {
+      "name": "ranger",
+      "source": "./plugins/ranger",
+      "description": "Ranger is the foreman who never leaves the site. Give him one prompt and walk away — he runs a self-directing senior-engineering loop that never stops and never runs out of work. A thin lead (reads state files, never code) drives five Opus sub-agents — scout, planner, implementer, reviewer, assessor — through survey → rank → plan → plan-review → build → review → verify → commit, one local commit per item. When the backlog runs dry the scout steps back, enumerates the app's domains, and rotates through them with a persistent pointer — correctness, UI/UX and visual polish, real-user flows, performance, accessibility, security, feature gaps — so there is always work, and never a second pass over the same ground. UI items are driven through a real browser as a user would, then fixed and made to look better. A Stop hook makes stopping impossible while the run is active; a PreToolUse hook hard-denies git push, remote mutation, and PR creation regardless of what the model decides. Local commits only. Branches and dev merges require explicit flags. Never asks the user anything unless --ask. Blast-radius circuit breaker, no-progress quarantine, and revert-don't-pile-on regression discipline keep an unattended run from turning into churn.",
+      "version": "0.1.0",
+      "category": "productivity",
+      "author": {
+        "name": "gshepptech"
+      }
     }
   ]
 }
