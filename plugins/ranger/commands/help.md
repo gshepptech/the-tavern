@@ -32,7 +32,8 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 ## Commands
 
 - `/ranger:run <brief> --dry-run` — **preview.** See the ranked backlog and the top item's plan without changing anything. The recommended first contact.
-- `/ranger:run <brief> [flags]` — start. One prompt, then walk away.
+- `/ranger:run <brief> [flags]` — run **one** cycle and return. Keep it going with `/loop /ranger:run <brief>` (watched, Esc to stop) or `ranger-run.sh` (overnight).
+- `/ranger:run <brief> --preset ui` — run a curated checklist (`ui` / `ux` / `a11y` / `harden` / `perf`), skipping anything the app doesn't have.
 - `/ranger:stop` — down tools. The clean exit.
 - `/ranger:resume [run-id]` — pick a stopped run back up: same backlog, rotation, and flags.
 - `/ranger:status` — what he's on right now. Read-only, safe mid-run.
@@ -43,7 +44,9 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 | flag | default | with the flag |
 |---|---|---|
 | *(none)* | commits locally to the **current branch** | — |
+| `--preset <name>` | full domain rotation | focus a curated checklist: `ui`, `ux`, `a11y`, `harden`, `perf` (skips items the app lacks) |
 | `--dry-run` | executes | previews only — survey + top plan, no writes, no commit |
+| `--new` | continues a parked run | forces a fresh run |
 | `--branch` | one branch for everything | a local branch per item |
 | `--merge-dev` | leaves integration to you | merges verified items into `dev` |
 | `--ask` | **never asks you anything** | may ask when genuinely blocked |
@@ -55,13 +58,14 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 
 **`git push` is blocked for the entire run and no flag enables it.** A `PreToolUse` hook denies pushes, remote mutation and PR creation outright — instructions are a request, a hook is a guarantee.
 
-## Overnight
+## Keeping it running
 
-```bash
-~/.claude/plugins/.../ranger/scripts/ranger-run.sh "make the dashboard genuinely good"
-```
+Each `/ranger:run` does **one cycle and returns** — no Stop hook trapping the turn, so no transcript spam and no fighting other plugins' hooks. Two drivers keep it continuous:
 
-Same agents, same state files, but each cycle is a fresh `claude -p` process — nothing accumulates, so it runs indefinitely. `/ranger:stop` from any session ends it.
+- **Watched:** `/loop /ranger:run <brief>` — the native loop re-invokes each tick; **Esc** to stop.
+- **Overnight:** `ranger-run.sh "<brief>"` — a fresh `claude -p` process per cycle, so context never accumulates.
+
+`/ranger:stop` ends a run; `/ranger:resume` continues one.
 
 **Run unattended mode in a sandbox.** With no human to answer permission prompts, Ranger runs with permissions bypassed — the runner and every agent execute tools without asking. `git push`, remote mutation and PR creation are hard-blocked even in that mode, but **only git is guarded — everything else (file writes, shell, network) runs unprompted.** That is the cost of an unattended loop, not a defect. Run overnight/headless mode in a container, VM, or throwaway clone — never on a machine you care about while you walk away.
 

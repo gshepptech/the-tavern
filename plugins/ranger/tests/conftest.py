@@ -88,23 +88,3 @@ def guard(project):
 
     _verdict.project = project
     return _verdict
-
-
-@pytest.fixture
-def gate(project):
-    """Return a function: -> (blocked: bool, reason: str) for the Stop gate."""
-
-    def _stop(*, session_id: str = "S1"):
-        cp = _run(
-            "foreman-gate.py",
-            {"cwd": str(project.path), "session_id": session_id},
-        )
-        assert cp.returncode == 0, f"gate must always exit 0, got {cp.returncode}: {cp.stderr}"
-        out = cp.stdout.strip()
-        if not out:
-            return (False, "")
-        payload = json.loads(out)
-        return (payload.get("decision") == "block", payload.get("reason", ""))
-
-    _stop.project = project
-    return _stop

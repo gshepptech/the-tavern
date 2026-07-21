@@ -20,7 +20,7 @@
 
 Most "autonomous" loops die one of two deaths: they run out of work and stop, or they fill their context window and go stupid. Ranger is built against both.
 
-- **No exit condition.** An empty backlog is a survey trigger, not a finish line. The run ends on `/ranger:stop` or a cap you asked for — nothing else. A `Stop` hook enforces it.
+- **No exit condition.** An empty backlog is a survey trigger, not a finish line. Continuous operation is a *driver's* job — `/loop /ranger:run` while you watch (Esc to stop), or a headless runner overnight. Each `/ranger:run` does one clean cycle and returns; nothing traps the turn, so there's no transcript spam and no fighting other plugins' hooks.
 - **A thin lead.** The foreman reads state files and spawns agents. He never opens a source file. Every agent gets a fresh context; the lead's window stays small, so the run survives hours.
 - **Plan review before code.** A rejected plan costs one agent; a bad implementation costs five.
 - **Fresh-eyes verification.** The assessor never sees the plan — only the acceptance criteria and the code. It cannot be argued into agreeing.
@@ -42,14 +42,14 @@ First, see what he'd do — this previews the ranked work and the top plan, and 
 /ranger:run make the dashboard genuinely good --dry-run
 ```
 
-Happy with it? Hand him the site:
+Happy with it? Clear the methodical-mode strict gates once (they'd otherwise block an unattended turn), then set him going with the native loop:
 
 ```
-/warden:strict-off          # once, so nothing interactive can deadlock the run
-/ranger:run make the dashboard genuinely good
+/warden:strict-off          # plus /adhoc:strict-off and /plumb:strict-off if you run those
+/loop /ranger:run make the dashboard genuinely good
 ```
 
-That is the whole interaction. He will not ask you anything. Your **first run in a repo is capped at 5 items** so you can review before trusting him longer — pass `--unlimited` to let him run without a limit.
+That is the whole interaction — he will not ask you anything; press **Esc** when you want him to stop. Your **first run in a repo is capped at 5 items** so you can review before trusting him longer — pass `--unlimited` to let him run without a limit. (Prefer a `--preset`? `/loop /ranger:run … --preset ui`.)
 
 ---
 
@@ -106,15 +106,28 @@ There is no `--push`. Pushing is blocked for the entire run.
 
 ---
 
-## 🌙 Overnight
+## 🔁 Keeping it running
 
-The in-session loop keeps its lead thin, but context still grows. For a genuinely unbounded run:
+Each `/ranger:run` does **one cycle and returns** — a clean turn, no hook trapping the session. Two ways to keep it going:
+
+**Watched, in your session** — wrap it in the native loop; press **Esc** to stop:
+
+```
+/loop /ranger:run make the dashboard genuinely good
+```
+
+**Overnight, unattended** — a fresh `claude -p` process per cycle, so context never accumulates:
 
 ```bash
 plugins/ranger/scripts/ranger-run.sh "make the dashboard genuinely good"
 ```
 
-Same agents, same `.ranger/` state, but each cycle is a fresh `claude -p` process — nothing accumulates. `/ranger:stop` from any session ends it.
+`/ranger:stop` from any session ends a run; `/ranger:resume` picks it back up.
+
+> [!WARNING]
+> **Run unattended mode in a sandbox.** Because no human is present to answer permission prompts, Ranger runs with permissions bypassed — the `ranger-run.sh` runner and every agent it spawns execute tools without asking. The `PreToolUse` hook hard-blocks `git push`, remote mutation and PR creation, and that block holds even in bypass mode — but **only git is guarded. Everything else runs unprompted**: file writes, shell commands, network calls. That is the cost of an unattended loop, not a defect, and it is standard for this class of tool.
+>
+> So run overnight/headless mode somewhere a bad command can't hurt you: a container or devcontainer, a VM, or a throwaway clone of the repo. Do **not** point unattended mode at a machine you care about and walk away. The watched `/loop /ranger:run` is lower-risk because you are right there — but it bypasses prompts too.
 
 > [!WARNING]
 > **Run unattended mode in a sandbox.** Because no human is present to answer permission prompts, Ranger runs with permissions bypassed — the `ranger-run.sh` runner and every agent it spawns execute tools without asking. The `PreToolUse` hook hard-blocks `git push`, remote mutation and PR creation, and that block holds even in bypass mode — but **only git is guarded. Everything else runs unprompted**: file writes, shell commands, network calls. That is the cost of an unattended loop, not a defect, and it is standard for this class of tool.
@@ -133,8 +146,8 @@ Same agents, same `.ranger/` state, but each cycle is a fresh `claude -p` proces
 | grinding on the impossible | 3 cycles with no commit → the item is quarantined, rotation advances |
 | a bad change compounding | revert, don't pile on — one commit per item, one `git revert` away |
 | conflicts | a conflicting merge is aborted and left on its branch, never resolved unattended |
-| interactive deadlock | preflight refuses to start unless `warden`'s strict gates are off |
-| trapping other sessions | both hooks are session-scoped and fail open |
+| interactive deadlock | preflight refuses to start unless the methodical-mode strict gates (`warden`, `adhoc`, `plumb`) are off |
+| trapping other sessions | the guard hook is session-scoped and fails open; there is no Stop hook to trap a turn |
 
 ---
 
@@ -142,7 +155,7 @@ Same agents, same `.ranger/` state, but each cycle is a fresh `claude -p` proces
 
 ```
 .ranger/
-  active-run.json          the marker that arms both hooks — {} when idle
+  active-run.json          the marker that arms the guard hook — {} when idle
   runs/<run-id>/
     state.json             status, phase, cycle, flags, domain rotation
     backlog.json           ranked items: ready / in_flight / done / quarantined

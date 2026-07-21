@@ -7,7 +7,7 @@ hide-from-slash-command-tool: "true"
 
 # Stop Ranger
 
-End the active run. This is the intended exit — the Stop hook blocks everything else.
+End the active run: mark it stopped and disarm, so a `/loop` driving it winds down (press Esc to end the loop) and the next `/ranger:run` starts fresh instead of continuing this one.
 
 1. Read `.ranger/active-run.json`. If it is missing, empty, or `{}`, say "No active Ranger run." and stop.
 

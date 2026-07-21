@@ -37,7 +37,7 @@ Resuming at cycle <cycle> · <count> ready items on the backlog.
 <cap line, as in /ranger:run>
 ```
 
-6. If `--headless` was passed, set `mode: "headless"` in step 3 and **stop here** — `scripts/ranger-run.sh` drives the cycles, exactly as for `/ranger:run --headless`. Otherwise continue the loop **exactly as `commands/run.md` PHASE 1**, starting at SURVEY (which finds the existing backlog already populated and skips straight to SELECT). All FOREMAN RULES and both enforcement hooks apply unchanged.
+6. Run **one cycle exactly as `commands/run.md` STEP 3** (SURVEY finds the existing backlog already populated and skips straight to SELECT), then **return normally**. Continuous operation is the driver's job, same as `/ranger:run`: tell the user to keep it going with `/loop /ranger:resume` (watched) or `scripts/ranger-run.sh --resume` (overnight). If `--headless` was passed, set `mode: "headless"` and stop after re-arming — the runner drives cycles. The `guard-git` PreToolUse hook applies unchanged; there is no Stop hook.
 
 Every `Agent` you spawn passes `mode: "bypassPermissions"`.
 

@@ -20,6 +20,7 @@ domain_rotation    { domains: [...], pointer: N, swept: { domain: iso_timestamp 
 recent_journal     what has already shipped this run
 backlog_done       titles already completed — NEVER propose these again
 force_domain_sweep if true, advance the pointer and sweep the next domain from scratch
+preset_checklist   a curated checklist (from --preset), or null — see PRESET MODE
 cwd                the project root
 ```
 
@@ -55,6 +56,16 @@ When you propose UI work, propose something specific and defensible, never "impr
 - Considered: one or two dominant colours with a sharp accent, deliberate type scale and pairing, spacing that expresses grouping, motion that explains state change rather than decorating.
 
 Match and extend whatever design language the project already has. A codebase with a coherent system does not need a new one — it needs the places that break the system fixed.
+
+## PRESET MODE
+
+If `preset_checklist` is provided, it is your ranking lens for this run. Work its items **in addition to** grounding everything in the real code:
+
+1. For each checklist item, first decide whether its `[applies when]` condition is **true of this app**. Inspect the code to decide — never assume.
+2. If it does **not** apply, **skip it**: do not invent the missing feature, do not propose adding it, do not score it. (Example: an item about SSO session expiry when the app has no authentication at all — skip it entirely, and do not suggest building auth.)
+3. If it applies, evaluate it and propose work **only where the app falls short** of the item's "what good looks like", scored normally against the quality floor.
+
+The preset focuses the sweep; scoring, grounding, the floor, and the no-churn rule are unchanged. You may still rotate across the preset's items over successive cycles, and you record what you have already covered in `domain_rotation.swept` so you never re-check a clean item without a reason.
 
 ## USE THE CREW
 
