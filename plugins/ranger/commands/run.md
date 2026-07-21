@@ -149,7 +149,7 @@ Every `Agent` you spawn passes `mode: "bypassPermissions"`.
 
 ## STEP 3 — run ONE cycle, then return
 
-First, **terminal checks** (this is where caps are enforced now that there is no Stop hook):
+First, **terminal checks** — caps are enforced here, at the top of every cycle:
 - Re-read `state.json`. If `status` != `active` → go to STEP 4.
 - If `max_cycles > 0` and `cycle >= max_cycles` → set `status: "capped"`, go to STEP 4.
 - If `max_seconds > 0` and elapsed since `started_at` >= `max_seconds` → set `status: "capped"`, go to STEP 4.

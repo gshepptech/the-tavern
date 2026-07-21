@@ -31,25 +31,35 @@ Most "autonomous" loops die one of two deaths: they run out of work and stop, or
 
 ## 🚀 Install
 
+**1. Install**
+
 ```bash
 claude plugin marketplace add gshepptech/the-tavern
 claude plugin install ranger@the-tavern
 ```
 
-First, see what he'd do — this previews the ranked work and the top plan, and changes nothing:
+*(Already installed? `claude plugin marketplace update the-tavern` to get the latest.)*
+
+**2. Preview — changes nothing**
 
 ```
 /ranger:run make the dashboard genuinely good --dry-run
 ```
 
-Happy with it? Clear the methodical-mode strict gates once (they'd otherwise block an unattended turn), then set him going with the native loop:
+You'll see the ranked backlog and the plan for the top item.
+
+**3. Set him going**
 
 ```
-/warden:strict-off          # plus /adhoc:strict-off and /plumb:strict-off if you run those
 /loop /ranger:run make the dashboard genuinely good
 ```
 
-That is the whole interaction — he will not ask you anything; press **Esc** when you want him to stop. Your **first run in a repo is capped at 5 items** so you can review before trusting him longer — pass `--unlimited` to let him run without a limit. (Prefer a `--preset`? `/loop /ranger:run … --preset ui`.)
+Press **Esc** to stop. He never asks you anything.
+
+That's it. Two things worth knowing:
+
+- Your **first run in a repo stops after 5 items** so you can review the commits before trusting him longer. Add `--unlimited` to remove that.
+- If you run a methodical-mode plugin (`warden`, `adhoc`, `plumb`), clear its strict gate first — `/warden:strict-off` etc. — or it will block the loop. Ranger checks this and tells you exactly what to run.
 
 ---
 

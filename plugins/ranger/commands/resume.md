@@ -18,7 +18,13 @@ Parse `$ARGUMENTS`: an optional `run-id`, plus the cap flags (`--unlimited`, `--
 
 ## Preflight
 
-Same as `/ranger:run`: confirm `~/.claude/.warden-strict-mode` reads exactly `off` (else stop and tell the user to run `/warden:strict-off`), and confirm the git tree is in a state you can commit against.
+Same as `/ranger:run` STEP 2a: check all three methodical-mode strict gates and confirm the git tree is in a state you can commit against.
+
+```bash
+for p in warden adhoc plumb; do printf '%s=%s\n' "$p" "$(cat ~/.claude/.$p-strict-mode 2>/dev/null || echo off)"; done
+```
+
+A missing marker counts as `off`. If any prints anything else, name which and stop — the user clears it with `/warden:strict-off`, `/adhoc:strict-off`, or `/plumb:strict-off`.
 
 ## Re-arm and continue
 
