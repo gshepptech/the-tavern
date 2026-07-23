@@ -56,7 +56,7 @@ The runtime gives you these hooks (do not import them — they are globals):
    "the other findings." It is NOT justified by "I need to flatten/map/filter first" (do
    that inside a pipeline stage) or "the stages are conceptually separate." Smell test:
    `const a = await parallel(...); const b = transform(a); const c = await parallel(b...)`
-   where `transform` has no cross-item dependency → rewrite as one `pipeline()`.
+   where `transform` has no cross-item dependency -> rewrite as one `pipeline()`.
 8. **Use `schema` for any structured return.** Never have an agent return JSON-as-text and
    then `JSON.parse` it — pass a JSON Schema and the runtime validates + retries for you.
 9. **Inside `pipeline()`/`parallel()` stages, set `opts.phase` explicitly** (and usually
@@ -69,8 +69,8 @@ The runtime gives you these hooks (do not import them — they are globals):
     what was dropped — silent truncation reads as "covered everything" when it did not.
 13. **Subagents return raw data, not prose for a human.** Their final text IS the return
     value. Prompt them accordingly ("Return …", "Emit …").
-14. **Scale to the ask.** "find any bugs" → a few finders, single-vote verify. "thoroughly
-    audit" / "be comprehensive" → larger finder pool, 3–5 vote adversarial pass, synthesis.
+14. **Scale to the ask.** "find any bugs" -> a few finders, single-vote verify. "thoroughly
+    audit" / "be comprehensive" -> larger finder pool, 3–5 vote adversarial pass, synthesis.
 
 ---
 
@@ -80,7 +80,7 @@ Classify the user's task into one of these. Each maps to a skeleton. Compose fre
 are starting points, not a menu to pick exactly one from.
 
 ### UNDERSTAND — map an unfamiliar system
-Parallel readers, each owning a subsystem, → one synthesis agent. Barrier is justified:
+Parallel readers, each owning a subsystem, -> one synthesis agent. Barrier is justified:
 the synthesizer needs all maps at once.
 ```js
 const SUBSYSTEMS = ['auth', 'billing', 'api', 'jobs']
@@ -93,8 +93,9 @@ return { maps, summary }
 ```
 
 ### DESIGN — choose among approaches (judge panel)
-Generate N independent attempts from different angles, score with parallel judges,
-synthesize from the winner while grafting the best of the runners-up.
+Generate N independent attempts from different angles, each scored by its own judge in
+the same pipeline — no barrier, since judging one design never needs another's — then
+pick the top-scored attempt.
 ```js
 const ANGLES = ['MVP-first', 'risk-first', 'user-first']
 const attempts = await pipeline(ANGLES,
@@ -120,14 +121,14 @@ const confirmed = results.flat().filter(Boolean).filter(f => f.verdict && f.verd
 return { confirmed }
 ```
 
-### RESEARCH — multi-modal sweep → deep-read → verify → synthesize
+### RESEARCH — multi-modal sweep -> deep-read -> verify -> synthesize
 Search several different ways (each blind to the others), deep-read the hits, verify
 claims, then synthesize a cited report. Verification per-claim is a pipeline; synthesis
 is a final barrier.
 
-### MIGRATE — discover sites → transform each in isolation → verify
+### MIGRATE — discover sites -> transform each in isolation -> verify
 Discover the work-list (often inline, before the workflow), then `pipeline` each site
-through transform (in a `worktree`) → verify. Worktree isolation is justified here because
+through transform (in a `worktree`) -> verify. Worktree isolation is justified here because
 transforms mutate files in parallel.
 ```js
 const verified = await pipeline(args.sites,
