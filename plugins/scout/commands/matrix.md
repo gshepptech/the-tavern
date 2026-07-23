@@ -2,7 +2,7 @@
 description: Generate routes × roles coverage suite with reused storageState (login once per role)
 ---
 
-The user wants every route × every role tested. Roles config and route source from $ARGUMENTS or sensible defaults.
+The user wants every route × every role tested. Roles and login flow come from `scout.config.json`; the route inventory comes from the smoke specs `/scout:crawl` already generated.
 
 ## Preflight
 
@@ -32,6 +32,8 @@ Look for `scout.config.json` at the cwd root. If absent, ask the user for the ro
 ```
 
 The `anon` role has `null` credentials — used for unauthenticated traffic. Never invent credentials. If the user hasn't provided them, ask.
+
+If `scout.config.json` didn't already exist, write the collected answers to it at the cwd root, in the scaffold's shape — the setup specs generated below `import` it directly, so it must be a real file before they run.
 
 ## Generate authenticated storageState (once per role)
 

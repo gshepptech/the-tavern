@@ -8,7 +8,7 @@ The user wants a smoke test per discoverable route. Base URL is in $ARGUMENTS (d
 
 1. `playwright.config.ts` must exist. If not, route them to `/scout:init`.
 2. Dev server must be reachable. `curl -sI $BASE_URL`.
-3. Playwright MCP must be loaded (for the crawl phase).
+3. Playwright MCP must be loaded (for the dynamic crawl phase) — check that `browser_navigate`/`browser_snapshot` are available. If they aren't, tell the user to restart Claude Code and STOP.
 
 ## Route discovery — two passes, both run
 
@@ -18,7 +18,7 @@ Detect the framework by what's in the repo:
 
 | Framework | Where routes live |
 |---|---|
-| Next.js (app router) | `app/**/page.{ts,tsx,js,jsx}` — route = path from `app/` minus `/page.*`, with `[param]` → `:param` |
+| Next.js (app router) | `app/**/page.{ts,tsx,js,jsx}` — route = path from `app/` minus `/page.*`, with `[param]` -> `:param` |
 | Next.js (pages router) | `pages/**/*.{ts,tsx,js,jsx}` excluding `_app`, `_document`, `api/` |
 | React Router | grep for `<Route path=` and `createBrowserRouter` |
 | Vue Router | `router/index.{ts,js}` — read the `routes` array |
@@ -36,7 +36,7 @@ Union the two passes. Static catches routes hidden behind auth or feature flags;
 
 ## Generate specs
 
-For each route, emit `tests/smoke/<slug>.spec.ts` where slug is the route with `/` → `-` (root → `index`):
+For each route, emit `tests/smoke/<slug>.spec.ts` where slug is the route with `/` -> `-` (root -> `index`):
 
 ```ts
 import { test, expect } from '@playwright/test';

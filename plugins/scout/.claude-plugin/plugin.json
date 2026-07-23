@@ -1,8 +1,18 @@
 {
   "name": "scout",
-  "description": "Scout is the inspector who tests every room — end-to-end test authoring and maintenance for web apps via Playwright + Playwright MCP. She drives a real browser, reads the accessibility tree, and emits *.spec.ts files that pass — then keeps them passing. /scout:init scaffolds Playwright in the cwd and registers the MCP server. /scout:write <flow> drives the browser to perform the flow and emits a green spec. /scout:crawl discovers every route and generates a smoke spec per route. /scout:matrix produces a routes × roles coverage suite with reused storageState. /scout:audit runs the suite, reads trace.zip files, and triages failures by root cause. /scout:record wraps playwright codegen for manual capture. The author skill enforces selector hygiene (getByRole over CSS), auto-wait discipline, and idempotent test design; the diagnose skill drives trace-driven flaky-test triage. The spec-writer subagent isolates MCP-driven spec authoring from the main context.",
-  "version": "0.2.0",
+  "version": "0.2.1",
+  "description": "Scout is the inspector who tests every room \u2014 end-to-end test authoring and maintenance for web apps via Playwright + Playwright MCP. She drives a real browser, reads the accessibility tree, and emits *.spec.ts files that pass \u2014 then keeps them passing. /scout:init scaffolds Playwright in the cwd and registers the MCP server. /scout:write <flow> drives the browser to perform the flow and emits a green spec. /scout:crawl discovers every route and generates a smoke spec per route. /scout:matrix produces a routes \u00d7 roles coverage suite with reused storageState. /scout:audit runs the suite, reads trace.zip files, and triages failures by root cause. /scout:record wraps playwright codegen for manual capture. The author skill enforces selector hygiene (getByRole over CSS), auto-wait discipline, and idempotent test design; the diagnose skill drives trace-driven flaky-test triage. The spec-writer subagent isolates MCP-driven spec authoring from the main context.",
   "author": {
     "name": "gshepptech"
-  }
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/scout/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "playwright",
+    "e2e",
+    "browser",
+    "accessibility",
+    "test-generation"
+  ]
 }

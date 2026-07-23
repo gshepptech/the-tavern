@@ -48,8 +48,8 @@ This taxonomy matches `/scout:audit`. Use the same class names.
 **Confirm via trace:** Did the prior steps succeed? Is the page in the expected state? If yes, this is a real difference between expectation and reality.
 
 **Fix path is a JUDGMENT call:**
-- The product changed intentionally → update the assertion
-- The product regressed → file a bug, don't update the assertion
+- The product changed intentionally -> update the assertion
+- The product regressed -> file a bug, don't update the assertion
 - Surface BOTH options to the user. Do not silently relax assertions; that's how regressions get masked.
 
 ### CONSOLE_ERROR
@@ -67,8 +67,8 @@ This taxonomy matches `/scout:audit`. Use the same class names.
 **Confirm via trace:** Was the failing request the one the test depends on? Or incidental (e.g., a third-party analytics endpoint)?
 
 **Fix:**
-- Test's target endpoint failing → real bug or environment issue. Check if the dev server has the required state (DB seeded, env vars set).
-- Incidental endpoint failing → mock it in the test via `page.route(...)` so the test is hermetic.
+- Test's target endpoint failing -> real bug or environment issue. Check if the dev server has the required state (DB seeded, env vars set).
+- Incidental endpoint failing -> mock it in the test via `page.route(...)` so the test is hermetic.
 
 ### STATE_LEAK
 
