@@ -1,0 +1,109 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifests:
+    name: Manifests and docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      # Every plugin manifest is well-formed and its name matches marketplace.json.
+      - name: Validate manifests
+        run: python3 .github/scripts/validate_manifests.py
+
+      # The plugin cache is version-keyed, so a stale version means a fix that
+      # never reaches anyone. This checks all four places a version is written.
+      - name: Check version agreement
+        run: python3 .github/scripts/check_versions.py
+
+      # No decorative Unicode in docs, and every relative link resolves.
+      - name: Check documentation
+        run: python3 .github/scripts/check_docs.py
+
+      # Documented-but-unwired behaviour is the defect class that dominated an
+      # entire release: flags in an argument-hint that no script parses, and
+      # subagent types left behind by a rename. Both are invisible in review.
+      - name: Check flags and agent references
+        run: python3 .github/scripts/check_flags.py
+
+  syntax:
+    name: Syntax
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Shell scripts parse
+        run: git ls-files '*.sh' | xargs -r -I{} bash -n {}
+
+      - name: JavaScript parses
+        run: git ls-files '*.js' | xargs -r -I{} node --check {}
+
+      - name: Python compiles
+        run: git ls-files '*.py' | xargs -r python3 -m py_compile
+
+      # Hooks are executed by Claude Code directly, so a non-executable hook
+      # script is a silent runtime failure rather than a syntax error.
+      - name: Hook scripts are executable
+        run: |
+          fail=0
+          for f in $(git ls-files 'plugins/*/scripts/*.py' 'plugins/*/scripts/*.sh'); do
+            if [ ! -x "$f" ]; then echo "not executable: $f"; fail=1; fi
+          done
+          exit $fail
+
+  tests:
+    name: Tests (${{ matrix.plugin }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - plugin: warden
+            dir: plugins/warden
+            deps: ""
+          - plugin: sage
+            dir: plugins/sage
+            deps: "--with jsonschema"
+          - plugin: ranger
+            dir: plugins/ranger
+            deps: ""
+          - plugin: smith
+            dir: plugins/smith/mcp-server
+            deps: '--with jsonschema --with "mcp>=1.0.0"'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - name: Run ${{ matrix.plugin }} tests
+        working-directory: ${{ matrix.dir }}
+        # Matrix values are defined in this file, not derived from event data,
+        # so there is no untrusted input here. Passing them through env anyway
+        # keeps the run: block free of expression interpolation, which is the
+        # pattern that goes wrong the moment someone adds an event-driven input.
+        env:
+          DEPS: ${{ matrix.deps }}
+        # Some tests are deliberately skipped: they are red-until-implemented
+        # markers for planned work and each carries a skip reason. Skips are
+        # expected; failures are not.
+        run: uv run --with pytest $DEPS python -m pytest -q
