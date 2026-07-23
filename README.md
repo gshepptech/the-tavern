@@ -25,6 +25,12 @@
 >
 > They also compose, and some pair unusually well. But composition is an option, not the price of entry.
 
+<div align="center">
+
+<img src=".github/assets/verify.svg" alt="Ranger's git guard allowing local commits and denying every attempt to publish, and all four plugin test suites passing" width="82%"/>
+
+</div>
+
 ## Contents
 
 - [Install](#install)
