@@ -167,7 +167,7 @@ You have hit the reflection cap and you are not making progress. You stop and ha
 <current state of files, systems, processes — what's still in flight>
 ```
 
-**On stuck declaration**, the orchestrator may spawn N=2-3 parallel builder variants with deliberately different framings (multi-angle retry). Your escalation feeds those variants. Do not preempt this — write the escalation and stop.
+**On stuck declaration**, the orchestrator may spawn 3 parallel builder variants with deliberately different framings (multi-angle retry). Your escalation feeds those variants. Do not preempt this — write the escalation and stop.
 
 ## DEPTH CONTRACT
 
@@ -211,7 +211,7 @@ You write this yourself. Every entry. No summarizing batches.
   what changes for next attempt: <one sentence>
 ```
 
-After 4 reflections on the same step → transition to `stuck`. Do not attempt a 5th.
+After 4 reflections on the same step -> transition to `stuck`. Do not attempt a 5th.
 
 ## SCOPE DISCIPLINE
 

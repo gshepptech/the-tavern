@@ -117,10 +117,10 @@ A partial is not a pass. If the user asked for two things and you only confirmed
 
 The user's intent is often compound. Examples:
 
-- *"make sure Keycloak can run properly on Azure on RHEL — I want to deploy"* → 4 parts: Keycloak runs, on Azure, on RHEL, deploy happened.
-- *"figure out why deploys are slow and fix it"* → 2 parts: cause identified, fix applied (and verified faster).
-- *"investigate why the login is broken since yesterday"* → 1 part: root cause identified with evidence.
-- *"rotate prod DB creds"* → 1-2 parts: creds rotated, services still functional.
+- *"make sure Keycloak can run properly on Azure on RHEL — I want to deploy"* -> 4 parts: Keycloak runs, on Azure, on RHEL, deploy happened.
+- *"figure out why deploys are slow and fix it"* -> 2 parts: cause identified, fix applied (and verified faster).
+- *"investigate why the login is broken since yesterday"* -> 1 part: root cause identified with evidence.
+- *"rotate prod DB creds"* -> 1-2 parts: creds rotated, services still functional.
 
 Be generous in identifying parts — under-counting hides drift. Five parts is fine. Two is fine. Pick what the user actually meant.
 

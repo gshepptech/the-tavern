@@ -58,7 +58,7 @@ You MUST emit exactly this JSON, nothing else:
 
 - `quick` — narrow, well-scoped, codebase-only or single-system. Examples: *"why does test X fail"*, *"run the linter on src/auth"*.
 - `standard` — multi-system, infra-touching, or hybrid (investigate + fix + verify). Default for ambiguous.
-- `thorough` — flagged by user via `--thorough`. Doubles depth contract; orchestrator pre-spawns N=3 builder variants from the start.
+- `thorough` — flagged by user via `--thorough`. Doubles depth contract (recon and builder budgets, per-mode evidence floors); if the builder later declares stuck, the orchestrator auto-triggers multi-angle retry instead of asking first.
 
 If `flags.scope_override` is set, use it verbatim. If `flags.thorough`, set `thorough`.
 
@@ -77,22 +77,22 @@ If `flags.scope_override` is set, use it verbatim. If `flags.thorough`, set `tho
 
 ### hosts_likely_involved
 
-Scan the intent for host-shaped tokens. Also check if `.sellsword/hosts.yml` exists in cwd — if so, fuzzy-match host tags against the intent. Examples: *"deploy to azure"* → `["azure"]`, *"check staging"* → `["staging"]`, no hosts implied → `[]`.
+Scan the intent for host-shaped tokens. Also check if `.sellsword/hosts.yml` exists in cwd — if so, fuzzy-match host tags against the intent. Examples: *"deploy to azure"* -> `["azure"]`, *"check staging"* -> `["staging"]`, no hosts implied -> `[]`.
 
 ### domain_hints
 
 Single-word tags that help recon focus its research. Examples:
-- *"Keycloak on Azure"* → `["keycloak", "azure", "java-security"]`
-- *"airgap bundle"* → `["airgap", "package-management", "offline-install"]`
-- *"deploy times slow"* → `["deployment", "performance", "ci-cd"]`
+- *"Keycloak on Azure"* -> `["keycloak", "azure", "java-security"]`
+- *"airgap bundle"* -> `["airgap", "package-management", "offline-install"]`
+- *"deploy times slow"* -> `["deployment", "performance", "ci-cd"]`
 
 Aim for 3-6 hints. Use lowercase kebab-case.
 
 ### recon_focus_areas
 
 Concrete things recon should investigate first. Examples:
-- *"deploy Keycloak to Azure"* → `["existing IaC (terraform/bicep/pulumi)", "keycloak config and filter chain", "RHEL/Java environment", "auth flow and verification surface"]`
-- *"why deploys are slow"* → `["CI pipeline config", "recent deploy timing data", "test suite duration trends", "build cache behavior"]`
+- *"deploy Keycloak to Azure"* -> `["existing IaC (terraform/bicep/pulumi)", "keycloak config and filter chain", "RHEL/Java environment", "auth flow and verification surface"]`
+- *"why deploys are slow"* -> `["CI pipeline config", "recent deploy timing data", "test suite duration trends", "build cache behavior"]`
 
 Aim for 3-5 areas. Be specific — "investigate the codebase" is useless; "find the keycloak.conf and trace the filter chain" is useful.
 
@@ -170,7 +170,7 @@ Emit:
   "hosts_likely_involved": ["ci"],
   "domain_hints": ["ci-performance", "build-time", "test-duration", "caching"],
   "recon_focus_areas": ["CI config files", "recent deploy timing histograms", "Docker layer / package cache strategy", "parallelization in test suite", "monorepo affected-graph behavior"],
-  "rationale": "Hybrid task — investigate then fix. Starts in investigating mode; builder will transition to planning once it identifies bottlenecks. Thorough scope means recon runs deeper, builder spawns N=3 variants on hard sub-problems. Plan checkpoint enabled because the fix will involve config changes."
+  "rationale": "Hybrid task — investigate then fix. Starts in investigating mode; builder will transition to planning once it identifies bottlenecks. Thorough scope means recon and the builder run with doubled budgets and depth floors, and a stuck declaration auto-escalates to multi-angle retry without asking first. Plan checkpoint enabled because the fix will involve config changes."
 }
 ```
 

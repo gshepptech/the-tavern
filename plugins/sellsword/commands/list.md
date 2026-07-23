@@ -14,9 +14,9 @@ FILTER="$ARGUMENTS"
 
 Default filter: show all runs, most recent first.
 
-- `--active` → only `status` in {initialized, scouting, plan_approval, executing, dual_verification}
-- `--completed` → only `status == "completed"`
-- `--all` → everything including cancelled
+- `--active` -> only `status` in {initialized, scouting, recon_complete, executing, active} — the last one (`active`) is `/sellsword:goal`'s in-progress marker; `/sellsword:do` runs never use it.
+- `--completed` -> only `status` in {completed, goal_met}
+- `--all` -> everything including cancelled, capped, blocked, and stuck
 
 ## Behavior
 
