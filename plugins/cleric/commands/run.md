@@ -120,9 +120,12 @@ Write `$RUN_DIR/state.json`:
   "pre_sweep_branch": "<branch>",
   "created_at": "<ISO>",
   "cwd": "<absolute>",
-  "tooling": <tooling.json contents>
+  "tooling": <tooling.json contents>,
+  "track_results": {}
 }
 ```
+
+`track_results` starts empty and is filled in per track as PHASE 2 and PHASE 4 complete — it's what `/cleric:status` reads to render the per-track table.
 
 Status line to user:
 
@@ -150,6 +153,8 @@ apply: false
 Wait for all to return. Each writes its `assessment.md` under `<track_dir>` and returns a structured JSON summary.
 
 Validate each return parses correctly. If any track failed to produce JSON, log the failure and continue with the others (don't fail the whole run for one track).
+
+For each track that returned valid JSON, write its structured return into `state.json`'s `track_results.<track>` (candidates_total, by_confidence, assessment_path, etc.) — this is the data `/cleric:status` renders.
 
 Update state.json: `status: "inspection_complete"`, `phase: "review"`.
 
@@ -259,7 +264,7 @@ The track agent will:
 - Revert any batch that fails checks
 - Write applied.md with the final list of what stuck
 
-Wait for the track to return. Read its structured return. If `checks_passed: false` across all batches, flag the track as failed in state.json but continue to the next track (don't cascade-fail).
+Wait for the track to return. Read its structured return and merge it into `state.json`'s `track_results.<track>` (applied_count, reverted_count, checks_passed, applied_path). If `checks_passed: false` across all batches, flag the track as failed in state.json but continue to the next track (don't cascade-fail).
 
 Append a status line per track:
 
@@ -346,7 +351,7 @@ End with one question to the user: "Anything look off, or want to elevate any of
 1. **Refuse to run on a dirty working tree.** Always. The safety model depends on atomic commits.
 2. **Default is `--dry-run`.** Apply requires explicit opt-in (`--apply`).
 3. **HIGH-only auto-applies.** Never auto-apply MEDIUM/LOW even with `--auto`. The flag controls the *checkpoint*, not the *confidence threshold*.
-4. **Track order matters in apply phase.** deprecated-slop → dead-code → dedup → type-consolidate → type-strengthen → error-cleanup → circular-deps. Do not reorder casually.
+4. **Track order matters in apply phase.** deprecated-slop -> dead-code -> dedup -> type-consolidate -> type-strengthen -> error-cleanup -> circular-deps. Do not reorder casually.
 5. **Atomic commits.** Each track makes its own commits, one batch per commit. Reviewer reads these to verify.
 6. **Don't do work yourself.** Spawn tracks. Read their outputs. Render to chat. Don't edit code.
 7. **Reviewer is mandatory after apply.** Never skip the final cross-track check.

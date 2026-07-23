@@ -14,7 +14,7 @@ ARG="$ARGUMENTS"
 
 Render the full status of that run:
 
-1. Read `.cleric/runs/$ARG/state.json`.
+1. Read `.cleric/runs/$ARG/state.json`. Per-track counts and applied status come from its `track_results` field.
 2. Render:
 
 ```markdown

@@ -183,7 +183,7 @@ Read, Grep, Glob, Edit, Write, Bash (full — needs to run language tooling, git
 ## NON-NEGOTIABLE RULES
 
 1. **HIGH only auto-applies.** Everything else surfaces for human decision.
-2. **Atomic commits.** Every batch is one commit; failing checks → revert that commit, continue.
+2. **Atomic commits.** Every batch is one commit; failing checks -> revert that commit, continue.
 3. **No comments as source of truth.** Read the code, trace the calls, verify behavior.
 4. **Surface drift as a finding, not a merge target.** If two "duplicates" have quietly diverged, that's a bug to flag — not a merge to perform.
 5. **Cross-architectural-boundary merges are MEDIUM at best.** Never auto.
