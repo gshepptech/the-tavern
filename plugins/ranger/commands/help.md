@@ -15,7 +15,9 @@ He is a **thin lead** — he reads state files and spawns agents, and never open
 
 ## The cycle
 
-`survey → select → plan → plan-review → build → review → verify → commit`
+`survey -> plan -> plan-review -> select -> build -> review -> verify -> commit`
+
+He works a **crew, not a queue**. Surveying, planning and plan review are read-only — they cannot corrupt a working tree — so he dispatches them in parallel pools: six scouts sweeping different slices of the app at once, three planners, three plan reviewers. Only the build touches the shared tree, so only the build is serial, one item at a time. The payoff is that by the time he needs something to build, the thinking is already done and queued.
 
 Plan review comes before implementation on purpose: a rejected plan costs one agent, a bad implementation costs five. Verification is fresh-eyes — the assessor never sees the plan, only the acceptance criteria and the code. UI items get driven through a real browser as a user would.
 
@@ -23,9 +25,11 @@ One item, one local commit. So any single change is one `git revert` away.
 
 ## Why it never runs out of work
 
-An empty backlog is a survey trigger, not an exit. When maintenance work is exhausted the scout steps back, enumerates the app's domains, and rotates through them with a persistent pointer so it never sweeps the same ground twice: correctness → UI/UX and visual polish → real-user flows → performance → accessibility → security → DX → feature gaps.
+A *thinning* backlog is the survey trigger — not an empty one. He refills while the current item is still being built, so he never stalls waiting for work to be found.
 
-It will not invent churn to look busy. If a domain is genuinely healthy the scout advances the rotation rather than refactoring good code for its own sake.
+The first survey maps the app's real domains. After that he crosses those domains with nine lenses — correctness, UI/UX, visual polish, real-user flows, performance, accessibility, security, DX, feature gaps — and hands one domain×lens **pair** to each scout. A persistent map of swept pairs means no ground is covered twice.
+
+It will not invent churn to look busy. A scout that finds nothing worth doing reports its pair **clean**, which is a real answer; the foreman responds by dispatching more pairs, never by pressing a scout to come back with something. Keeping the backlog full is his job, not theirs — and that split is exactly what stops an idle loop from refactoring healthy code.
 
 If `cleric`, `seer` or `scout` are installed, the scout uses them for their specialisms instead of duplicating them.
 
@@ -45,18 +49,22 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 |---|---|---|
 | *(none)* | commits locally to the **current branch** | — |
 | `--preset <name>` | full domain rotation | focus a curated checklist: `ui`, `ux`, `a11y`, `harden`, `perf` (skips items the app lacks) |
-| `--dry-run` | executes | previews only — survey + top plan, no writes, no commit |
+| `--dry-run` | executes | previews only — one scout + top plan, no writes, no commit |
+| `--scouts=N` | 6 sweep in parallel | resize the survey team (1–8) |
+| `--planners=N` | 3 plan in parallel | resize the plan pool (1–4) |
 | `--new` | continues a parked run | forces a fresh run |
 | `--branch` | one branch for everything | a local branch per item |
 | `--merge-dev` | leaves integration to you | merges verified items into `dev` |
 | `--ask` | **never asks you anything** | may ask when genuinely blocked |
-| `--max-cycles=N` | see first-run cap | stops after N items (`0` = unlimited) |
-| `--max-hours=N` | see first-run cap | stops after N hours (`0` = unlimited) |
-| `--unlimited` | see first-run cap | removes the first-run cap; no limits |
+| `--max-cycles=N` | **unlimited** | stands down after N shipped items (`0` = unlimited) |
+| `--max-hours=N` | **unlimited** | stands down after N hours (`0` = unlimited) |
+| `--unlimited` | — | no-op, kept so older invocations don't break |
 
-**First-run safety cap.** The *first* run in a repo defaults to **5 items, then stands down** so you can review before trusting it longer — even though "never stops" is the design. Pass `--unlimited` (or any explicit `--max-*`) to override; later runs in the same repo default to unlimited.
+**Runs are uncapped by default** — that is the whole design, but it means nothing ends a run except `/ranger:stop`, Esc, or killing the runner. Caps are checked between items, so bounding a run never leaves a half-finished change behind.
 
-**`git push` is blocked for the entire run and no flag enables it.** A `PreToolUse` hook denies pushes, remote mutation and PR creation outright — instructions are a request, a hook is a guarantee.
+`--max-cycles` counts **shipped items**, not attempts: a cycle that reverts, quarantines, or finds nothing above the quality floor spends tokens without advancing the count. So `--max-cycles` bounds output and **`--max-hours` bounds spend** — the hours cap is the one to reach for overnight.
+
+**`git push` is blocked for the entire run and no flag enables it.** A `PreToolUse` hook denies pushes, remote mutation, `git send-email`, `gh api` writes and PR creation. It is enforced outside the model, so it holds even under bypassed permissions, and it resolves quoting and looks inside `sh -c` / `eval` wrappers. It is a guardrail against an agent publishing by accident, not a sandbox — the real containment for an unattended run is running it somewhere disposable.
 
 ## Keeping it running
 
@@ -78,6 +86,6 @@ Each `/ranger:run` does **one cycle and returns** — no Stop hook trapping the 
 
 ## Honest caveats
 
-An unbounded run consumes tokens for as long as it runs. Watch the first few cycles before trusting it overnight — that attended-to-unattended transition is the whole game. And `--max-hours` exists even though it defaults to off; use it the first night.
+An unbounded run consumes tokens for as long as it runs, and **unbounded is the default** — nothing stops a run but you. Watch the first few cycles before trusting it overnight; that attended-to-unattended transition is the whole game. `--max-hours=N` is the only cap that ends a run on its own, and it is off unless you pass it. Use it the first night.
 
 Unattended mode runs with permissions bypassed — only `git push` is genuinely blocked, everything else runs without asking. Run it in a sandbox, not on a machine you care about.

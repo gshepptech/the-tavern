@@ -1,8 +1,18 @@
 {
   "name": "ranger",
-  "description": "Ranger is the foreman who never leaves the site. Give him one prompt and walk away — he runs a self-directing senior-engineering loop that never stops and never runs out of work. A thin lead (reads state files, never code) drives five Opus sub-agents — scout, planner, implementer, reviewer, assessor — through survey → rank → plan → plan-review → build → review → verify → commit, one local commit per item. When the backlog runs dry the scout steps back, enumerates the app's domains, and rotates through them with a persistent pointer — correctness, UI/UX and visual polish, real-user flows, performance, accessibility, security, feature gaps — so there is always work, and never a second pass over the same ground. UI items are driven through a real browser as a user would, then fixed and made to look better. Each invocation runs one cycle and returns; keep it going with `/loop /ranger:run` (watched, Esc to stop) or the bundled headless runner (overnight) — no Stop-hook trapping or transcript spam. Curated `--preset` briefs (ui, ux, a11y, harden, perf) focus the sweep and skip anything the app lacks instead of inventing it, and `--dry-run` previews the work without changing anything. A PreToolUse hook hard-denies git push, remote mutation, and PR creation regardless of what the model decides. Local commits only. Branches and dev merges require explicit flags. Never asks the user anything unless --ask. Blast-radius circuit breaker, no-progress quarantine, and revert-don't-pile-on regression discipline keep an unattended run from turning into churn.",
-  "version": "0.2.0",
+  "version": "0.3.0",
+  "description": "Ranger is the foreman who never leaves the site. Give him one prompt and walk away \u2014 he runs a self-directing senior-engineering loop that never stops and never runs out of work. A thin lead (reads state files, never code) drives five Opus sub-agents \u2014 scout, planner, implementer, reviewer, assessor \u2014 through survey \u2192 rank \u2192 plan \u2192 plan-review \u2192 build \u2192 review \u2192 verify \u2192 commit, one local commit per item. When the backlog runs dry the scout steps back, enumerates the app's domains, and rotates through them with a persistent pointer \u2014 correctness, UI/UX and visual polish, real-user flows, performance, accessibility, security, feature gaps \u2014 so there is always work, and never a second pass over the same ground. UI items are driven through a real browser as a user would, then fixed and made to look better. Each invocation runs one cycle and returns; keep it going with `/loop /ranger:run` (watched, Esc to stop) or the bundled headless runner (overnight) \u2014 no Stop-hook trapping or transcript spam. Curated `--preset` briefs (ui, ux, a11y, harden, perf) focus the sweep and skip anything the app lacks instead of inventing it, and `--dry-run` previews the work without changing anything. A PreToolUse hook hard-denies git push, remote mutation, and PR creation regardless of what the model decides. Local commits only. Branches and dev merges require explicit flags. Never asks the user anything unless --ask. Blast-radius circuit breaker, no-progress quarantine, and revert-don't-pile-on regression discipline keep an unattended run from turning into churn.",
   "author": {
     "name": "gshepptech"
-  }
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/ranger/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "autonomous",
+    "unattended",
+    "loop",
+    "maintenance",
+    "multi-agent"
+  ]
 }

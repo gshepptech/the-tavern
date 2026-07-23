@@ -5,7 +5,7 @@ NOT pip-install pytest globally):
 
     uvx pytest plugins/ranger/tests/
 
-The hooks are exercised as subprocesses, exactly as Claude Code invokes them:
+The hook is exercised as a subprocess, exactly as Claude Code invokes it:
 a JSON event on stdin, behaviour expressed through exit code and stdout. This
 tests the real contract, not an imported approximation.
 """
@@ -86,5 +86,19 @@ def guard(project):
         )
         return "deny" if cp.returncode == 2 else "allow"
 
+    def _reason(command: str, *, session_id: str = "S1") -> str:
+        """The text of a denial, so tests can assert the user is told what to do."""
+        cp = _run(
+            "guard-git.py",
+            {
+                "cwd": str(project.path),
+                "session_id": session_id,
+                "tool_name": "Bash",
+                "tool_input": {"command": command},
+            },
+        )
+        return cp.stderr
+
     _verdict.project = project
+    _verdict.reason = _reason
     return _verdict
