@@ -7,7 +7,7 @@ unintended commands, a hook that leaks data, an injection in a workflow script,
 or anything else with a security impact — please report it privately.
 
 Please open a [GitHub Security Advisory](https://github.com/gshepptech/the-tavern/security/advisories/new)
-(Security → Advisories → *Report a vulnerability*). This keeps your report
+(Security, then Advisories, then *Report a vulnerability*). This keeps your report
 private until a fix is available.
 
 Please do **not** open a public issue for a vulnerability before it has been
@@ -29,6 +29,23 @@ When reporting, include where possible:
 ## Scope notes
 
 These plugins run inside Claude Code and can drive shell commands, file edits,
-browsers (Scout/Playwright), and remote systems (Sellsword). Treat that capability the
-way you would any developer tool: review what a plugin does before granting it
+browsers (Scout, via Playwright), and remote systems (Sellsword). Treat that capability
+the way you would any developer tool: review what a plugin does before granting it
 permissions, and report anything that acts outside its stated remit.
+
+Two capabilities deserve naming explicitly, because they are the largest surface
+here and they are working as designed rather than as defects:
+
+- **Unattended runs execute with permissions bypassed.** Ranger's headless runner
+  and Sellsword's `/sellsword:goal` are built to work with no human present to answer a
+  permission prompt, so they do not ask. A `PreToolUse` hook hard-blocks `git push`,
+  remote mutation and PR creation for the whole of a Ranger run, and that block
+  holds even in bypass mode — but **only git is guarded**. File writes, shell
+  commands and network calls run unprompted. Run unattended mode in a container, a
+  VM, or a throwaway clone, never on a machine you care about.
+- **Sellsword operates on real infrastructure**, including SSH to remote hosts. Its host
+  configuration lives in `.sellsword/hosts.yml` in your project.
+
+A report that one of these acts *outside* its documented remit is in scope and
+welcome. A report that unattended mode runs commands without asking is expected
+behaviour, documented in the relevant plugin's README.
