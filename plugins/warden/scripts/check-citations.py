@@ -75,6 +75,10 @@ UNCERTAINTY_MODE_FILE = HOME / ".claude" / ".warden-uncertainty-mode"
 STRICT_MODE_FILE = HOME / ".claude" / ".warden-strict-mode"
 FABLE_MODE_FILE = HOME / ".claude" / ".warden-fable-mode"
 TRUST_ME_FILE = HOME / ".claude" / ".warden-trust-me"
+# /warden:trust-me writes TRUST_ME_FILE; the UserPromptSubmit hook promotes it to
+# this armed marker at the start of the NEXT turn. Only the armed marker is
+# honoured here — see consume_trust_me() for why.
+TRUST_ME_ARMED_FILE = HOME / ".claude" / ".warden-trust-me-armed"
 LOG_FILE = HOME / ".claude" / ".warden-citations-log.jsonl"
 
 # Critic agent identifiers — two tiers
@@ -225,22 +229,77 @@ def read_mode(path: Path) -> str:
 
 
 def consume_trust_me() -> bool:
-    """Check and delete the one-shot trust-me flag. Returns True if it was present."""
-    if not TRUST_ME_FILE.exists():
+    """Check and delete the ARMED one-shot trust-me flag.
+
+    Deliberately reads TRUST_ME_ARMED_FILE, not the marker /warden:trust-me
+    writes. This hook fires at the end of EVERY turn, including the turn that
+    ran /warden:trust-me — so consuming the raw marker here spent the bypass
+    before the user's next prompt arrived, and the gates fired anyway. The
+    UserPromptSubmit hook promotes the raw marker to the armed one at the start
+    of the following turn, which is the turn the user actually meant to
+    protect. Same mechanism that makes /warden:casual correct.
+    """
+    if not TRUST_ME_ARMED_FILE.exists():
         return False
     try:
-        TRUST_ME_FILE.unlink()
+        TRUST_ME_ARMED_FILE.unlink()
     except OSError:
         pass
     return True
 
 
+LOG_MAX_BYTES = 2 * 1024 * 1024
+
+
+def _redact_for_log(event: dict) -> dict:
+    """Strip response prose and absolute paths before anything is written down.
+
+    This log lives at a single path in $HOME and accumulates across every
+    project you ever use Warden in, including private ones. It exists to tune the
+    gates -- which gate fired, how often, on what shape of input -- and that
+    needs counts and categories, not content. It previously recorded up to 120
+    characters of the assistant's actual prose and the absolute path of every
+    cited file, which is a transcript fragment of someone's private work
+    sitting in a file nobody remembers is there.
+    """
+    def scrub(node):
+        if isinstance(node, dict):
+            out = {}
+            for key, value in node.items():
+                if key == "match":
+                    # Keep the length so tuning can still see what tripped it.
+                    out["match_len"] = len(str(value))
+                elif key == "path":
+                    # The filename is enough to spot a pattern; the directory
+                    # tree is somebody's private client work.
+                    out["path"] = os.path.basename(str(value))
+                elif key in ("phrase", "text", "excerpt", "reason", "prompt"):
+                    out[f"{key}_len"] = len(str(value))
+                else:
+                    out[key] = scrub(value)
+            return out
+        if isinstance(node, list):
+            return [scrub(item) for item in node]
+        return node
+
+    try:
+        return scrub(json.loads(json.dumps(event)))
+    except (TypeError, ValueError):
+        return {"ts": event.get("ts"), "redaction_failed": True}
+
+
 def log_event(event: dict) -> None:
     try:
         LOG_FILE.parent.mkdir(parents=True, exist_ok=True)
+        # Rotate rather than growing without bound in the user's home directory.
+        try:
+            if LOG_FILE.stat().st_size > LOG_MAX_BYTES:
+                LOG_FILE.replace(LOG_FILE.with_suffix(".jsonl.1"))
+        except OSError:
+            pass
         with LOG_FILE.open("a") as fh:
-            fh.write(json.dumps(event) + "\n")
-    except OSError:
+            fh.write(json.dumps(_redact_for_log(event)) + "\n")
+    except (OSError, TypeError, ValueError):
         pass
 
 
@@ -473,19 +532,38 @@ def is_clarifying_response(response_text: str) -> bool:
 
 
 def load_transcript(path: str) -> list[dict]:
+    """Read a transcript, tolerating everything a real transcript throws at us.
+
+    This hook runs at the end of every turn in every project, so a transcript
+    it cannot parse must degrade to "no opinion", never to a traceback. Three
+    real cases used to crash it, each of which surfaces in ordinary use:
+
+      - non-UTF-8 bytes anywhere in the file (a grep result, a binary blob, a
+        file path in another encoding) raised UnicodeDecodeError, which is not
+        an OSError and so escaped the handler below;
+      - a line that is valid JSON but not an object (a bare list or string),
+        which then failed on .get();
+      - `content: null`, which is a legal shape and is handled downstream.
+
+    errors="replace" keeps the rest of the transcript readable rather than
+    discarding the whole file over one bad byte.
+    """
     try:
         msgs = []
-        with open(path) as fh:
+        with open(path, encoding="utf-8", errors="replace") as fh:
             for line in fh:
                 line = line.strip()
                 if not line:
                     continue
                 try:
-                    msgs.append(json.loads(line))
+                    parsed = json.loads(line)
                 except json.JSONDecodeError:
                     continue
+                # Only objects have the shape the rest of this file expects.
+                if isinstance(parsed, dict):
+                    msgs.append(parsed)
         return msgs
-    except OSError:
+    except (OSError, UnicodeDecodeError, ValueError):
         return []
 
 
@@ -920,7 +998,12 @@ def main() -> int:
     user_prompt = find_last_user_prompt(messages)
     verified_paths = collect_verified_paths(turn_messages)
     strict_off = read_mode(STRICT_MODE_FILE) == "off"
-    trust_me_consumed = consume_trust_me() if not strict_off else False
+    # Consume unconditionally, even when strict is off. The flag is only USED
+    # by the strict gates below, but if it were left unconsumed while strict is
+    # off it would strand — a stale armed marker would then bypass some future
+    # turn once strict is re-enabled. Clearing it here can't weaken anything:
+    # with strict off, the gates it feeds are skipped anyway.
+    trust_me_consumed = consume_trust_me() and not strict_off
 
     citations_blocked, citations_reason, citations_details = check_citations(
         response_text, verified_paths
@@ -1016,4 +1099,23 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    # Last-resort fail-open. This hook runs at the end of every turn in every
+    # project; a traceback here would surface as a hook error on work that has
+    # nothing to do with Warden. A gate that cannot decide must let the response
+    # through, never break the session. Specific failure modes are handled
+    # closer to their cause - this only catches what nobody anticipated.
+    try:
+        sys.exit(main())
+    except Exception as exc:  # noqa: BLE001 - deliberate catch-all, see above
+        # Fail open, but leave a trace. A silently-crashing gate looks
+        # identical to a working one — the user believes they are protected
+        # while nothing fires. Record it so a persistent break is findable.
+        try:
+            log_event({
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "decision": "error-fail-open",
+                "error": f"{type(exc).__name__}: {exc}"[:200],
+            })
+        except Exception:  # noqa: BLE001 - logging must never break fail-open
+            pass
+        sys.exit(0)
