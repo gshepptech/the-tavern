@@ -338,8 +338,8 @@ If validation fails for either agent: re-spawn that agent with a corrective prom
 | pass | fail | re-spawn builder in `executing` with fresh-eyes' findings — go back to PHASE 6 (max 3 audit-cycles total) |
 | conditional-pass | pass | proceed to PHASE 8, include auditor's important findings |
 | conditional-pass | partial | render both, ask user how to proceed |
-| fail | any | re-spawn builder with auditor findings → PHASE 6 (max 3 cycles) |
-| any | fail | re-spawn builder with fresh-eyes findings → PHASE 6 (max 3 cycles) |
+| fail | any | re-spawn builder with auditor findings -> PHASE 6 (max 3 cycles) |
+| any | fail | re-spawn builder with fresh-eyes findings -> PHASE 6 (max 3 cycles) |
 
 If 3 audit-cycles have elapsed without convergence, render to user with all findings and ask them to decide: ship as-is, push back at Sellsword, or cancel.
 

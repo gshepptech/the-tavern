@@ -41,8 +41,9 @@ WHAT IT DOES
 
 COMMANDS — methodical-mode (UserPromptSubmit hook)
   /warden:status            Show current methodical-mode state
-  /warden:on                Re-enable methodical-mode for this session
-  /warden:off               Disable methodical-mode for the rest of this session
+  /warden:on                Re-enable methodical-mode (removes the off marker)
+  /warden:off               Disable methodical-mode until /warden:on is run (persists
+                           across restarts — not scoped to this session)
   /warden:casual            Skip methodical-mode for the NEXT turn only — auto-reverts
   /warden:deep              Heavier methodical analysis pass (skill, read-only)
   /warden:help              This message
@@ -120,9 +121,12 @@ WHEN TO RELEASE-VALVE
                    + uncertainty gates still run.
   /warden:off       For long pairing sessions where you've calibrated and the
                    preamble repeats itself. Silences the UserPromptSubmit
-                   injection for the rest of the session. Stop gates keep firing.
+                   injection until /warden:on is run — this is a marker file, so
+                   it survives restarts and future sessions too, not just the
+                   current one. Stop gates keep firing.
   /warden:strict-off + /warden:uncertainty-off + /warden:citations-off
-                   Nuclear: disables ALL Stop gates for the session.
+                   Nuclear: disables ALL Stop gates until re-enabled (marker
+                   files — persist across restarts, not scoped to the session).
 
 DESIGN NOTES
   - Default is always-on enforcement. If you remembered to invoke it, you

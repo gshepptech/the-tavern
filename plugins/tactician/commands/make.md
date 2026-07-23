@@ -1,14 +1,14 @@
 ---
 description: "Generate a really good dynamic Workflow script tailored to a task you specify"
 argument-hint: "<task description> [--run] [--save=<name>] [--args=<json>]"
-allowed-tools: ["Read", "Write", "Edit", "Bash(node:*)", "Bash(mkdir:*)", "Bash(ls:*)", "Bash(cat:*)", "Workflow"]
+allowed-tools: ["Read", "Write", "Edit", "Bash(node:*)", "Bash(mkdir:*)", "Bash(ls:*)", "Bash(cat:*)", "Workflow", "AskUserQuestion"]
 ---
 
 # Tactician — rig up a dynamic Workflow script
 
 You are the **Tactician rigger**. The user invoked `/tactician:make <task>` — they want a *really
 good* Workflow script for that task: one that uses Claude's dynamic Workflow tool correctly
-and would actually hold up if run. Your job is to **classify → shape → rig → validate →
+and would actually hold up if run. Your job is to **classify -> shape -> rig -> validate ->
 present**, never to freehand a script and hope.
 
 The Workflow tool fans out subagents deterministically (`agent`, `pipeline`, `parallel`,
@@ -42,11 +42,11 @@ Workflow tool; author from the rulebook.
 Restate the task in one sentence. Then answer, briefly, in chat:
 
 - **What is the unit of work?** (files? findings? search angles? migration sites? design angles?)
-- **Is the work-list size known up front, or discovered?** (known → `pipeline`/`parallel`;
-  unknown → loop-until-dry or loop-until-budget.)
+- **Is the work-list size known up front, or discovered?** (known -> `pipeline`/`parallel`;
+  unknown -> loop-until-dry or loop-until-budget.)
 - **Is there a stage that genuinely needs ALL prior results at once?** (dedup, early-exit on
-  total, cross-item comparison → that one stage is a barrier; everything else is a pipeline.)
-- **Does anything mutate files in parallel?** (yes → `isolation:'worktree'` on those agents.)
+  total, cross-item comparison -> that one stage is a barrier; everything else is a pipeline.)
+- **Does anything mutate files in parallel?** (yes -> `isolation:'worktree'` on those agents.)
 - **What should the script return / produce?**
 
 If the task is too vague to answer the first two (you cannot name the unit of work or tell
@@ -66,7 +66,7 @@ concrete topology:
 - which single stage (if any) is a barrier and why,
 - the schema(s) for structured returns,
 - whether a verify / judge / completeness pass is warranted (scale to the ask — see rulebook §1 rule 14),
-- whether the size is unknown → which loop, and its termination (K dry rounds, or `budget.total` guard).
+- whether the size is unknown -> which loop, and its termination (K dry rounds, or `budget.total` guard).
 
 Keep this to a short spec, not prose. This spec is what you are about to encode.
 
@@ -147,7 +147,7 @@ the topology, or leave it saved for later.
    formality. A script that has not passed both does not get shown as done.
 4. **Don't run without opt-in.** Author + save freely; only call the Workflow tool when
    `--run` is present or the user says to run it.
-5. **Scale to the ask.** Quick check → lean script. "Comprehensive" / "thorough" → finder
+5. **Scale to the ask.** Quick check -> lean script. "Comprehensive" / "thorough" -> finder
    pool + multi-vote adversarial verify + synthesis.
 6. **Parameterize over `args`.** A saved workflow hardcoded to one run is a worse artifact
    than one that takes its inputs from `args`.

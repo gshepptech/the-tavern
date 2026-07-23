@@ -69,7 +69,7 @@ For each error-handling site, classify as:
 The handling does one of these:
 
 1. **Real boundary** — catches at a process / async boundary where errors must not propagate (HTTP request handler, background job runner, message consumer). Converts to logged + 500 / dead-letter / retried.
-2. **Real recovery** — alternative path exists and is correct (cache miss → fetch from source; primary DB down → secondary; parse failure → use default-but-clearly-logged).
+2. **Real recovery** — alternative path exists and is correct (cache miss -> fetch from source; primary DB down -> secondary; parse failure -> use default-but-clearly-logged).
 3. **Real logging** — error is logged with context, then re-thrown / re-returned. Adds value via structured logging.
 4. **Real cleanup** — resource handle released, lock released, transaction rolled back. The catch is the cleanup mechanism.
 5. **Real user-facing reporting** — catches to format an error message for the user (UI form errors, CLI exit codes).

@@ -196,9 +196,9 @@ flags: { thorough: <bool>, yolo: true }
 
 Wait for the builder. Branch on `final_mode`:
 
-- **`stuck`** → PHASE 4d (multi-angle retry).
-- **`investigating` / `planning` / `executing`** (budget hit mid-run) — do NOT ask the user. Re-spawn the builder with the same inputs; it resumes from its journal. Cap at **3** budget re-spawns per cycle; if still not done, treat as `stuck` → PHASE 4d.
-- **`done` / `verifying` complete** → PHASE 4b.
+- **`stuck`** -> PHASE 4d (multi-angle retry).
+- **`investigating` / `planning` / `executing`** (budget hit mid-run) — do NOT ask the user. Re-spawn the builder with the same inputs; it resumes from its journal. Cap at **3** budget re-spawns per cycle; if still not done, treat as `stuck` -> PHASE 4d.
+- **`done` / `verifying` complete** -> PHASE 4b.
 
 ### 4b. Dual verification
 
@@ -246,18 +246,18 @@ Then decide:
 
 | auditor | fresh-eyes | action |
 |---|---|---|
-| `pass` | `pass` | **Goal met.** → PHASE 5 with `status: "goal_met"`. |
+| `pass` | `pass` | **Goal met.** -> PHASE 5 with `status: "goal_met"`. |
 | anything else | any | re-dispatch (below). |
 | any | anything else | re-dispatch (below). |
 
 `conditional-pass`, `partial`, and `fail` are NOT a pass. To re-dispatch: set `user_feedback` = the auditor's findings + the fresh-eyes' findings/drift flags, then **check the caps**:
 
-- `CYCLE >= flags.max_cycles` → PHASE 5 with `status: "capped"`.
-- elapsed since `started_at` >= `MAX_SECONDS` → PHASE 5 with `status: "capped"`.
+- `CYCLE >= flags.max_cycles` -> PHASE 5 with `status: "capped"`.
+- elapsed since `started_at` >= `MAX_SECONDS` -> PHASE 5 with `status: "capped"`.
 
 If neither cap is hit, loop back to **4a** with the new `user_feedback`.
 
-### 4d. Stuck → multi-angle retry
+### 4d. Stuck -> multi-angle retry
 
 On builder `stuck`, do NOT ask the user. Run Sellsword's multi-angle retry: spawn **3 builder variants in parallel** (one message, three `Agent` calls, all `mode: "bypassPermissions"`), each with the escalation plus a different `framing_hint`:
 
@@ -267,7 +267,7 @@ On builder `stuck`, do NOT ask the user. Run Sellsword's multi-angle retry: spaw
 
 Each writes `$RUN_DIR/retry/variant-{A,B,C}/`. Then spawn an arbiter (`sellsword:builder` in `investigating` mode, `arbiter_task: true`) to read all three and emit `$RUN_DIR/retry/synthesis.md`. Re-enter **4a** with the synthesis as `user_feedback`.
 
-If the builder returns `stuck` again on the cycle after a retry-informed attempt → PHASE 5 with `status: "stuck"`.
+If the builder returns `stuck` again on the cycle after a retry-informed attempt -> PHASE 5 with `status: "stuck"`.
 
 ---
 

@@ -18,10 +18,15 @@ Read-only. Never changes a run.
 **<status>** — <run_id> · cycle <cycle><cap> · <elapsed>
 Brief: <brief>
 Phase: <phase> · In flight: <item or "—"> · Stalls: <stall_count>
+Crew: <scouts> scouts · <planners> planners · 1 builder
+Pipeline: <ready> ready · <planned> planned · <approved> approved (watermark <backlog_watermark>)
 Branch: <current git branch> · flags: <the flags that are on, or "defaults (local commits, current branch, never asks)">
 
 **Last 5 shipped**
 <the last five journal lines>
+
+**Plans ready to build**
+<approved items: score, title — or "none yet">
 
 **Next up**
 <top 5 ready backlog items: score, title>
@@ -30,7 +35,7 @@ Branch: <current git branch> · flags: <the flags that are on, or "defaults (loc
 <items with a blocker note, or "none">
 
 **Domain rotation**
-<pointer position, current domain, and which domains have been swept>
+<pointer position, and how many domain × lens pairs are swept of the total>
 ```
 
 4. If `status` is `active`, close with: `/ranger:stop to end the run.`

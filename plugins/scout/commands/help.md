@@ -35,13 +35,14 @@ SUBAGENT
 CONFIG
   playwright.config.ts   Scaffolded by /scout:init. baseURL via $BASE_URL env.
   .mcp.json              Playwright MCP entry (headed by default).
-  scout.config.json     Roles + login flow for /scout:matrix. Created on first
+  scout.config.json        Roles + login flow for /scout:matrix. Created on first
                          matrix run.
   .auth/                 storageState per role. Gitignored — contains session
                          tokens. Never commit.
 
 TYPICAL FLOW
   1. /scout:init                              (once per project)
+     -> restart Claude Code, start the dev server, then continue
   2. /scout:crawl http://localhost:3000       (smoke baseline)
   3. /scout:write "user logs in and adds a todo"   (per-feature specs)
   4. /scout:audit                             (run + triage on each PR)

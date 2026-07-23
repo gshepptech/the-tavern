@@ -241,6 +241,221 @@ def test_off_mode_short_circuits():
     print("  ✓ off_mode_short_circuits")
 
 
+def _run_hook_with_home(transcript_path: str, home: str) -> dict:
+    """Run the Stop hook against a caller-owned HOME so markers can be inspected."""
+    event = {
+        "session_id": "test-session",
+        "transcript_path": transcript_path,
+        "stop_hook_active": False,
+        "hook_event_name": "Stop",
+    }
+    proc = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps(event),
+        capture_output=True,
+        text=True,
+        env={**os.environ, "HOME": home},
+        timeout=10,
+    )
+    return {"exit": proc.returncode, "stdout": proc.stdout}
+
+
+def test_trust_me_survives_its_own_turn():
+    """The raw /warden:trust-me marker must NOT be consumed by the Stop hook.
+
+    Regression test. The Stop hook fires at the end of every turn, including
+    the turn that ran /warden:trust-me and created the marker. Consuming it there
+    spent the bypass before the user's next prompt arrived, so the gates still
+    fired and the escape hatch never worked. Only the ARMED marker — promoted
+    by the UserPromptSubmit hook at the start of the following turn — may be
+    consumed here.
+    """
+    home = tempfile.mkdtemp()
+    claude_dir = Path(home) / ".claude"
+    claude_dir.mkdir(parents=True)
+    raw = claude_dir / ".warden-trust-me"
+    raw.write_text("")
+
+    t = write_transcript([
+        msg("user", "/warden:trust-me"),
+        msg("assistant", [
+            text_block("Strict gates bypassed for your next turn."),
+        ]),
+    ])
+    _run_hook_with_home(t, home)
+
+    assert raw.exists(), (
+        "the raw .warden-trust-me marker was consumed by the Stop hook on the turn "
+        "that created it — the bypass is spent before the user's next prompt"
+    )
+    print("  ✓ trust_me_survives_its_own_turn")
+
+
+def test_trust_me_armed_marker_is_consumed():
+    """The armed marker IS consumed, so the bypass stays one-shot."""
+    home = tempfile.mkdtemp()
+    claude_dir = Path(home) / ".claude"
+    claude_dir.mkdir(parents=True)
+    armed = claude_dir / ".warden-trust-me-armed"
+    armed.write_text("")
+
+    t = write_transcript([
+        msg("user", "What is a monad?"),
+        msg("assistant", [
+            text_block("A monad is a structure for sequencing computations."),
+        ]),
+    ])
+    _run_hook_with_home(t, home)
+
+    assert not armed.exists(), (
+        "the armed marker survived the Stop hook — the bypass would leak into "
+        "later turns instead of being one-shot"
+    )
+    print("  ✓ trust_me_armed_marker_is_consumed")
+
+
+def test_inject_promotes_trust_me_marker():
+    """UserPromptSubmit must promote the raw marker to the armed one, once."""
+    inject = PLUGIN_ROOT / "scripts" / "inject.sh"
+    assert inject.exists(), f"inject.sh not found at {inject}"
+
+    home = tempfile.mkdtemp()
+    claude_dir = Path(home) / ".claude"
+    claude_dir.mkdir(parents=True)
+    raw = claude_dir / ".warden-trust-me"
+    armed = claude_dir / ".warden-trust-me-armed"
+    raw.write_text("")
+
+    subprocess.run(
+        ["bash", str(inject)],
+        capture_output=True, text=True,
+        env={**os.environ, "HOME": home}, timeout=10,
+    )
+    assert not raw.exists() and armed.exists(), (
+        "inject.sh did not promote .warden-trust-me to .warden-trust-me-armed"
+    )
+
+    # Promotion must also happen while the preamble is silenced: /warden:off
+    # stops injection but the Stop gates keep firing, so a bypass must arm.
+    (claude_dir / ".warden-state").write_text("off")
+    armed.unlink()
+    raw.write_text("")
+    subprocess.run(
+        ["bash", str(inject)],
+        capture_output=True, text=True,
+        env={**os.environ, "HOME": home}, timeout=10,
+    )
+    assert armed.exists(), "inject.sh skipped trust-me promotion while warden was off"
+    print("  ✓ inject_promotes_trust_me_marker")
+
+
+def _run_hook_raw(transcript_bytes: bytes) -> int:
+    """Run the Stop hook against a transcript written as raw bytes.
+
+    Returns the exit code. The hook must never exit non-zero: it runs at the
+    end of every turn in every project, so a traceback surfaces as a hook error
+    on work that has nothing to do with Warden.
+    """
+    home = tempfile.mkdtemp()
+    (Path(home) / ".claude").mkdir(parents=True)
+    tpath = Path(home) / "transcript.jsonl"
+    tpath.write_bytes(transcript_bytes)
+    event = {
+        "session_id": "test-session",
+        "transcript_path": str(tpath),
+        "stop_hook_active": False,
+        "hook_event_name": "Stop",
+    }
+    proc = subprocess.run(
+        [sys.executable, str(HOOK)],
+        input=json.dumps(event),
+        capture_output=True,
+        text=True,
+        env={**os.environ, "HOME": home},
+        timeout=10,
+    )
+    return proc.returncode
+
+
+def test_malformed_transcripts_never_crash():
+    """A transcript the hook cannot parse must mean 'no opinion', not a crash.
+
+    Regression test. Each of these raised a traceback (exit 1) on every Stop
+    event, in every project:
+      - non-UTF-8 bytes anywhere in the file (UnicodeDecodeError is not an
+        OSError, so it escaped load_transcript's handler)
+      - a line that is valid JSON but not an object
+      - content: null, which is a legal message shape
+    """
+    cases = {
+        "non-utf8 bytes": b'{"role":"user","content":"hi"}\n'
+                          b'{"role":"assistant","content":[{"type":"text","text":"caf\xe9"}]}\n',
+        "content is null": b'{"role":"user","content":"hi"}\n'
+                           b'{"role":"assistant","content":null}\n',
+        "json line is not an object": b'{"role":"user","content":"hi"}\n["not","an","object"]\n',
+        "empty file": b"",
+        "not json at all": b"this is not json\nnor is this\n",
+    }
+    for label, payload in cases.items():
+        rc = _run_hook_raw(payload)
+        assert rc == 0, f"hook exited {rc} on a transcript with {label} - must fail open"
+    print("  ✓ malformed_transcripts_never_crash")
+
+
+def test_stale_trust_me_marker_is_not_promoted():
+    """A trust-me left unspent must not bypass an unrelated later session.
+
+    /warden:trust-me means "bypass my next turn". If the user runs it and never
+    submits another prompt that session, the raw marker persists; without a
+    freshness check the first prompt of a later session would promote and
+    consume it, silently bypassing a turn the user never meant to protect.
+    """
+    inject = PLUGIN_ROOT / "scripts" / "inject.sh"
+    home = tempfile.mkdtemp()
+    claude = Path(home) / ".claude"
+    claude.mkdir(parents=True)
+    raw = claude / ".warden-trust-me"
+    raw.write_text("")
+    # Backdate it well past the freshness window.
+    old = 1_600_000_000  # a fixed epoch far in the past
+    os.utime(raw, (old, old))
+
+    subprocess.run(["bash", str(inject)], capture_output=True, text=True,
+                   env={**os.environ, "HOME": home}, timeout=10)
+
+    assert not raw.exists(), "a stale raw marker should be discarded, not left to fire later"
+    assert not (claude / ".warden-trust-me-armed").exists(), (
+        "a stale raw marker must not be promoted to armed"
+    )
+    print("  ✓ stale_trust_me_marker_is_not_promoted")
+
+
+def test_armed_trust_me_consumed_even_when_strict_off():
+    """The armed marker must be cleared even while strict is off, or it strands.
+
+    If strict mode is off when the armed marker exists and it is only consumed
+    when strict is on, it survives until strict is re-enabled and then bypasses
+    that future turn. Consuming it unconditionally cannot weaken anything: with
+    strict off the gates it feeds are skipped anyway.
+    """
+    home = tempfile.mkdtemp()
+    claude = Path(home) / ".claude"
+    claude.mkdir(parents=True)
+    (claude / ".warden-trust-me-armed").write_text("")
+    (claude / ".warden-strict-mode").write_text("off")
+
+    t = write_transcript([
+        msg("user", "hi"),
+        msg("assistant", [text_block("ok")]),
+    ])
+    _run_hook_with_home(t, home)
+
+    assert not (claude / ".warden-trust-me-armed").exists(), (
+        "armed marker must be consumed even when strict is off, or it strands"
+    )
+    print("  ✓ armed_trust_me_consumed_even_when_strict_off")
+
+
 def test_stop_hook_active_short_circuits():
     """When stop_hook_active=true, the hook must not re-block (avoids infinite loop)."""
     t = write_transcript([
@@ -392,6 +607,12 @@ def main() -> int:
         test_diff_lines_skipped,
         test_bare_path_without_line_skipped,
         test_off_mode_short_circuits,
+        test_malformed_transcripts_never_crash,
+        test_stale_trust_me_marker_is_not_promoted,
+        test_armed_trust_me_consumed_even_when_strict_off,
+        test_trust_me_survives_its_own_turn,
+        test_trust_me_armed_marker_is_consumed,
+        test_inject_promotes_trust_me_marker,
         test_stop_hook_active_short_circuits,
         test_grep_counts_as_verification,
         test_log_written_on_block,

@@ -21,7 +21,7 @@ For simple single-action flows (one click, one assertion), do it inline — spaw
 
 ### 1. Slug the spec
 
-Convert the flow description to a kebab-case slug. Example: "user logs in and sees dashboard" → `login-shows-dashboard`. Target path: `tests/<slug>.spec.ts`. If a file already exists at that path, append `-2`, `-3`, etc. — never silently overwrite.
+Convert the flow description to a kebab-case slug. Example: "user logs in and sees dashboard" -> `login-shows-dashboard`. Target path: `tests/<slug>.spec.ts`. If a file already exists at that path, append `-2`, `-3`, etc. — never silently overwrite.
 
 ### 2. Drive the browser
 

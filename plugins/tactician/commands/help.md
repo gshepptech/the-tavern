@@ -56,11 +56,11 @@ paused run, re-invoke the Workflow tool with `{scriptPath, resumeFromRunId}`.
 
 | archetype | shape |
 |---|---|
-| **understand** | parallel readers per subsystem → one synthesis (barrier justified) |
-| **design** | N approaches from different angles → judge panel → synthesize winner |
+| **understand** | parallel readers per subsystem -> one synthesis (barrier justified) |
+| **design** | N approaches from different angles -> judge panel scores each -> pick top-scored |
 | **review** | dimensions in a pipeline, each finding adversarially verified as it lands |
-| **research** | multi-modal sweep → deep-read → verify claims → cited synthesis |
-| **migrate** | discover sites → transform each in a worktree → verify |
+| **research** | multi-modal sweep -> deep-read -> verify claims -> cited synthesis |
+| **migrate** | discover sites -> transform each in a worktree -> verify |
 | **generic** | loop-until-dry / loop-until-budget for unknown-size work |
 
 The full generation procedure lives in `references/rulebook.md` — hard rules, archetype

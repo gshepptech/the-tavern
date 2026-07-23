@@ -62,6 +62,6 @@ Proceed with apply?
 ## Rules
 
 - **Same refuse-on-dirty-tree rule** as `run.md` PHASE 0.2.
-- **Same track-application order** (deprecated-slop → dead-code → dedup → type-consolidate → type-strengthen → error-cleanup → circular-deps).
+- **Same track-application order** (deprecated-slop -> dead-code -> dedup -> type-consolidate -> type-strengthen -> error-cleanup -> circular-deps).
 - **Reviewer pass is mandatory.**
 - **If the user runs `apply` on a completed run, refuse.** They should run `/cleric:run` again for a fresh pass.

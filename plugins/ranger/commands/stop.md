@@ -1,5 +1,5 @@
 ---
-description: "Tell Ranger to down tools — the only clean way to end a run"
+description: "Tell Ranger to down tools — mark the run stopped and disarm the guard"
 argument-hint: "[run-id]"
 allowed-tools: ["Bash(cat:*)", "Bash(ls:*)", "Bash(date:*)", "Bash(test:*)", "Bash(tail:*)", "Read", "Write", "Edit"]
 hide-from-slash-command-tool: "true"
@@ -17,7 +17,7 @@ End the active run: mark it stopped and disarm, so a `/loop` driving it winds do
    - `status: "stopped"`
    - `ended_at: "<ISO-8601 UTC>"`
 
-4. **Disarm the hooks**: overwrite `.ranger/active-run.json` with `{}`.
+4. **Disarm the guard hook**: overwrite `.ranger/active-run.json` with `{}`.
 
    Do this even if step 3 failed — a broken state file must never leave the gate armed. If you cannot write the marker, tell the user to delete `.ranger/active-run.json` by hand.
 

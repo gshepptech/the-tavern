@@ -41,8 +41,23 @@ from __future__ import annotations
 import json
 import os
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
+
+# A goal loop runs inside a Claude session — there is no external runner to
+# record a PID or trap on exit. So if that session is Ctrl-C'd or killed while
+# the run is uncapped (max_seconds == 0), `status` stays `active` on disk with
+# nothing to clear it, and this Stop hook goes on blocking EVERY later session
+# in the repo from ending its turn — a far worse trap than a denied git command.
+# state.json is rewritten every cycle (commands/goal.md PHASE 4), so its mtime
+# is a heartbeat. The unit between writes is a whole builder+auditor+fresh-eyes
+# cycle, which on a hard "thorough" problem can run for hours, so the window is
+# deliberately wide: a cold heartbeat means the loop is abandoned, and a dead
+# run must never police a live session. A false "dead" here only lets a loop
+# end early (the user resumes) — milder than the guard's fail-open — so the
+# margin is set generously rather than tight.
+STALE_AFTER_SECONDS = 12 * 60 * 60
 
 
 def _allow() -> int:
@@ -100,7 +115,8 @@ def main() -> int:
     if not run_dir.is_absolute():
         run_dir = project_dir / run_dir
 
-    state = _load_json(run_dir / "state.json")
+    state_path = run_dir / "state.json"
+    state = _load_json(state_path)
     if not state or state.get("mode") != "goal":
         return _allow()
 
@@ -108,6 +124,16 @@ def main() -> int:
     # cancelled all mean the orchestrator (or /sellsword:cancel) is done — let it stop.
     if state.get("status") != "active":
         return _allow()
+
+    # An `active` run whose heartbeat has gone cold is a dead session, not a
+    # live loop. Do not trap whatever session is now stopping. (goal.md rewrites
+    # state.json every cycle, so a fresh mtime means the loop is genuinely
+    # working; only a long silence trips this.)
+    try:
+        if time.time() - state_path.stat().st_mtime > STALE_AFTER_SECONDS:
+            return _allow()
+    except OSError:
+        pass
 
     # --- safety caps: the gate stops enforcing once a cap is reached ----------
     cycle = _as_int(state.get("cycle"))

@@ -1,8 +1,18 @@
 {
   "name": "seer",
-  "description": "Macro-architecture / design-cohesion review — the senior-engineer 'is this shaped right or accreted?' critique, not bug-hunting or lint. Seer reads a codebase the way a gumshoe reads a crime scene: deduces the real design problem from the detail that's out of place. /seer:review <target> runs a Workflow engine that builds a grounded structural map of the target (a path, the diff, a subsystem, or a described piece of logic), then runs 8 blind design lenses — package/module proliferation, missed sharing & reuse, helper sprawl & abstraction fit, flow & layering, cohesion, naming/structural consistency, accretion markers, boundary & dependency direction — each a separate agent hunting one class of design problem. Every candidate finding is adversarially cross-examined by a skeptic that tries to refute it as intentional, so plausible-but-wrong smells get dropped; a completeness critic then re-lenses any in-scope area no finding touched. The result is synthesized into a per-subsystem deliberate/mixed/accreted verdict with file:line evidence and an ordered, concrete reshaping plan. Report only — never edits code. Forbidden from style nits, correctness bugs, or treating comments as source of truth ('the code is the only witness that doesn't lie'); an empty result is a valid honest outcome for a well-shaped target.",
   "version": "0.1.0",
+  "description": "Macro-architecture / design-cohesion review \u2014 the senior-engineer 'is this shaped right or accreted?' critique, not bug-hunting or lint. Seer reads a codebase the way a gumshoe reads a crime scene: deduces the real design problem from the detail that's out of place. /seer:review <target> runs a Workflow engine that builds a grounded structural map of the target (a path, the diff, a subsystem, or a described piece of logic), then runs 8 blind design lenses \u2014 package/module proliferation, missed sharing & reuse, helper sprawl & abstraction fit, flow & layering, cohesion, naming/structural consistency, accretion markers, boundary & dependency direction \u2014 each a separate agent hunting one class of design problem. Every candidate finding is adversarially cross-examined by a skeptic that tries to refute it as intentional, so plausible-but-wrong smells get dropped; a completeness critic then re-lenses any in-scope area no finding touched. The result is synthesized into a per-subsystem deliberate/mixed/accreted verdict with file:line evidence and an ordered, concrete reshaping plan. Report only \u2014 never edits code. Forbidden from style nits, correctness bugs, or treating comments as source of truth ('the code is the only witness that doesn't lie'); an empty result is a valid honest outcome for a well-shaped target.",
   "author": {
     "name": "gshepptech"
-  }
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/seer/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "architecture",
+    "code-review",
+    "design",
+    "refactoring",
+    "analysis"
+  ]
 }

@@ -53,10 +53,10 @@ Removes legacy/deprecated code only when CLEARLY obsolete (no callers, no live s
 
 Every track classifies each proposed change:
 
-- **HIGH** — clearly safe, no edge cases, checks will pass → auto-apply on `--apply`
-- **MEDIUM** — probably safe but has dependencies or trade-offs → surfaced for your decision
-- **LOW** — risky, ambiguous, or actively a bad idea → flagged, NOT changed
-- **UNCERTAIN** — couldn't determine → flagged for review
+- **HIGH** — clearly safe, no edge cases, checks will pass -> auto-apply on `--apply`
+- **MEDIUM** — probably safe but has dependencies or trade-offs -> surfaced for your decision
+- **LOW** — risky, ambiguous, or actively a bad idea -> flagged, NOT changed
+- **UNCERTAIN** — couldn't determine -> flagged for review
 
 Only HIGH auto-applies. Everything else is shown to you.
 
@@ -64,8 +64,8 @@ Only HIGH auto-applies. Everything else is shown to you.
 
 - **Refuses to run on a dirty working tree.** Stash or branch first.
 - **Atomic commits per batch.** Each track makes its own commits; reverting any one is `git revert <sha>`.
-- **Checks after every batch.** Type check, tests, lint, build (auto-detected). Any failure → that batch is reverted, candidates marked UNCERTAIN.
-- **Track order in apply phase:** `deprecated-slop → dead-code → dedup → type-consolidate → type-strengthen → error-cleanup → circular-deps`. Designed to minimize cross-track conflict.
+- **Checks after every batch.** Type check, tests, and lint (auto-detected); dead-code and deprecated-slop also run a build. Any failure -> that batch is reverted, candidates marked UNCERTAIN. The mandatory reviewer pass re-runs the full matrix, build included, at the end.
+- **Track order in apply phase:** `deprecated-slop -> dead-code -> dedup -> type-consolidate -> type-strengthen -> error-cleanup -> circular-deps`. Designed to minimize cross-track conflict.
 - **Mandatory reviewer pass** after apply: full check matrix re-run, cross-track conflict scan, consolidated debrief.
 
 ## Flow
@@ -107,6 +107,7 @@ Only HIGH auto-applies. Everything else is shown to you.
 - `tooling.json` — detected language tools
 - `tracks/<name>/assessment.md` — per-track findings
 - `tracks/<name>/applied.md` — what actually got applied per track
+- `elevations.json` — MEDIUM/LOW items you elevated to HIGH for this run, if you chose "review MEDIUM/LOW first"
 - `summary.md` — final cross-track summary
 - `checks.md` — final check matrix output
 

@@ -1,6 +1,6 @@
 ---
 name: circular-deps
-description: Cleric pass 4 — Circular dependency untangling. Maps the full dependency graph using language-appropriate tools (madge for JS/TS, gomodgraph + custom Go AST scan for Go), identifies every cycle, and prioritizes those that affect maintainability, testability, or correctness. Untangles by extracting shared logic into neutral modules — never by introducing new abstractions just to break a cycle.
+description: Cleric pass 4 — Circular dependency untangling. Maps the full dependency graph using language-appropriate tools (madge for JS/TS; go vet and go mod graph plus a custom AST scan for Go; pycycle and pylint for Python), identifies every cycle, and prioritizes those that affect maintainability, testability, or correctness. Untangles by extracting shared logic into neutral modules — never by introducing new abstractions just to break a cycle.
 model: opus
 effort: xhigh
 ---

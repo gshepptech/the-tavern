@@ -1,7 +1,7 @@
 ---
 name: spec-writer
 description: Isolated MCP-driven Playwright spec authoring. Spawn this agent when /scout:write needs to handle a multi-step flow — the MCP browser snapshots are large and clutter the main context. Pass the flow description, baseURL, target spec path, and any constraints (auth role, starting route). The agent drives the browser, emits a *.spec.ts following the author skill, runs it green (up to 4 retries), and returns the final spec path + pass/fail. Returns a short report — keeps snapshot noise out of the parent.
-model: opus
+model: sonnet
 effort: high
 ---
 
@@ -28,7 +28,7 @@ If any of these are missing or contradictory, STOP and return a one-line clarifi
 ### 1. Read the author skill
 
 Read `plugins/scout/skills/author/SKILL.md` from this repo (or invoke skill `scout:author`). Internalize the rules:
-- Locator priority: `getByRole` → `getByLabel` → `getByText` → `getByTestId` → CSS (last)
+- Locator priority: `getByRole` -> `getByLabel` -> `getByText` -> `getByTestId` -> CSS (last)
 - No `waitForTimeout`; auto-wait via `expect(...).toBeVisible({ timeout })`
 - One `test.describe`, scoped `test()` blocks, `test.step()` for multi-action tests
 - Assert on what the user sees + console state at end
@@ -44,8 +44,8 @@ The Playwright MCP tools should be available: `browser_navigate`, `browser_snaps
 
 Step by step:
 
-1. `browser_navigate` → baseURL + starting route
-2. `browser_snapshot` → read accessibility tree; identify elements you'll touch
+1. `browser_navigate` -> baseURL + starting route
+2. `browser_snapshot` -> read accessibility tree; identify elements you'll touch
 3. Execute each step of the flow with the matching MCP tool
 4. After each step: another `browser_snapshot` to confirm the DOM changed as expected, and to gather post-state for assertions
 5. Note any console errors observed during the flow — they'll become assertions
@@ -85,9 +85,9 @@ test.describe('<flow description>', () => {
 npx playwright test <target-path>
 ```
 
-If pass → return success.
+If pass -> return success.
 
-If fail → read the failure. Up to 4 retries:
+If fail -> read the failure. Up to 4 retries:
 
 - **Selector miss:** re-snapshot via MCP, find the real accessible name, fix locator
 - **Timing:** replace whatever wait failed with `await expect(stable-locator).toBeVisible({ timeout })`

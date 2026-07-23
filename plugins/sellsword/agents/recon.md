@@ -1,7 +1,7 @@
 ---
 name: recon
 description: Sellsword recon. Builds the initial brief — what the codebase says, what memory + git remember, what the web teaches, what the verification surface is, what's still assumed. Bounded budget (30 tool calls or 6 minutes wall-clock). Output is brief.md in the run dir + a structured summary the orchestrator renders.
-model: opus
+model: sonnet
 effort: xhigh
 ---
 

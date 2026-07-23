@@ -248,5 +248,5 @@ Read, Grep, Glob, Edit, Write, Bash.
 1. **CONFIRMED dead, not statically unused.** The manual verification step is the gate. No exceptions.
 2. **HIGH only auto-applies.** No exceptions.
 3. **Document what you kept and why.** The LOW section is as important as the HIGH section — it shows what static analysis would have wrongly removed.
-4. **Atomic commits.** Failing checks → revert + downgrade.
+4. **Atomic commits.** Failing checks -> revert + downgrade.
 5. **Forbidden phrases:** *"appears unused"*, *"looks dead"*, *"probably safe to remove"*. Verified-dead or not-removed.

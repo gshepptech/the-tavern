@@ -4,13 +4,43 @@
 # unless the session has been silenced via /warden:off or /warden:casual.
 #
 # State file: ~/.claude/.warden-state
-#   absent / "on" → inject (default)
-#   "off"         → skip (until /warden:on)
-#   "casual"      → skip once, then auto-revert to on (one-turn release valve)
+#   absent / "on" -> inject (default)
+#   "off"         -> skip (until /warden:on)
+#   "casual"      -> skip once, then auto-revert to on (one-turn release valve)
 
 set -euo pipefail
 
 STATE_FILE="${HOME}/.claude/.warden-state"
+TRUST_ME_FILE="${HOME}/.claude/.warden-trust-me"
+TRUST_ME_ARMED_FILE="${HOME}/.claude/.warden-trust-me-armed"
+
+# Arm a pending /warden:trust-me for THIS turn.
+#
+# The strict gates live in the Stop hook, which fires at the END of every turn
+# — including the end of the turn that ran /warden:trust-me and created the
+# marker. Consuming the marker there spent the bypass one turn early, before
+# the user's next prompt ever arrived, so the gates still fired and the escape
+# hatch never worked.
+#
+# Promotion happens here instead, at UserPromptSubmit, which is the same
+# mechanism that makes /warden:casual correct: this hook already ran for the
+# trust-me turn before the marker existed, so the first prompt to see it is the
+# one the user actually meant to protect. The Stop hook consumes the *armed*
+# marker only. Runs before the state check below because /warden:off silences the
+# preamble but leaves the Stop gates firing — a bypass must still arm.
+#
+# Only a FRESH marker is promoted. /warden:trust-me means "bypass my NEXT turn";
+# if the user ran it and then never submitted another prompt that session, the
+# raw marker would otherwise sit around and silently bypass the first turn of
+# some later, unrelated session. A marker older than a few minutes is stale
+# intent — discard it rather than honour it.
+if [[ -f "${TRUST_ME_FILE}" ]]; then
+  if find "${TRUST_ME_FILE}" -mmin -5 2>/dev/null | grep -q .; then
+    mv -f "${TRUST_ME_FILE}" "${TRUST_ME_ARMED_FILE}" 2>/dev/null || rm -f "${TRUST_ME_FILE}"
+  else
+    rm -f "${TRUST_ME_FILE}"
+  fi
+fi
 
 # Read state (default: on)
 state="on"

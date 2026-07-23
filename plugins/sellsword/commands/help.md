@@ -38,7 +38,7 @@ Examples:
 
 ## Flags
 
-- `--thorough` — doubles depth contract; spawns N=3 builder variants in parallel from the start; runs the auditor twice with different framings.
+- `--thorough` — doubles the depth contract (recon budget, builder budgets, and per-mode evidence floors) and skips the "ask first" step on stuck — multi-angle retry fires automatically instead of waiting for you to opt in.
 - `--yolo` — skips the plan-approval checkpoint. **Forbidden against production** (Sellsword enforces this regardless of flag).
 - `--scope=quick|standard` — override scope (default: dispatcher decides).
 
@@ -55,17 +55,19 @@ Examples:
 4. **One checkpoint** (only for side-effecting tasks) — the builder proposes a plan in chat, you approve / revise / cancel.
 5. **Auditor** runs after execution — adversarial check, must produce an evidence ledger of commands it actually ran.
 6. **Fresh-eyes** runs in parallel with the auditor — blind to everything except the original intent and current state. Catches drift the auditor and builder can't see.
-7. **Debrief** in chat — what was done, what changed along the way, what was verified, open follow-ups.
+7. If either verdict is less than a clean pass, Sellsword re-spawns the builder with their findings and re-verifies — up to 3 audit-cycles — before handing back to you. `/sellsword:do` still ends the turn on its own; it doesn't run unattended the way `/sellsword:goal` does.
+8. **Debrief** in chat — what was done, what changed along the way, what was verified, open follow-ups.
 
 ## On stuck
 
-When the builder declares stuck (4 reflections without progress on a step), Sellsword spawns **N=2-3 parallel builder variants** with deliberately different framings ("treat this as a config issue," "treat as an environment issue," "treat as a permissions issue"). An arbiter synthesizes their findings. This replaces the single-builder-reading-its-own-reflections loop that the research showed degenerates.
+When the builder declares stuck (4 reflections without progress on a step), Sellsword spawns **3 parallel builder variants** with deliberately different framings ("treat this as a config issue," "treat as an environment issue," "treat as a permissions issue"). An arbiter synthesizes their findings. This replaces the single-builder-reading-its-own-reflections loop that the research showed degenerates.
 
 ## Where state lives
 
 Everything is in `.sellsword/runs/<run-id>/`:
 
 - `state.json` — phase, status, configuration
+- `dispatcher-config.json` — the dispatcher's classification
 - `brief.md` — recon's output
 - `plan.md` — the builder's plan (if checkpoint phase ran)
 - `journal.md` — append-only log of every significant action
@@ -75,6 +77,7 @@ Everything is in `.sellsword/runs/<run-id>/`:
 - `fresh-eyes-verdict.md` — blind drift check with evidence ledger
 - `followups.md` — out-of-scope things noticed during the run
 - `escalation.md` — only present if the builder got stuck
+- `retry/variant-{A,B,C}/` and `retry/synthesis.md` — only present if multi-angle retry fired
 
 You don't have to read any of these. Plan and debrief render in chat. The files exist for resume and audit.
 
@@ -84,7 +87,7 @@ You don't have to read any of these. Plan and debrief render in chat. The files 
 /sellsword:goal <completion condition>
 ```
 
-`/sellsword:do` does one task and hands back. `/sellsword:goal` takes a *completion condition* and runs Sellsword's builder → auditor → fresh-eyes loop **unattended**, cycle after cycle, until the condition is met — auditor AND fresh-eyes both return `pass` — or a safety cap stops it. No plan checkpoint, no budget questions. You set the finish line and walk away.
+`/sellsword:do` does one task and hands back. `/sellsword:goal` takes a *completion condition* and runs Sellsword's builder -> auditor -> fresh-eyes loop **unattended**, cycle after cycle, until the condition is met — auditor AND fresh-eyes both return `pass` — or a safety cap stops it. No plan checkpoint, no budget questions. You set the finish line and walk away.
 
 ```
 /sellsword:goal every test in test/auth passes and `npm run lint` exits 0
@@ -120,6 +123,8 @@ hosts:
 ```
 
 The builder references host tags rather than re-learning hosts every run. Production-tagged hosts force plan approval.
+
+Recon also reads `.sellsword/access.yml` if present, for the same purpose — both files are optional and read-only for Sellsword; nothing writes to them.
 
 ## What Sellsword is NOT
 

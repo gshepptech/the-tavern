@@ -14,7 +14,7 @@ After it succeeds, reply to the user with three short lines:
 
 - methodical-mode: explain the value
   - `on` — methodical preamble fires every turn (default)
-  - `off` — silenced for the session; `/warden:on` re-enables
+  - `off` — silenced until `/warden:on` re-enables it (marker file — persists across restarts, not scoped to this session)
   - `casual` — next turn skips, then auto-reverts to on
 - citation-verifier: explain the value
   - `default` — Stop hook blocks responses with unverified file:line citations (default)
