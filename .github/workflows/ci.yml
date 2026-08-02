@@ -91,7 +91,9 @@ jobs:
             deps: ""
           - plugin: smith
             dir: plugins/smith/mcp-server
-            deps: '--with jsonschema --with "mcp>=1.0.0"'
+            # No --with overrides: pyproject.toml declares jsonschema and the
+            # mcp<2.0.0 cap, and it must stay the single source of that pin.
+            deps: ""
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
