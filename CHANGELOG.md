@@ -15,7 +15,7 @@ version moves. Every plugin whose runtime files changed is bumped in both its
 
 | Plugin | Version | Why |
 |---|---|---|
-| Ranger | 0.2.0 to 0.3.0 | new `--scouts` / `--planners` flags, and runs are now uncapped by default — a behaviour change nobody should receive silently |
+| Ranger | 0.2.0 to 0.4.0 | new `--scouts` / `--planners` flags, runs are now uncapped by default, and the crew is model-tiered rather than uniformly Opus — behaviour changes nobody should receive silently |
 | Sellsword | 0.2.0 to 0.3.0 | `/sellsword:goal` runs can be resumed, which they could not before |
 | Smith | 4.4.0 to 4.4.1 | agent-type namespace, `--nyquist` parsing, MCP tool names, stream allow-list — repairs only |
 | Warden | 0.5.0 to 0.5.1 | `/warden:trust-me` now works |
@@ -77,6 +77,8 @@ version moves. Every plugin whose runtime files changed is bumped in both its
 - Cleric documented `decisions.md` and `log.md` as run artifacts; nothing writes them.
 
 ### Changed
+- **Ranger's crew is model-tiered instead of uniformly Opus.** A default cycle fans out six scouts, three planners and three plan reviewers before anything is built, and every one of them ran `opus` — most at `effort: xhigh`. The model now goes where the judgement is: scout and planner drop to `sonnet` (the planner escalates to `opus` when an item's effort is 3+), while reviewer, implementer and assessor stay on `opus` as the quality gates. Nothing runs at `xhigh`. Recorded as a `MODEL BUDGET` section in `commands/run.md`, which also names pool size (`--scouts`, `--planners`) as the cheapest spend dial, so the tiering does not quietly drift back.
+- **The assessor no longer re-reads the whole page after every click.** It took a bare `browser_snapshot` per action, dumping the entire accessibility tree into an Opus context dozens of times per UI item. It now locates with `browser_find`, bounds snapshots with `target`/`depth`, spills full-page trees to disk via `filename`, and budgets roughly 15 browser calls per item. It deliberately keeps `opus` on UI lenses — motion and interaction feel cannot be judged from a screenshot, so moving the visual gate to a cheaper model would blind it rather than save it.
 - **Honest labelling of what enforces each safety claim.** Two guarantees read like mechanisms but are the model following prose, and now say so. Cleric's confidence gate presented HIGH/MEDIUM/LOW as a threshold; the README now states the rank is a judgement the model makes and honours, and that the real protection is the atomic-commit-plus-`git reset` undo, not the label. Sellsword's `--allow-production` and plan checkpoint were framed as hard gates; `goal-gate.py` only blocks a run from *stopping*, so the README now separates the one hook-enforced promise from the several prose-enforced ones and names the environment as the actual containment.
 - **Every plugin README rebuilt to stand on its own.** Each crew member is usable with no other plugin installed, so each README now leads with that, carries its own complete setup and commands, and links siblings only from a "Pairs well with" footer. The root README leads with nine independent tools rather than a Sage-to-Smith spine with the rest as edges.
 - **No emoji or decorative Unicode in documentation.** Removed throughout the READMEs and prose; functional markers that define runtime output (status glyphs in Sellsword's run table, verdict marks in Smith's TRACE tables, good/bad example marks in Scout's authoring skill) are deliberately kept.

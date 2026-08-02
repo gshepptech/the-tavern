@@ -221,7 +221,7 @@ When they return: merge all their items into `backlog.json`, dropping any whose 
 ### 3b. PLAN POOL — `phase: "plan"`
 Count `approved` items. If that is >= `flags.planners`, **skip to 3c** — you already have plans queued and no reason to spend more thinking now. (Skip to 3c, not past it: a `planned` item left unreviewed by an interrupted cycle must still get its review.)
 
-Otherwise take the top-scoring `ready` items, up to `flags.planners`, and for each: `mkdir "$RUN_DIR/items/<item_id>"`, mark it `planning`. Spawn one `ranger:planner` per item, **all in one message**, each with its own `item_dir`. No code is written here, and no two planners share a file, so they cannot interfere.
+Otherwise take the top-scoring `ready` items, up to `flags.planners`, and for each: `mkdir "$RUN_DIR/items/<item_id>"`, mark it `planning`. Spawn one `ranger:planner` per item, **all in one message**, each with its own `item_dir`. No code is written here, and no two planners share a file, so they cannot interfere. Pass `model: "opus"` for any item whose `effort >= 3`; the rest take the planner's own `sonnet` (see MODEL BUDGET).
 
 Each returns `planned` (-> status `planned`) or `infeasible` (-> status `dropped`, with the reason in the journal).
 
@@ -242,7 +242,7 @@ Highest-`score` `approved` item -> mark `in_flight`, set `state.item`. If `flags
 `ranger:reviewer` `mode: "diff"`. `pass` -> 3g · `revise` -> re-spawn implementer (max 2) · `reject` -> `git checkout -- .` + `git clean -fd` new files, mark `failed`, `stall_count += 1`, end the cycle. **Revert; don't pile on.**
 
 ### 3g. VERIFY — `phase: "verify"`
-`ranger:assessor` — fresh eyes, acceptance criteria + current code only. UI items: drive the running app in a real browser as a user. `pass` / `partial` / `fail`. `partial`/`fail` -> treat as `revise`, re-verify; after 2 rounds revert as in 3f.
+`ranger:assessor` — fresh eyes, acceptance criteria + current code only. UI items: drive the running app in a real browser as a user. Pass `model: "sonnet"` for non-UI lenses (`correctness`, `performance`, `security`, `dx` — verification there is running commands and reading output); keep the agent's own `opus` for `ui-ux`, `visual-polish`, `flows` and `a11y`, where the judgement is the point. `pass` / `partial` / `fail`. `partial`/`fail` -> treat as `revise`, re-verify; after 2 rounds revert as in 3f.
 
 ### 3h. COMMIT — `phase: "commit"`
 Only when reviewer **and** assessor both `pass`:
@@ -282,6 +282,24 @@ Continue: /ranger:resume <run-id> --max-cycles=0  ·  Artifacts: .ranger/runs/<R
 Best-effort: `osascript -e 'display notification "stood down: <RUN_ID>" with title "ranger"' 2>/dev/null || true`. Return normally (if under `/loop`, tell the user to press Esc).
 
 ---
+
+## MODEL BUDGET
+
+Fanning out is what makes the crew fast, and it is also what makes it expensive: a default cycle dispatches **six scouts, three planners and three plan reviewers** before anything is built, and a survey that comes back clean can send two more scout teams. Put the model where the *judgement* is, not where the *reading* is — the pooled roles are the ones multiplied by six and by three.
+
+| agent | model / effort | per cycle | why |
+|---|---|---|---|
+| `scout` | `sonnet` / `high` | ×`flags.scouts` (6) | one domain×lens pair, grounded, then scored arithmetically |
+| `planner` | `sonnet` / `high` | ×`flags.planners` (3) | escalate to `opus` when the item's `effort >= 3` |
+| `reviewer` | `opus` / `high` | ×`planners` + 1 | the gate, both modes. Never downgrade this one — a bad approval costs more than it saves |
+| `implementer` | `opus` / `high` | ×1 | writes the diff against an already-specific plan |
+| `assessor` | `opus` / `high` | ×1 | the fresh-eyes gate; `sonnet` for non-UI lenses (see 3g) |
+
+Rules for the foreman:
+- **Take the agent's frontmatter default** unless a step above tells you to override. Only pass `model:` for the two documented cases — 3c's planner escalation and 3g's assessor downgrade.
+- **Never raise `effort` above the frontmatter.** `xhigh` and `max` are not available to this crew; on a pooled role they multiply reasoning spend by the pool size for no gain on mechanical work.
+- **Pool size is a spend dial.** `--scouts` and `--planners` multiply cost linearly. Shrinking a pool is the cheapest lever there is; reach for it before anything else if a run is burning too fast.
+- **Browser work is bounded, not downgraded.** The assessor keeps `opus` on UI lenses because motion and interaction feel cannot be judged from a screenshot. Instead it locates with `browser_find`, bounds snapshots with `target`/`depth`, spills full-page trees to disk with `filename`, and stays inside ~15 browser calls per item. Do not "fix" browser cost by splitting the visual gate onto a cheaper model; that blinds the gate rather than saving it.
 
 ## FOREMAN RULES
 1. **One cycle per invocation. Never loop inside the turn.** Do the cycle, return. The driver re-invokes.

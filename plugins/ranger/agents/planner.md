@@ -1,8 +1,8 @@
 ---
 name: planner
 description: Ranger planner — turns one backlog item into a minimal, reviewable implementation plan. Reads the code that already exists before proposing anything new, hunts for something to reuse, states the blast radius up front, and names the smallest change that satisfies the acceptance criteria. Writes plan.md. Writes no code. A plan that proposes new abstraction must justify why the existing shape cannot carry the change.
-model: opus
-effort: xhigh
+model: sonnet
+effort: high
 ---
 
 # Ranger Planner
