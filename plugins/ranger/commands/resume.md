@@ -51,7 +51,11 @@ Anything other than `CLEAR` — name which and stop. The user clears it with `/w
    - If a cap flag was passed, apply it (as in `/ranger:run` — `0`/`--unlimited` means no cap).
    - Else if the run was `capped` (`cycle >= max_cycles`), the user set that cap deliberately, so do not silently remove it — extend it by the same size again (`max_cycles += the original cap`, minimum `+5`) and set `cap_source: "resume-extended"`. Tell the user: *"Resuming — I'll ship <n> more items then stand down again. Add --max-cycles=0 to remove the cap."*
    - Else (was `stopped` by the user) keep its existing caps.
-3. Update `state.json`: `status: "active"`, `phase: "survey"`, `item: null`, clear `ended_at`, set `resumed_at` and `session_id` to this session. Keep `cycle`, `backlog.json`, `domain_rotation`, and `flags` untouched. If the run predates crew sizing and has no `scouts` / `planners` / `backlog_watermark`, fill in the defaults (`6`, `3`, `scouts + 2`); any item left mid-flight from the old serial cycle is still valid — reset a stranded `planning` or `in_flight` item to `ready`.
+3. Update `state.json`: `status: "active"`, `phase: "survey"`, `item: null`, clear `ended_at`, set `resumed_at` and `session_id` to this session. Keep `cycle`, `backlog.json`, `domain_rotation`, and `flags` untouched. If the run predates crew sizing and has no `scouts` / `planners` / `backlog_watermark`, fill in the defaults (`6`, `3`, `scouts + 2`). If it predates the backlog economics and has no `backlog_cap` / `floor` / `lean_cycles` / `domain_rotation.yield`, fill in `40` / `6` / `0` / `{}` — **do not** try to reconstruct a risen floor from the journal; starting a resumed run back at the base floor is the safe direction, and it will rise again on its own. Any item left mid-flight from the old serial cycle is still valid — reset a stranded `planning` or `in_flight` item to `ready`.
+
+   Ensure `.ranger/FACTS.md` exists (skeleton in `commands/run.md` STEP 2e). A run that predates it has none; create it empty and let the next recon or your own corrections fill it.
+
+   Keep `lean_cycles` as it stands — it is a gauge of how the run was going, and it never ended anything. If it is `>= 5`, say so in the resume line along with the floor, so the user knows they are picking up a run that was finding thin work.
 4. Write the marker `.ranger/active-run.json` -> `{ "run_id": "<run_id>", "run_dir": ".ranger/runs/<run_id>" }`. **This re-arms the guard hook.**
 5. Tell the user, in three lines:
 

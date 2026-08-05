@@ -17,9 +17,10 @@ Read-only. Never changes a run.
 ```
 **<status>** — <run_id> · cycle <cycle><cap> · <elapsed>
 Brief: <brief>
-Phase: <phase> · In flight: <item or "—"> · Stalls: <stall_count>
+Phase: <phase> · In flight: <item, with its tier, or "—"> · Stalls: <stall_count>
 Crew: <scouts> scouts · <planners> planners · 1 builder
-Pipeline: <ready> ready · <planned> planned · <approved> approved (watermark <backlog_watermark>)
+Pipeline: <ready> ready · <planned> planned · <approved> approved (watermark <backlog_watermark>, cap <backlog_cap>)
+Economics: floor <floor> · <lean_cycles> lean cycles<" — nothing above floor lately; he keeps sweeping until you stop him" if lean_cycles >= 5>
 Branch: <current git branch> · flags: <the flags that are on, or "defaults (local commits, current branch, never asks)">
 
 **Last 5 shipped**
@@ -29,7 +30,7 @@ Branch: <current git branch> · flags: <the flags that are on, or "defaults (loc
 <approved items: score, title — or "none yet">
 
 **Next up**
-<top 5 ready backlog items: score, title>
+<top 5 ready backlog items: score, title, tier>
 
 **Quarantined**
 <items with a blocker note, or "none">

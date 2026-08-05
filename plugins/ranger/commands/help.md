@@ -11,15 +11,19 @@ Explain the following to the user, in your own words and compactly.
 
 The foreman who never leaves the site. You give him one brief and walk away; he runs a senior-engineering loop that never stops and never runs out of work.
 
-He is a **thin lead** — he reads state files and spawns agents, and never opens a source file himself. That is what lets a run go for hours: every agent gets a fresh context, and the lead's own window stays small.
+He is a **thin lead** — he spawns agents and manages state files, and he never edits code. He *will* read one when reading settles a question faster than dispatching an agent to go and find out, but that is the exception. That thinness is what lets a run go for hours: every agent gets a fresh context, and the lead's own window stays small.
 
 ## The cycle
 
-`survey -> plan -> plan-review -> select -> build -> review -> verify -> commit`
+`survey -> triage -> plan -> claims-check -> plan-review -> select -> build -> review -> verify -> commit`
 
-He works a **crew, not a queue**. Surveying, planning and plan review are read-only — they cannot corrupt a working tree — so he dispatches them in parallel pools: six scouts sweeping different slices of the app at once, three planners, three plan reviewers. Only the build touches the shared tree, so only the build is serial, one item at a time. The payoff is that by the time he needs something to build, the thinking is already done and queued.
+He works a **crew, not a queue**. Surveying, planning, claims-checking and plan review are read-only — they cannot corrupt a working tree — so he dispatches them in parallel pools: six scouts sweeping different slices of the app at once, three planners, three checkers, three plan reviewers. Only the build touches the shared tree, so only the build is serial, one item at a time. The payoff is that by the time he needs something to build, the thinking is already done and queued.
 
-Plan review comes before implementation on purpose: a rejected plan costs one agent, a bad implementation costs five. Verification is fresh-eyes — the assessor never sees the plan, only the acceptance criteria and the code. UI items get driven through a real browser as a user would.
+**Not every item gets the whole crew.** He triages first — a copy fix or a one-line constant is `trivial` and gets two agents, an implementer and one diff review. Concurrency, migrations, auth and shared components are `risky` and get two plan reviewers plus a mandatory fresh-eyes gate. Everything else is `standard`. Running five agents on a label reword isn't rigour, it's waste competing with the item that deserved it.
+
+Plan review comes before implementation on purpose: a rejected plan costs one agent, a bad implementation costs five. And a **claims check** comes before *that* — a cheap pass that opens every source the plan cites and reports which claims actually held, because most revision rounds in a mature run are citation defects rather than design defects, and catching those with an `opus` reviewer is the expensive way to do it.
+
+Verification is fresh-eyes — the assessor never sees the plan, only the acceptance criteria and the code. UI items get driven through a real browser as a user would. For pure logic already pinned by a test he has watched fail against the pre-change code, that test *is* the evidence and the assessor is skipped.
 
 One item, one local commit. So any single change is one `git revert` away.
 
@@ -27,9 +31,25 @@ One item, one local commit. So any single change is one `git revert` away.
 
 A *thinning* backlog is the survey trigger — not an empty one. He refills while the current item is still being built, so he never stalls waiting for work to be found.
 
-The first survey maps the app's real domains. After that he crosses those domains with nine lenses — correctness, UI/UX, visual polish, real-user flows, performance, accessibility, security, DX, feature gaps — and hands one domain×lens **pair** to each scout. A persistent map of swept pairs means no ground is covered twice.
+The first survey maps the app's real domains — **every tier that runs code**, not just the one with a UI. After that he crosses those domains with nine lenses — correctness, UI/UX, visual polish, real-user flows, performance, accessibility, security, DX, feature gaps — and hands one domain×lens **pair** to each scout. A persistent map of swept pairs means no ground is covered twice, and a yield count means pairs that come back clean twice go cold and stop getting swept.
 
 It will not invent churn to look busy. A scout that finds nothing worth doing reports its pair **clean**, which is a real answer; the foreman responds by dispatching more pairs, never by pressing a scout to come back with something. Keeping the backlog full is his job, not theirs — and that split is exactly what stops an idle loop from refactoring healthy code.
+
+## …and how he gets pickier instead of stopping
+
+**He never stands down on his own.** `/ranger:stop`, Esc, or a cap you set — that's the whole list. On a maturing codebase, though, "never runs out of work" turns into a treadmill: the real defects clear and the loop grinds ever more marginal items at full cost. So instead of stopping, he raises his standards:
+
+- **The floor rises** — starts at 6, climbs every 10 lean cycles, never falls. A run at cycle 100 refuses work a run at cycle 5 would take.
+- **The backlog is capped** at 40. At the cap, filing an item means dropping one, and there's a prune pass where killing items *is* the work.
+- **Lean runs get reported.** Five consecutive cycles of nothing above the floor and he says so in one line, then carries on sweeping. Whether that's worth continuing is yours to decide, not his.
+
+The survey is the uncapped part of a cycle on purpose: a scout team that comes back empty is answered with another team, and another, until he finds work above the floor or has swept every remaining pair.
+
+Review findings never become backlog items — that's a loop generating its own demand, and it's how a backlog reaches 120 items with nothing important in it.
+
+## `.ranger/FACTS.md`
+
+One short file every agent reads before it reasons: the north star, the settled constraints, how the repo is *really* tested, the conventions agents trip on, what's out of bounds. The recon scout seeds it, the foreman corrects it, **you can edit it by hand.** It stops agents re-deriving settled facts every cycle and occasionally getting them wrong.
 
 If `cleric`, `seer` or `scout` are installed, the scout uses them for their specialisms instead of duplicating them.
 
