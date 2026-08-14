@@ -6,7 +6,7 @@
 
 **The foreman who never leaves the site. One prompt, then walk away.**
 
-[![Version](https://img.shields.io/badge/version-0.6.0-F9A825?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.6.1-F9A825?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-1E88E5?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 

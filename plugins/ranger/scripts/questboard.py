@@ -69,9 +69,9 @@ OPTIONAL_STRING_KEYS = ("summary", "body", "outcome")
 # Second-resolution UTC, always with the trailing Z. Two notes written in the
 # same second have no defined order, which is why nothing may depend on a
 # total ordering of the workspace.
-CREATED_RE = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+CREATED_RE = re.compile(r"\A\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z\Z")
 
-PLUGIN_RE = re.compile(r"^[a-z][a-z0-9-]*$")
+PLUGIN_RE = re.compile(r"\A[a-z][a-z0-9-]*\Z")
 
 
 # ---------------------------------------------------------------------------

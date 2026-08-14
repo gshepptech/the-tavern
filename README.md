@@ -124,15 +124,15 @@ Do not want to clone anything? A profile is only a list of plugin names, so this
 
 | Who | Trade | Runs alone | Key commands |
 |---|---|---|---|
-| **[Sage](plugins/sage/README.md)** `v5.1.0` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
-| **[Smith](plugins/smith/README.md)** `v4.5.0` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume` |
+| **[Sage](plugins/sage/README.md)** `v5.1.1` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
+| **[Smith](plugins/smith/README.md)** `v4.5.1` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume` |
 | **[Warden](plugins/warden/README.md)** `v0.5.1` | Keeps the work plumb — methodical-mode guardrails; a pre-response checklist plus Stop-hook gates on every ad-hoc turn | yes | `/warden:on`, `/warden:off`, `/warden:casual`, `/warden:trust-me`, `/warden:status` |
 | **[Sellsword](plugins/sellsword/README.md)** `v0.4.0` | The general contractor — a multi-agent crew that owns an outcome; investigate, plan, execute, verify | yes | `/sellsword:do`, `/sellsword:goal`, `/sellsword:list`, `/sellsword:resume`, `/sellsword:cancel` |
 | **[Cleric](plugins/cleric/README.md)** `v0.2.0` | The sweep — careful low-risk cleanup across 7 focused tracks, auto-applying only high-confidence changes | yes | `/cleric:run`, `/cleric:apply`, `/cleric:status` |
 | **[Scout](plugins/scout/README.md)** `v0.2.1` | The inspector — end-to-end Playwright test authoring and maintenance through a real browser | yes | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **[Tactician](plugins/tactician/README.md)** `v0.2.1` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | yes | `/tactician:make` |
 | **[Seer](plugins/seer/README.md)** `v0.2.0` | The surveyor — macro-architecture and design-cohesion review; is this shaped right, or accreted? | yes | `/seer:review` |
-| **[Ranger](plugins/ranger/README.md)** `v0.6.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
+| **[Ranger](plugins/ranger/README.md)** `v0.6.1` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
 
 <div align="center">
 

@@ -10,7 +10,7 @@
       "name": "sage",
       "source": "./plugins/sage",
       "description": "Turns a vague feature idea into a locked, buildable spec. Researches your codebase first, then interviews you with grounded questions and writes a spec with typed invariants and citations. Plans only, never writes code.",
-      "version": "5.1.0",
+      "version": "5.1.1",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -28,7 +28,7 @@
       "name": "smith",
       "source": "./plugins/smith",
       "description": "Builds a spec out autonomously. Decomposes it into parallel work, builds in waves, then verifies through independent streams and grinds defects to zero before it will call the work done.",
-      "version": "4.5.0",
+      "version": "4.5.1",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -153,7 +153,7 @@
       "name": "ranger",
       "source": "./plugins/ranger",
       "description": "Give it one brief and walk away. A self-directing loop that finds work, sizes the effort to the job, plans and reviews in parallel, builds one item at a time, verifies with fresh eyes, and commits — until you stop it. Local commits only.",
-      "version": "0.6.0",
+      "version": "0.6.1",
       "category": "automation",
       "author": {
         "name": "gshepptech"

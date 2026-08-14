@@ -7,6 +7,9 @@ file tracks the marketplace as a whole.
 
 ## [Unreleased]
 
+### Fixed
+- **`questboard.py` accepted a trailing newline in `plugin` and `created`, and `validate` called it healthy.** Both patterns were anchored with `$`, which in Python matches the end of the string *or* the position just before a final newline — so `"plugin": "ranger\n"` satisfied the slug check. That is worse than a plain parsing bug, because `validate` exists to be loud about a malformed workspace and instead reported `nothing malformed` and exited 0, while `read` passed the malformed field on to its caller as `prior_work`. Both patterns are now anchored `\A…\Z`, which matches exactly. The three vendored copies stay byte-identical, so the fix lands in Sage, Ranger and Smith together. Found by the new Ranger scout contract on its first run, which is the first evidence that requiring an executed artifact surfaces things a citation would not have.
+
 ### Changed
 - **Ranger stops believing findings and starts reproducing them.** A field review of eight full cycles found that the loop's dominant failure was not fixing the wrong thing — it was fixing the right thing for a reason that dissolved the moment anyone executed it, because every stage in the pipeline read and none of them ran. The response is four changes that move the loop from arguing about code to observing it:
   - **An item carries an artifact, or it is a hypothesis.** A scout now files the command it ran and what it saw, not only the line it read. `confidence` is scored off that artifact rather than off how well the item argues, and an item with no artifact enters as `hypothesis` and is quarantined on arrival — never planned, because a plan written against an unreproduced claim looks exactly like a good one. Quarantine is a state, not a bin: hard to reproduce is not false, and a driver can settle it later.
@@ -33,11 +36,11 @@ version moves. Every plugin whose runtime files changed is bumped in both its
 
 | Plugin | Version | Why |
 |---|---|---|
-| Ranger | 0.2.0 to 0.6.0 | new `--scouts` / `--planners` flags, uncapped runs by default, a model-tiered crew, per-item effort tiering, a rising quality floor and a capped backlog — and now a required evidence artifact per item, two new agents (`builder`, `driver`), verdicts written to disk, a default path of one build agent instead of three, and `--planners` defaulting to 1. Behaviour changes nobody should receive silently |
+| Ranger | 0.2.0 to 0.6.1 | new `--scouts` / `--planners` flags, uncapped runs by default, a model-tiered crew, per-item effort tiering, a rising quality floor and a capped backlog — and now a required evidence artifact per item, two new agents (`builder`, `driver`), verdicts written to disk, a default path of one build agent instead of three, and `--planners` defaulting to 1. Behaviour changes nobody should receive silently |
 | Sellsword | 0.2.0 to 0.3.0 | `/sellsword:goal` runs can be resumed, which they could not before |
-| Smith | 4.4.0 to 4.4.1 | agent-type namespace, `--nyquist` parsing, MCP tool names, stream allow-list — repairs only |
+| Smith | 4.4.0 to 4.5.1 | agent-type namespace, `--nyquist` parsing, MCP tool names, stream allow-list, the `.questboard` workspace, and the `questboard.py` anchor fix |
 | Warden | 0.5.0 to 0.5.1 | `/warden:trust-me` now works |
-| Sage | 5.0.0 to 5.0.1 | mode flags no longer corrupt the feature slug |
+| Sage | 5.0.0 to 5.1.1 | mode flags no longer corrupt the feature slug, plus the `.questboard` workspace and the `questboard.py` anchor fix |
 | Scout | 0.2.0 to 0.2.1 | `/scout:matrix` writes the config its generated specs import |
 | Tactician | 0.2.0 to 0.2.1 | `/tactician:make` was missing `AskUserQuestion` from its allowed-tools |
 | Cleric | 0.1.0 to 0.1.1 | corrected static-analysis tool names change which commands the agents run |
