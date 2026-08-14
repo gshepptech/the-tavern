@@ -34,6 +34,7 @@
 ## Contents
 
 - [Install](#install)
+- [Start with a profile](#start-with-a-profile)
 - [The Crew](#the-crew)
 - [Which one do I need?](#which-one-do-i-need)
 - [Using them together](#using-them-together)
@@ -81,19 +82,57 @@ Warden is the only plugin that starts working the moment it is installed: every 
 
 ---
 
+## Start with a profile
+
+Nine plugins is nine decisions, and nobody arriving for the first time has the information to make them. If you would rather not choose yet, install a named set and add the rest when you find out you want them:
+
+```bash
+git clone https://github.com/gshepptech/the-tavern && cd the-tavern
+./scripts/install-profile.sh daily
+```
+
+| Profile | Plugins | For |
+|---|---|---|
+| `daily` | warden, sage, cleric | Working solo on a codebase you did not write |
+| `pipeline` | sage, smith | Specifying a feature and having it built out |
+| `review` | seer, cleric | Assessing and tidying, without autonomous writing |
+| `unattended` | sellsword, ranger | Work that runs while you are away. Bypasses permissions |
+| `all` | all nine | You want the crew |
+
+`--list` shows what each contains, `--dry-run` prints the commands and runs nothing, and `--scope project` writes a committed `.claude/settings.json` so everyone cloning the repo gets the same set.
+
+Do not want to clone anything? A profile is only a list of plugin names, so this is the whole of `daily`:
+
+```bash
+/plugin marketplace add gshepptech/the-tavern
+/plugin install warden@the-tavern
+/plugin install sage@the-tavern
+/plugin install cleric@the-tavern
+```
+
+> [!IMPORTANT]
+> Profiles are a convention of this repo, not a Claude Code feature. There is no bundle or group in the marketplace manifest, and **no plugin here depends on another**. A profile is a shortcut for people without an opinion yet, and installing one plugin on its own stays the first-class path.
+
+> [!WARNING]
+> The `unattended` and `all` profiles include **Sellsword and Ranger, which run with permissions bypassed** in their unattended modes. Read the warning under [Install](#install) before you run one. Installing them is safe, since nothing runs until you invoke it, but `/ranger:run` headless and `/sellsword:goal` belong in a container, a VM, or a throwaway clone.
+
+[docs/profiles.md](docs/profiles.md) has each profile in full: who it is for, exactly what it leaves out, and the honest cost.
+
+---
+
 ## The Crew
 
 | Who | Trade | Runs alone | Key commands |
 |---|---|---|---|
-| **[Sage](plugins/sage/README.md)** `v5.0.1` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
-| **[Smith](plugins/smith/README.md)** `v4.4.1` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume` |
+| **[Sage](plugins/sage/README.md)** `v5.1.0` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
+| **[Smith](plugins/smith/README.md)** `v4.5.0` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume` |
 | **[Warden](plugins/warden/README.md)** `v0.5.1` | Keeps the work plumb — methodical-mode guardrails; a pre-response checklist plus Stop-hook gates on every ad-hoc turn | yes | `/warden:on`, `/warden:off`, `/warden:casual`, `/warden:trust-me`, `/warden:status` |
-| **[Sellsword](plugins/sellsword/README.md)** `v0.3.0` | The general contractor — a multi-agent crew that owns an outcome; investigate, plan, execute, verify | yes | `/sellsword:do`, `/sellsword:goal`, `/sellsword:list`, `/sellsword:resume`, `/sellsword:cancel` |
-| **[Cleric](plugins/cleric/README.md)** `v0.1.1` | The sweep — careful low-risk cleanup across 7 focused tracks, auto-applying only high-confidence changes | yes | `/cleric:run`, `/cleric:apply`, `/cleric:status` |
+| **[Sellsword](plugins/sellsword/README.md)** `v0.4.0` | The general contractor — a multi-agent crew that owns an outcome; investigate, plan, execute, verify | yes | `/sellsword:do`, `/sellsword:goal`, `/sellsword:list`, `/sellsword:resume`, `/sellsword:cancel` |
+| **[Cleric](plugins/cleric/README.md)** `v0.2.0` | The sweep — careful low-risk cleanup across 7 focused tracks, auto-applying only high-confidence changes | yes | `/cleric:run`, `/cleric:apply`, `/cleric:status` |
 | **[Scout](plugins/scout/README.md)** `v0.2.1` | The inspector — end-to-end Playwright test authoring and maintenance through a real browser | yes | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **[Tactician](plugins/tactician/README.md)** `v0.2.1` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | yes | `/tactician:make` |
-| **[Seer](plugins/seer/README.md)** `v0.1.0` | The surveyor — macro-architecture and design-cohesion review; is this shaped right, or accreted? | yes | `/seer:review` |
-| **[Ranger](plugins/ranger/README.md)** `v0.5.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
+| **[Seer](plugins/seer/README.md)** `v0.2.0` | The surveyor — macro-architecture and design-cohesion review; is this shaped right, or accreted? | yes | `/seer:review` |
+| **[Ranger](plugins/ranger/README.md)** `v0.6.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
 
 <div align="center">
 
@@ -159,7 +198,7 @@ Macro-architecture and design-cohesion review — the senior-engineer *"is this 
 
 ### Ranger — the foreman
 
-Hand him one prompt and walk away. `/ranger:run <brief>` starts a **self-directing senior-engineering loop that never stops and never runs out of work**. A thin lead — reads state files, never source — works a crew of Opus agents through *survey, plan, plan-review, select, build, review, verify, commit*, one local commit per item. The read-only half of the crew runs in parallel pools (scouts sweeping different slices of the app at once, planners and reviewers alongside); only the implementer touches the shared tree, so only the build is serial. The backlog refills above a watermark rather than at zero, so it never stalls waiting for work. Curated `--preset` briefs focus the sweep; `--dry-run` previews first. A PreToolUse hook hard-denies `git push`. Runs are uncapped by default — `--max-hours=N` is the cap that bounds spend.
+Hand him one prompt and walk away. `/ranger:run <brief>` starts a **self-directing senior-engineering loop that never stops and never runs out of work**. A thin lead — reads state files, never source — works a crew of agents through *survey, triage, select, build, review, verify, commit*, one local commit per item. Most items go to a single builder that reads, decides, edits and proves in one pass, and escalates to the full plan-and-review pipeline only when it finds the work is wider than the ticket implied. Every item carries an artifact — the command someone ran and what they saw — and one agent, the driver, runs the system instead of reading it. The read-only half of the crew runs in parallel pools; only the build touches the shared tree. The backlog refills above a watermark rather than at zero, so it never stalls waiting for work. Curated `--preset` briefs focus the sweep; `--dry-run` previews first. A PreToolUse hook hard-denies `git push`. Runs are uncapped by default — `--max-hours=N` is the cap that bounds spend.
 
 </details>
 
@@ -255,6 +294,39 @@ flowchart LR
 | **Smith then Scout** | Build the feature, then lock its behaviour in with real browser tests |
 | **Ranger with Cleric / Seer / Scout** | If they are installed, Ranger dispatches to them for their specialisms instead of duplicating the work — none is required |
 | **Warden under Sellsword** | Sellsword does long multi-step work; Warden keeps each step's claims grounded |
+
+### The shared workspace: what one plugin learns, the next one can use
+
+Six of the nine can leave each other notes, in an optional directory called `.questboard/`. It is the smallest thing that lets the crew share what it learns without any of them depending on the others.
+
+| Plugin | Reads | Writes |
+|---|---|---|
+| **Sage** | | a note pointing at each sealed spec |
+| **Smith** | resolves `--spec` from those notes when you do not pass one | |
+| **Ranger** | what the project has already tried, before its scouts sweep | an attempt per committed and per quarantined item |
+| **Sellsword** | | what a run learned that the repo does not record |
+| **Cleric** | | the items it deliberately did not auto-apply |
+| **Seer** | | its verdict, so it reaches a tool and not just a casefile |
+
+The most visible effect is the Sage to Smith handoff. This still works and is still the documented way to do it:
+
+```bash
+/sage:plan "add a workloads page that lists running pods with status and logs"
+/smith:start lathe --spec sage-specs/workloads-page/spec.md
+```
+
+but now so does this:
+
+```bash
+/sage:plan "add a workloads page that lists running pods with status and logs"
+/smith:start lathe          # finds the spec Sage just sealed, and says which one
+```
+
+**Nothing requires it.** Every plugin behaves exactly as it did before when `.questboard/` is absent, which is the normal case. A plugin never creates the directory in order to read it, a malformed note is skipped rather than repaired, and a failed write is never allowed to fail a run. Warden, Scout and Tactician do not participate at all, because none of them has anything to say to the others.
+
+`.questboard/` is local and disposable. Delete it whenever you like; the only cost is that a tool rediscovers something.
+
+Full details, including how to write a tenth plugin against it: [the .questboard contract](docs/questboard-contract.md).
 
 ---
 

@@ -6,7 +6,7 @@
 
 **The foreman who never leaves the site. One prompt, then walk away.**
 
-[![Version](https://img.shields.io/badge/version-0.5.0-F9A825?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.6.0-F9A825?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-1E88E5?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -34,10 +34,13 @@ Most "autonomous" loops die one of two deaths: they run out of work and stop, or
 
 - **No exit condition.** An empty backlog is a survey trigger, not a finish line, and **nothing but you ends a run** — `/ranger:stop`, Esc, a cap you set. Ranger never decides for itself that the work is finished. Continuous operation is a *driver's* job: `/loop /ranger:run` while you watch, or a headless runner overnight. Each `/ranger:run` does one clean cycle and returns; nothing traps the turn.
 - **A thin lead.** The foreman spawns agents and manages state files; he never edits code. Every agent gets a fresh context; his own window stays small, so a run survives for hours.
-- **A crew, not a queue.** Surveying, planning, claims-checking and plan-review are read-only, so they run as parallel pools. Only the build touches the shared tree, so only the build is serial — one item at a time.
-- **Effort sized to the item.** A one-line copy fix gets two agents; a concurrency bug gets the full adversarial pipeline and a mandatory fresh-eyes gate. One fixed pipeline for everything is the most expensive mistake a loop like this can make.
+- **A crew, not a queue.** Surveying, driving, claims-checking and plan-review are read-only, so they run as parallel pools. Only the build touches the shared tree, so only the build is serial — one item at a time, unless two plans provably touch nothing in common, which puts them in separate worktrees behind five conditions and a flag.
+- **Effort sized to the item, declared after reading it.** A one-line copy fix gets two agents; a concurrency bug gets the full adversarial pipeline and a mandatory fresh-eyes gate. The lead guesses the tier from the entry and the build agent overrules it from the code — it can raise the tier, never lower it. One fixed pipeline for everything is the most expensive mistake a loop like this can make.
+- **An artifact, or it's a hypothesis.** An item carries the command someone ran and what they saw, not just the line they read. Citations prove a line exists; they don't prove the path reaches it or that the behaviour you inferred is the one a user gets. Items with no artifact are quarantined until something reproduces them — never planned.
 - **Plan review before code — and a claims check before that.** A rejected plan costs one agent; a bad implementation costs five. Most revision rounds in a mature run are citation defects, not design defects, so a cheap pass verifies every claim against its source before the expensive reviewer is spent.
+- **One agent that runs the system instead of reading it.** Everyone else reads. The driver starts the app, clicks the thing, calls the endpoint and measures what can't be eyeballed — which is how you find a control rendering at 12 pixels tall, or an error message sitting at `display: none` in every state a user can reach. "I couldn't reproduce it" is a success verdict, not a failure.
 - **Fresh-eyes verification.** The assessor never sees the plan — only the acceptance criteria and the code. It cannot be argued into agreeing. UI items get driven through a real browser, clicked through like a user would.
+- **A gate that dies is reported, never replaced.** Every verdict is written to disk before it is returned, so a dead agent degrades to a partial verdict instead of silence — and the foreman is forbidden from writing any gate it commissioned.
 - **Local commits only.** `git push` is denied by a `PreToolUse` hook for the whole run, and no flag turns it on.
 
 ---
@@ -88,22 +91,18 @@ flowchart LR
         s1[scout]:::pool
         s2[scout]:::pool
     end
-    subgraph PL["plan - planners, default 3"]
+    subgraph ESC["escalation only - planners, default 1"]
         direction TB
         p1[planner]:::pool
-        p2[planner]:::pool
-    end
-    subgraph PR["plan-review - planners"]
-        direction TB
-        r1[reviewer]:::pool
-        r2[reviewer]:::pool
+        c1[claims check]:::pool
+        r1[plan reviewer]:::pool
     end
 
-    SU --> TRI[triage]:::lead
-    TRI --> PL --> CHK[claims check]:::pool
-    CHK --> PR --> SEL[select]:::lead
-    TRI -.trivial: fast path.-> SEL
-    SEL --> BUILD[build — implementer]:::serial
+    SU --> TRI[triage - tier hint]:::lead
+    TRI --> SEL[select]:::lead
+    TRI -.risky.-> ESC --> SEL
+    SEL --> BUILD[build — builder]:::serial
+    BUILD -.needs-plan.-> ESC
     BUILD --> DIFF[review — diff]:::lead
     DIFF --> VER[verify — assessor]:::lead
     DIFF -.proved by a failing test.-> COM
@@ -113,25 +112,30 @@ flowchart LR
 
 | step | who | what |
 |---|---|---|
-| **survey** | *N* scouts in parallel | one domain/lens pair each — refills the backlog *before* it runs low |
-| **triage** | lead | sizes the machinery to the item: `trivial` / `standard` / `risky` |
-| **plan** | *M* planners in parallel | each reads what exists, hunts for reuse, writes the smallest correct plan |
-| **claims check** | *M* checkers in parallel | opens every source the plan cites and reports which claims held — cheap model |
-| **plan-review** | *M* reviewers in parallel | approve, revise, split, or drop — before a line of code exists |
-| **select** | lead | takes the highest-scoring already-approved plan |
-| **build** | 1 implementer — serial | the only step that touches the shared tree |
+| **survey** | *N* scouts in parallel | one domain/lens/modality triple each — refills the backlog *before* it runs low |
+| **triage** | lead | a `tier_hint` from the entry, and a route: default path, or pre-plan |
+| **select** | lead | the highest-scoring item that is ready or already approved |
+| **build** | 1 builder — serial | reads, decides, edits, proves; returns the diff **and** the plan it followed |
 | **review** | reviewer | correctness, regression, reuse, altitude, honesty — against the real diff |
 | **verify** | assessor | fresh eyes, evidence ledger, real browser for UI items — routed, not automatic |
 | **commit** | lead | one local commit, one journal line, back to survey |
 
 Reviewer **and** assessor must both return `pass`. Anything else revises, and after two rounds the item is reverted — never patched over.
 
+### The plan is part of the build, until it isn't
+
+Most items go to one agent. A separate planner writing a paragraph, a checker opening the two files it cites and a reviewer approving the paragraph is three agents' worth of ceremony to authorise a one-line edit — and the plan was never the hard part. Reading the code was, and the builder has to do that anyway.
+
+But difficulty isn't knowable from a ticket. "Add a key to this table" turns out to be two tables with opposite defaults. "Replace a repeated literal with a constant" turns out to be two different meanings that coincidentally match. None of that shows up in a backlog entry; all of it shows up ninety seconds into the code. So the builder can **bail** — `needs-plan` returns its reading and no diff, and the item escalates to the full planner -> claims-check -> plan-review path with that reading attached.
+
+The common case costs one agent. The rare case costs two. Every case used to cost three before a line was written.
+
 ### Not every item gets the whole crew
 
-Running five agents on a one-line copy fix isn't rigour, it's waste that competes with the item that deserved the rigour. The lead triages first:
+The build agent declares the item's real tier after reading it — the lead's hint came from a sentence, the builder's tier comes from the code. It may raise the tier; it may never lower it.
 
-- **`trivial`** — copy, a CSS value, a constant, a pure one-liner in one file. Implementer plus one diff review. Two agents, not seven.
-- **`standard`** — the default, and where most items land. The full pipeline above.
+- **`trivial`** — copy, a CSS value, a constant, a pure one-liner in one file. Builder plus one diff review. Two agents.
+- **`standard`** — the default, and where most items land. The pipeline above.
 - **`risky`** — concurrency, data format or migration, auth and secrets, a component with 3+ call sites. Two plan reviewers instead of one (disagreement is a revision), and the fresh-eyes gate is mandatory and can't be downgraded.
 
 Verification is routed the same way. The assessor is mandatory for anything where the judgement is visual or interactive, for `risky` items, and for any build the diff reviewer flagged. For a pure-logic fix already pinned by a test the lead has **watched fail against the pre-change code**, that test *is* the fresh-eyes evidence and the assessor is skipped — it would only re-derive it. When the assessor genuinely can't drive something, it has a time-boxed fallback ladder (`live` -> `seeded` -> `mechanism` -> `blocked`) and reports which rung it reached, instead of burning an hour fighting a toggle.
@@ -144,9 +148,23 @@ The first survey sends one scout to map the *product* — its real domains, like
 
 **correctness, UI/UX, visual polish, real-user flows, performance, accessibility, security, DX, feature gaps** — swept in that order.
 
-Every domain/lens combination is a **pair**, and each scout in a wave takes one; a persistent `swept` map means no pair is issued twice, so the loop moves forward instead of circling. The survey fires when the backlog drops **below a watermark** (default `scouts + 2` = 8 items), not when it hits zero — so the foreman is stocking up while the current item is still being built, and never stalls waiting for work.
+Every domain/lens combination is a **pair**, and each scout in a wave takes one; a persistent `swept` map means no pair is issued twice, so the loop moves forward instead of circling. The survey fires when the backlog drops **below a watermark** (default `scouts + 2` = 8 items), not when it hits zero — so the foreman is stocking up while the current item is still being built, and never stalls waiting for work. It goes out alongside the current build, since reading a half-edited tree is fine for an agent that proposes work rather than asserting a diff.
 
 The rotation also learns. The foreman records a **yield** per pair — sweeps versus items that survived dedup and the floor — and a pair that comes back clean twice goes cold and gets skipped until its domain changes. Breadth-first with no feedback spends the same on the well-hardened area as on the one full of defects.
+
+### When reading stops working, it stops reading
+
+There's a third axis: **modality**. Reading the source and driving the running system see different defects, and a run that has gone quiet is often an exhausted method rather than a healthy codebase — a reader eventually stops finding what a reader can find, and raising the bar just makes it read more selectively over the same ground.
+
+So after three lean cycles the survey switches to driving: start the app, walk the real flows, hit the real endpoints, measure what can't be eyeballed. It's cheaper too — driving one flow beats sweeping nine lenses across every domain to conclude nothing is wrong.
+
+The same agent settles the quarantine. Once three or more unreproduced items pile up, a driver goes and tries them: reproduced items become plannable, disproved ones are closed with evidence, and an item that turns out to be a *different* problem gets rewritten before anyone plans a fix for the wrong thing.
+
+### Entries rot, and closing one counts
+
+Every backlog entry carries a `verified_at` cycle stamp, and one older than 15 cycles has to be re-checked against the tree before it can be built. A loop that files continuously and never re-verifies drifts toward a board describing a codebase that no longer exists — one sweep of one board turned up six entries marked pending or blocked when the work had already shipped, each with a confident-sounding justification.
+
+**"Closed as already shipped" is a real outcome and it's reported as progress.** It's often the most valuable thing a cycle can produce, and it used to look like failure.
 
 **It will not manufacture churn.** Every candidate is scored `value + confidence - effort + consequence`; anything under the floor is dropped. A scout that finds nothing above the floor reports its pair **clean** — a real, useful answer. Keeping the backlog full is the foreman's job, answered by dispatching more pairs, never by pressing a scout to come back with something.
 
@@ -189,7 +207,7 @@ It holds the north star (what the project is optimising for right now, so a marg
 | `--preset <name>` | sweeps every domain in rotation | focuses one curated checklist: `ui`, `ux`, `a11y`, `harden`, `perf` |
 | `--dry-run` | executes for real | previews only — one scout + top plan, no writes, no commit |
 | `--scouts=N` | 6 sweep in parallel | resize the survey team (clamped 1–8) |
-| `--planners=N` | 3 plan (and 3 review) in parallel | resize the plan pool (clamped 1–4) |
+| `--planners=N` | 1 | resize the pre-plan pool, which now feeds escalations and `risky` items only (clamped 1–4) |
 | `--branch` | commits to the current branch | a local branch per item |
 | `--merge-dev` | leaves integration to you | merges verified items into `dev` |
 | `--ask` | **never asks you anything** | may ask when genuinely blocked |
@@ -359,15 +377,15 @@ All of it is on disk, not in the context window — a compaction mid-run is surv
 
 ## What it costs
 
-Every cycle is a crew, and the crew is subagents. At full stretch a `standard` cycle dispatches **6 scouts, then 3 planners, then 3 claims checkers, then 3 plan reviewers, then 1 implementer, 1 diff reviewer and 1 assessor** — eighteen agents, each with its own context window, to produce one commit. That is the ceiling, not the norm:
+Every cycle is a crew, and the crew is subagents. **The common case is now 6 scouts, then 1 builder, 1 diff reviewer and sometimes 1 assessor** — the builder plans and builds in one pass, so the planner, claims-checker and plan-reviewer pools are spent only on `risky` items and escalations. A `risky` item still dispatches the full stretch, and that is the ceiling rather than the norm:
 
-- A `trivial` item costs **two** agents — implementer and one diff review.
-- The survey is skipped while the backlog sits above the watermark, and skipped entirely at the cap.
-- The plan pool is skipped while approved plans are queued.
-- The assessor is skipped for pure-logic work already pinned by a test that was watched failing.
-- Claims checking runs on the cheap model and is *net negative* cost: it catches the citation defects that would otherwise burn an `opus` reviewer plus a whole re-plan round.
+- A `trivial` item costs **two** agents — builder and one diff review.
+- The survey is skipped while the backlog sits above the watermark, and skipped entirely at the cap. It also runs concurrently with the build, so it costs wall-clock only once.
+- The plan pool is skipped entirely unless something escalated or the item is `risky`.
+- The assessor is skipped for pure-logic work already pinned by a test that was watched failing *for the right reason*.
+- Claims checking runs on the cheap model and is *net negative* cost: it catches the citation and artifact defects that would otherwise burn an `opus` reviewer plus a whole re-plan round.
 
-Cycles are dearer when work doesn't land — a revised plan, a rejected diff or a failed verification all spend agents without producing a commit. `--scouts=N` and `--planners=N` are the dials on per-cycle width, but **triage is the bigger one**: getting the tier right saves more than any model choice.
+Cycles are dearer when work doesn't land — a revised plan, a rejected diff or a failed verification all spend agents without producing a commit. A builder that bails to `needs-plan` puts an item back on the expensive path, which is why the bail has to be honest rather than frequent: roughly one item in five or fewer is the shape this assumes. `--scouts=N` is the main dial on per-cycle width.
 
 Model follows the *check*, not the role. Claim-vs-source matching is mechanical and runs on `haiku`; mutation runs and criterion mapping are mechanical too. Copy, design judgement and the diff gate get the expensive model, because that's where the judgement actually is.
 

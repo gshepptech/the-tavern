@@ -1,0 +1,6 @@
+{
+  "questboard": 1,
+  "plugin": "sellsword",
+  "reads": [],
+  "writes": ["finding"]
+}

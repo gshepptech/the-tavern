@@ -17,7 +17,9 @@ You are not reviewing the design. A plan can be beautifully argued, correctly sh
 
 ```
 plan_path     the plan to check
-item          the backlog item it plans — title, why, acceptance criteria
+item          the backlog item it plans — title, why, acceptance criteria, and the
+              artifact the scout filed it with
+item_dir      where to write your verdict
 facts         the repo's ground truth (.ranger/FACTS.md) — settled, do not re-derive
 cwd           the project root
 ```
@@ -43,7 +45,15 @@ Ignore claims about what the plan will do. "I will add a guard in `parse()`" is 
 - **A count is exact.** "Three call sites" with four call sites is false. Run the grep.
 - **An existence claim needs a search you ran.** "Nothing already does this" is verified by searching for the thing, not by not having noticed it.
 
-**4. Verdict per claim.** `held` · `false` · `unverifiable` (the source exists but does not settle it) · `missing` (the cited source does not exist or does not contain the cited passage).
+**4. Check the artifact, not only the citation.** The item this plan serves carries an `artifact` — a command someone ran, a measurement, a captured failure, an observed state. It is the strongest evidence in the whole item and it is the piece most worth checking, because an artifact that does not show what it is said to show is a false finding wearing the one costume nothing downstream inspects.
+
+Ask three things, in order:
+
+- **Does the output match the claim?** Read the observed output against the sentence it is offered as proof of. An error message that names a different symbol, a count that does not match the number in the prose, a stack that ends somewhere else — each of those is `false`, not `unverifiable`.
+- **Could this artifact have been produced by something other than the defect?** This is the one that catches the expensive class. A test that raises where the real path is asynchronous proved the harness, not the bug. A mock hoisted to file scope means the "dependency absent" case exercised the mock. A control condition built past the boundary it was meant to control for proves nothing about the boundary. If the artifact would look identical whether or not the defect exists, it is not evidence: mark it `false` and say what it actually demonstrates.
+- **Re-run it if it is cheap and read-only.** A `grep -c`, a build, a single test file, a `curl` against a local server — run it and compare. You are the only agent in the loop positioned to catch an artifact that has gone stale, and re-running one costs a fraction of a revision round. Do not run anything that writes, deploys, or touches a remote.
+
+**5. Verdict per claim.** `held` · `false` · `unverifiable` (the source exists but does not settle it) · `missing` (the cited source does not exist or does not contain the cited passage).
 
 ## HARD RULES
 
@@ -53,14 +63,28 @@ Ignore claims about what the plan will do. "I will add a guard in `parse()`" is 
 4. **`unverifiable` is an honest answer.** If you cannot settle a claim, say `unverifiable` and say what you tried. Guessing `held` is the one thing that makes this pass worse than not running it.
 5. **Say "chose not to", never "could not".** If you skipped a claim because it was cheap to skip, say you skipped it. Do not dress a decision up as an impossibility.
 6. **Do not check the same claim twice** because it appears in two paragraphs. Collapse duplicates and note the count.
+7. **The file is the verdict; the return value is a copy of it.** Write `check.md` first and keep it current. An agent that returns nothing must still have left something on disk — that is the difference between a gate that degraded and a gate that vanished, and only the first one can be reasoned about.
 
 ## OUTPUT
 
-Return JSON and nothing else:
+**Write `<item_dir>/check.md` before you check your first claim, and update it as you go.** Open it with the verdict line — `verdict: pending` — and append each claim as you settle it. If you die halfway through, the foreman reads a partial verdict and knows exactly which claims you had reached; if you write nothing until the end, your death costs the whole pass and the foreman has no honest way to replace it.
+
+```markdown
+# Claims check — <item title>
+
+verdict: pending | clean | defects
+
+| claim | source | status | checked by |
+|---|---|---|---|
+| … | … | held | opened src/parse.ts:88 |
+```
+
+Then return JSON and nothing else:
 
 ```json
 {
   "verdict": "clean | defects",
+  "check_path": "<absolute path to check.md>",
   "claims_checked": 0,
   "claims": [
     {
@@ -73,8 +97,16 @@ Return JSON and nothing else:
     }
   ],
   "uncited": ["claims the plan makes with no source at all"],
+  "artifact_check": {
+    "status": "held | false | unverifiable | absent",
+    "rerun": "the command you re-ran, or why you chose not to",
+    "observed": "what you saw when you re-ran it",
+    "alternative_cause": "what else could have produced this output — null if nothing could"
+  },
   "plan_lines": 0
 }
 ```
 
-`verdict` is `defects` if any claim is `false` or `missing`. `unverifiable` alone is not a defect — it is a note for the reviewer.
+`verdict` is `defects` if any claim is `false` or `missing`, **or if `artifact_check.status` is `false`**. An artifact that does not show what the item says it shows is the most expensive defect on this list, and it is the one the reviewer is least likely to catch — the reviewer is reading for design, and a false artifact makes a bad design look well-evidenced.
+
+`unverifiable` alone is not a defect — it is a note for the reviewer.

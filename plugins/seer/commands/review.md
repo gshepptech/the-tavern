@@ -57,6 +57,32 @@ mkdir -p .seer/casefiles
 
 Write the rendered markdown (below) to `.seer/casefiles/$(date -u +%Y%m%d-%H%M%S).md`.
 
+### Leave a note in the shared workspace
+
+Optional, and only when `report.themes` is non-empty. A verdict nobody can act on is not worth recording. The full contract is `docs/questboard-contract.md`; the short version is that other plugins read `.questboard/notes/*.json` if it happens to exist, so a structural verdict reaches whatever runs next instead of dying in a casefile.
+
+```bash
+mkdir -p .questboard/notes && date -u +%Y%m%dT%H%M%SZ
+```
+
+Then `Write` one file to `.questboard/notes/<that timestamp>-seer-<4 hex chars you pick>.json`:
+
+```json
+{
+  "questboard": 1,
+  "id": "<the filename without .json>",
+  "kind": "finding",
+  "plugin": "seer",
+  "created": "<the same instant as YYYY-MM-DDTHH:MM:SSZ>",
+  "title": "Design review of <target>: <report.overall_verdict, trimmed to one line>",
+  "summary": "<N findings across M subsystems. Name the accreted ones.>",
+  "paths": [".seer/casefiles/<file>.md"],
+  "tags": ["<subsystem>", "<subsystem>"]
+}
+```
+
+**Never let this stop the debrief.** If `mkdir` or `Write` fails, drop it and carry on to the chat render. The casefile is the deliverable; the note is a pointer to it. Do not retry, do not tell the user, and do not write anything into `.questboard/` other than that one file.
+
 Then render this in chat, built **entirely from the returned `report` and `findings`** — do not add findings of your own, do not soften the file:line anchors:
 
 ```markdown

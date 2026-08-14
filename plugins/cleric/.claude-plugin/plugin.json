@@ -1,6 +1,6 @@
 {
   "name": "cleric",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Cleric is the crew member who sweeps the site clean \u2014 careful, low-risk codebase cleanup across 7 focused tracks: deduplication, type consolidation, dead code removal, circular dependency untangling, type strengthening, error-handling cleanup, and deprecated/AI-slop removal. On each track Cleric inspects, writes a critical assessment, ranks proposed changes by confidence, and auto-applies ONLY HIGH-confidence LOW-risk changes per batch \u2014 running language-appropriate type checks, tests, and lints after each batch. MEDIUM and LOW confidence changes get surfaced for explicit human approval. Atomic commits per batch so any failing check is one git revert away. Cleric works the conservative cleanup pass \u2014 never merging code that just LOOKS similar, never removing dynamically-imported code, never breaking legitimate boundary types, never silencing real errors. Refuses to use comments as a source of truth.",
   "author": {
     "name": "gshepptech"

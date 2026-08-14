@@ -6,7 +6,7 @@
 
 **Hand him a gnarly problem. He owns the outcome — investigate, plan, execute, verify.**
 
-[![version](https://img.shields.io/badge/sellsword-v0.3.0-FB8C00?style=flat-square)](.claude-plugin/plugin.json)
+[![version](https://img.shields.io/badge/sellsword-v0.4.0-FB8C00?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-FB8C00?style=flat-square)](../../LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-FB8C00?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -300,6 +300,16 @@ Every run writes to `.sellsword/runs/<run-id>/`:
 The plan and the debrief render in chat — you never have to open these files. `/sellsword:goal` also writes `.sellsword/active-goal.json` at the project root while a run is armed; every exit path empties it.
 
 ---
+
+## Shared workspace (optional)
+
+Sellsword is the one that goes outside the repo, so it tends to learn things the repo does not record. At the end of a run, if there is something a different tool could act on (open follow-ups, a constraint it hit, a drift flag nobody acted on), it writes one small JSON note to `.questboard/notes/`. A run that did exactly what was asked and found nothing surprising writes nothing.
+
+This matters most for `/sellsword:goal`, which is unattended: the chat debrief has nobody reading it.
+
+Nothing operational goes in the note. No credentials, no hostnames, nothing from `.sellsword/access.yml`. That detail belongs in `.sellsword/runs/<id>/`, which stays local to Sellsword.
+
+Sellsword reads nothing from the workspace and never fails a run over a failed write. The format is documented in [the .questboard contract](../../docs/questboard-contract.md).
 
 ## Pairs well with
 

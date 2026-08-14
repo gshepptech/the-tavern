@@ -33,6 +33,10 @@ Read the plan. Read the files it names, properly, before editing them. Then make
 
 **Any test you add must fail against the pre-change code, and you must watch it fail.** Write the test, `git stash` your change, run it, see red, `git stash pop`, see green. A test written after the fix and never run against the unfixed code is untested test code — it may assert nothing at all, and it will be trusted forever. If a test stays green with your change stashed, it is not testing your change: fix the test, or say so and return `deviated`. Put both results in `checks`.
 
+**Paste the actual failure text, verbatim.** "Verified red before the fix" is a sentence anyone can write, and from the outside a test that went red for the wrong reason is indistinguishable from one that went red for the right one. Both of these happen and neither is visible in a summary: the test failed on a missing fixture rather than the defect; the fixture could not construct the triggering case at all, so the assertion never ran. So the evidence is not "it failed" — it is **the failure output**, with the assertion line, the expected-versus-actual, or the exception and its message. The reviewer reads that text against the defect this item names, and if the failure is about something else, your red is not evidence of anything.
+
+If you genuinely cannot make the test go red — the harness cannot reach the state, the case needs data this environment does not have — say so and report the test as `undemonstrated`. That is **allowed and it is visible**, which is the entire point. What is not allowed is claiming a red you did not see, or one you saw for a reason you did not read.
+
 **On feedback rounds**, address every finding specifically. Do not rewrite the whole change to make a reviewer comment go away.
 
 **A reviewer's literal replacement text is a suggestion, not a contract.** Reviewers are told not to hand you code they have not executed, but when one does anyway, it has not been run — you are the one holding the file. Read what it is asking for, check it against the code in front of you, and write the line yourself. Pasting a prescription that does not compile costs the cycle, and the reviewer will not be the one to notice.
@@ -53,7 +57,7 @@ Read the plan. Read the files it names, properly, before editing them. Then make
 
 ## OUTPUT
 
-Write `<item_dir>/build.md` — a short record: what you changed, what you ran, what you observed.
+Write `<item_dir>/build.md` — a short record: what you changed, what you ran, what you observed. **Its first line is `verdict: pending`, written before your first edit** and updated the moment you have a real one. You are the only agent that leaves the tree changed; if you die, the foreman needs to know from disk whether it is looking at a finished change, a half-finished one, or an empty edit — it cannot get that from a diff.
 
 Then return JSON and nothing else:
 
@@ -69,8 +73,11 @@ Then return JSON and nothing else:
   "new_tests": [
     {
       "test": "<name or path>",
-      "failed_without_change": true,
-      "evidence": "the command you ran with the change stashed, and what you saw"
+      "status": "demonstrated | undemonstrated",
+      "command": "the command you ran with the change stashed",
+      "failure_output": "the real pre-fix failure text, verbatim — the assertion line, the expected vs actual, or the exception and its message. Required when status is demonstrated.",
+      "failure_is_the_defect": "one line: why this failure text is the defect this item names, and not something else",
+      "why_undemonstrated": "required when status is undemonstrated — what stopped you"
     }
   ],
   "acceptance_self_check": [

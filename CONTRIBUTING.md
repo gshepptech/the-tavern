@@ -59,7 +59,11 @@ python3 .github/scripts/check_docs.py
 # 4. Check documented flags are actually wired, and agent types exist
 python3 .github/scripts/check_flags.py
 
-# 5. Syntax-check JavaScript and shell
+# 5. Check the install profiles: every plugin exists, the docs agree,
+#    and any profile carrying an unattended plugin still warns about it
+python3 .github/scripts/check_profiles.py
+
+# 6. Syntax-check JavaScript and shell
 git ls-files '*.js' | xargs -I{} node --check {}
 git ls-files '*.sh' | xargs -I{} bash -n {}
 ```

@@ -344,6 +344,32 @@ git reset --hard <PRE_SWEEP_SHA>
 
 End with one question to the user: "Anything look off, or want to elevate any of the MEDIUM items?"
 
+### Leave a note in the shared workspace
+
+Optional, and only when there is something a *different* tool could act on: MEDIUM items you did not auto-apply, UNCITED drift, or anything flagged UNCERTAIN. A clean sweep with nothing held back writes no note. The contract is `docs/questboard-contract.md`; the short version is that other plugins read `.questboard/notes/*.json` if it exists, and the items you deliberately left alone are exactly the ones a later run keeps rediscovering.
+
+```bash
+mkdir -p .questboard/notes && date -u +%Y%m%dT%H%M%SZ
+```
+
+Then `Write` one file to `.questboard/notes/<that timestamp>-cleric-<4 hex chars you pick>.json`:
+
+```json
+{
+  "questboard": 1,
+  "id": "<the filename without .json>",
+  "kind": "finding",
+  "plugin": "cleric",
+  "created": "<the same instant as YYYY-MM-DDTHH:MM:SSZ>",
+  "title": "Cleanup sweep <RUN_ID>: <N> items held back",
+  "summary": "<what was applied, and what was left and why, two sentences>",
+  "paths": [".cleric/runs/<RUN_ID>/"],
+  "tags": ["<track>", "<track>"]
+}
+```
+
+**Never let this affect the run.** If it fails, drop it silently. Applied commits and the assessment files are the record; the note is a pointer for whatever runs next. One file, nothing else in `.questboard/`.
+
 ---
 
 ## ORCHESTRATOR NON-NEGOTIABLE RULES
@@ -359,4 +385,4 @@ End with one question to the user: "Anything look off, or want to elevate any of
 
 ## ON USER FOLLOW-UP
 
-After the debrief, the user may ask follow-ups about specific MEDIUM items, specific files, or revert decisions. Answer from the assessment files; don't re-spawn tracks. For elevations to apply after the run, recommend `/cleric:apply <RUN_ID> --elevate=<track>:<item-id>` (future command — for now, do it manually).
+After the debrief, the user may ask follow-ups about specific MEDIUM items, specific files, or revert decisions. Answer from the assessment files; don't re-spawn tracks. To act on a MEDIUM item after the run has finished, apply it directly rather than re-running the track: the assessment file records the exact change and the file it belongs to.

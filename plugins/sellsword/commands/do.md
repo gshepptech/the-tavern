@@ -387,6 +387,32 @@ Anything look off?
 
 Don't include the full ledger tables in chat — they're in the verdict files. Surface the verdict, the critical findings, and a 2-4-bullet summary of what was verified.
 
+### Leave a note in the shared workspace
+
+Optional, and only when the run turned up something outside itself: open follow-ups, a constraint you discovered the hard way, or a drift flag the user chose not to act on. A run that did exactly what was asked and found nothing surprising writes no note. The contract is `docs/questboard-contract.md`; the short version is that other plugins read `.questboard/notes/*.json` if it exists, and what you learned about this project is more useful to them than it is sitting in `.sellsword/runs/`.
+
+```bash
+mkdir -p .questboard/notes && date -u +%Y%m%dT%H%M%SZ
+```
+
+Then `Write` one file to `.questboard/notes/<that timestamp>-sellsword-<4 hex chars you pick>.json`:
+
+```json
+{
+  "questboard": 1,
+  "id": "<the filename without .json>",
+  "kind": "finding",
+  "plugin": "sellsword",
+  "created": "<the same instant as YYYY-MM-DDTHH:MM:SSZ>",
+  "title": "<one line: what the run learned, not what it did>",
+  "summary": "<the open follow-ups and any constraint worth knowing next time>",
+  "paths": [".sellsword/runs/<RUN_ID>/"],
+  "tags": ["<host or subsystem>"]
+}
+```
+
+**Never let this affect the run.** If `mkdir` or `Write` fails, drop it and finish the debrief. Do not put secrets, hostnames from `.sellsword/access.yml`, credentials or anything you would not paste into a shared channel into that file. It is a project-local file other tools read, and the run artifacts under `.sellsword/runs/` are where the operational detail belongs. One file, nothing else in `.questboard/`.
+
 ---
 
 ## ON USER FOLLOW-UP IN CHAT (after PHASE 8)

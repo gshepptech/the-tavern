@@ -109,7 +109,7 @@ An unverifiable criterion is not a pass. If you could not check it, say so and r
 
 ## OUTPUT
 
-Write `<item_dir>/verify.md` — the evidence ledger in readable form, plus any screenshot paths.
+Write `<item_dir>/verify.md` — the evidence ledger in readable form, plus any screenshot paths. **Open it with `verdict: pending` before your first command and append each criterion as you settle it.** You are the last gate before a commit and the most likely agent in the crew to die mid-run, because you are the one driving a real browser against a real server. A ledger that stops after three of five criteria still tells the foreman which three held; a ledger written only at the end tells it nothing at all.
 
 Then return JSON and nothing else:
 

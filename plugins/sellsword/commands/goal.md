@@ -311,7 +311,9 @@ auditor: <last auditor verdict> · fresh-eyes: <last fresh-eyes verdict>
 **Run artifacts:** `.sellsword/runs/<RUN_ID>/`
 ```
 
-4. Notify (best-effort — never fail the run on this):
+4. **Leave a note in the shared workspace**. Same rule, same shape and same "never let it affect the run" discipline as the `### Leave a note in the shared workspace` block in `/sellsword:do`'s PHASE 8. An unattended run has nobody reading the chat debrief, so this is the only way what it learned reaches anything else. Write it on every exit path, `goal_met` included, and set the title to what the run learned rather than its status. The same secrets rule applies: nothing from `.sellsword/access.yml`, no credentials, no hostnames.
+
+5. Notify (best-effort — never fail the run on this):
 
 ```bash
 osascript -e 'display notification "<status>: <RUN_ID>" with title "sellsword:goal"' 2>/dev/null || true

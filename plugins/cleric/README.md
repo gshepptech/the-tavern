@@ -6,7 +6,7 @@
 
 **A careful, low-risk codebase cleanup pass across 7 focused tracks — dedup, type consolidation, dead code, circular deps, type strengthening, error handling, and deprecated/AI-slop removal.**
 
-[![Version](https://img.shields.io/badge/version-0.1.1-558B2F?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.2.0-558B2F?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-558B2F?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -307,6 +307,14 @@ Tracks apply in a fixed order, chosen to minimize cross-track interference (dedu
 **When to run it:** before a release, after a feature merge, or as scheduled maintenance — e.g. `/cleric:run --auto --tracks=dead-code,deprecated-slop` on a weekly cron.
 
 ---
+
+## Shared workspace (optional)
+
+The items Cleric deliberately does not apply (MEDIUM, LOW, UNCERTAIN) are the ones every later tool rediscovers from scratch. If a sweep held anything back, Cleric writes one small JSON note to `.questboard/notes/` summarising what was applied, what was not, and pointing at the assessment files. A sweep that held nothing back writes nothing.
+
+Cleric reads nothing from the workspace, and a failed write is dropped silently. The commits and the assessment files under `.cleric/runs/` are the real record either way.
+
+The format is documented in [the .questboard contract](../../docs/questboard-contract.md).
 
 ## Pairs well with
 

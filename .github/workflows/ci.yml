@@ -42,6 +42,14 @@ jobs:
       - name: Check flags and agent references
         run: python3 .github/scripts/check_flags.py
 
+      # Install profiles are a convention of this repo, not a platform feature,
+      # so nothing validates them but this. Catches a profile naming a plugin
+      # that no longer exists, docs that disagree with the script, and the one
+      # that matters most: a profile bundling a permissions-bypassing tool
+      # without repeating the warning.
+      - name: Check install profiles
+        run: python3 .github/scripts/check_profiles.py
+
   syntax:
     name: Syntax
     runs-on: ubuntu-latest

@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "the-tavern",
-  "description": "The Tavern \u2014 a crew of AI builders for Claude Code. Sage draws it. Smith builds it.",
+  "description": "The Tavern — a crew of AI builders for Claude Code. Sage draws it. Smith builds it.",
   "owner": {
     "name": "gshepptech"
   },
@@ -10,7 +10,7 @@
       "name": "sage",
       "source": "./plugins/sage",
       "description": "Turns a vague feature idea into a locked, buildable spec. Researches your codebase first, then interviews you with grounded questions and writes a spec with typed invariants and citations. Plans only, never writes code.",
-      "version": "5.0.1",
+      "version": "5.1.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -28,7 +28,7 @@
       "name": "smith",
       "source": "./plugins/smith",
       "description": "Builds a spec out autonomously. Decomposes it into parallel work, builds in waves, then verifies through independent streams and grinds defects to zero before it will call the work done.",
-      "version": "4.4.1",
+      "version": "4.5.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -64,7 +64,7 @@
       "name": "sellsword",
       "source": "./plugins/sellsword",
       "description": "Hand it a gnarly problem and it owns the outcome. Five agents investigate, plan, execute and verify across code, servers and infrastructure, with two independent verifiers that must both pass before it stops.",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "category": "automation",
       "author": {
         "name": "gshepptech"
@@ -82,7 +82,7 @@
       "name": "cleric",
       "source": "./plugins/cleric",
       "description": "Careful codebase cleanup across seven tracks: duplication, dead code, weak types, circular dependencies, error handling and AI leftovers. Auto-applies only high-confidence changes, one revertable commit at a time.",
-      "version": "0.1.1",
+      "version": "0.2.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -135,7 +135,7 @@
       "name": "seer",
       "source": "./plugins/seer",
       "description": "Senior-engineer architecture review: is this shaped right, or did it just accrete? Eight blind design lenses, every finding cross-examined to drop the intentional ones, then a concrete reshaping plan. Report only.",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -152,8 +152,8 @@
     {
       "name": "ranger",
       "source": "./plugins/ranger",
-      "description": "Give it one brief and walk away. A self-directing loop that finds work, sizes the effort to the job, plans and reviews in parallel, builds one item at a time, verifies with fresh eyes, and commits \u2014 until you stop it. Local commits only.",
-      "version": "0.5.0",
+      "description": "Give it one brief and walk away. A self-directing loop that finds work, sizes the effort to the job, plans and reviews in parallel, builds one item at a time, verifies with fresh eyes, and commits — until you stop it. Local commits only.",
+      "version": "0.6.0",
       "category": "automation",
       "author": {
         "name": "gshepptech"

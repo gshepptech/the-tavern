@@ -6,7 +6,7 @@
 
 **Macro-architecture review — is this shaped right, or accreted?**
 
-[![version](https://img.shields.io/badge/seer-v0.1.0-37474F?style=flat-square)](.claude-plugin/plugin.json)
+[![version](https://img.shields.io/badge/seer-v0.2.0-37474F?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-4C9A2A?style=flat-square)](../../LICENSE)
 [![Claude Code plugin](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -235,6 +235,14 @@ Nothing in the repo changes — it is report-only, so the cost is tokens and a f
 > Seer never edits code. Cohesion findings are high-blast-radius structural calls — merging packages, deleting a migration path, moving a boundary — and only you decide which ones to act on.
 
 ---
+
+## Shared workspace (optional)
+
+Seer is report-only, so a verdict has no route into anything unless a person reads the casefile and acts. When findings survive cross-examination, Seer also writes one small JSON note to `.questboard/notes/` carrying the overall verdict and the casefile path, so a tool that runs later can see that a subsystem was called accreted before it starts work on it. A review where nothing survived writes nothing.
+
+Seer reads nothing from the workspace, never edits code, and drops a failed write silently. The casefile under `.seer/casefiles/` is the deliverable.
+
+The format is documented in [the .questboard contract](../../docs/questboard-contract.md).
 
 ## Pairs well with
 
