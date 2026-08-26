@@ -31,6 +31,24 @@ npx --no-install madge --circular --extensions ts,tsx,js,jsx src/ 2>/dev/null
 npx --no-install madge --circular --json src/ 2>/dev/null
 ```
 
+madge is often absent. When it is, build the graph from a real parser rather than from
+regex — the project almost certainly ships one:
+
+```bash
+for p in typescript @typescript-eslint/typescript-estree @babel/parser acorn espree; do
+  find . -type d -path "*/node_modules/$p" -not -path '*/node_modules/*/node_modules/*' -print -quit
+done
+```
+
+`require()` `typescript` from that path and read the import specifiers off
+`ts.createSourceFile()`. Resolve aliases against `tsconfig`'s `paths`, then run Tarjan over
+the result. Keep value, side-effect, dynamic and type-only edges in separate graphs so a
+type-only circuit is never reported as a runtime cycle — under `verbatimModuleSyntax` a
+type import emits nothing at all.
+
+A regex over import lines is the last resort, not the first fallback. If you do end up
+there, say so in the assessment and say what you checked for.
+
 ### Go
 
 ```bash

@@ -40,7 +40,25 @@ For each function/method in the codebase:
 
 Use `grep` + `awk` for pattern-shape extraction. Use language-specific AST tooling where available:
 
-- TS/JS: `npx jscodeshift --dry-run` for AST inspection, or read files with `Read` and reason directly
+- TS/JS: parse for real. A TS project vendors a parser even when it vendors nothing else, so
+  look in the project's own `node_modules` before concluding you have none:
+
+  ```bash
+  for p in typescript @typescript-eslint/typescript-estree @babel/parser acorn espree; do
+    find . -type d -path "*/node_modules/$p" -not -path '*/node_modules/*/node_modules/*' -print -quit
+  done
+  ```
+
+  `typescript` is the one that is almost always there — `require()` it from that path in a
+  `node` script and walk `ts.createSourceFile()`. Hash each function, method and component
+  body twice: once with identifiers intact, once with them erased, so near-clones group with
+  exact ones.
+
+  Reading the files and reasoning about them is not a substitute for this, and neither is a
+  line-window or regex pass: neither one can normalise identifier names or JSX attribute
+  order, so both miss the near-clones that matter most while reporting a floor as though it
+  were a ceiling. If no parser is installed anywhere, name the ones you looked for and what
+  the check returned. Never assert an absence you did not test.
 - Go: `gofmt -d` for normalized form; `golangci-lint run --enable dupl` (or `dupl` standalone)
 - Python: `pylint --enable=duplicate-code` or `pyflakes`
 

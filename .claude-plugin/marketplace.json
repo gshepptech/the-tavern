@@ -82,7 +82,7 @@
       "name": "cleric",
       "source": "./plugins/cleric",
       "description": "Careful codebase cleanup across seven tracks: duplication, dead code, weak types, circular dependencies, error handling and AI leftovers. Auto-applies only high-confidence changes, one revertable commit at a time.",
-      "version": "0.2.0",
+      "version": "0.2.1",
       "category": "development",
       "author": {
         "name": "gshepptech"
