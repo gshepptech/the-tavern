@@ -6,7 +6,7 @@
 
 **A careful, low-risk codebase cleanup pass across 7 focused tracks — dedup, type consolidation, dead code, circular deps, type strengthening, error handling, and deprecated/AI-slop removal.**
 
-[![Version](https://img.shields.io/badge/version-0.2.0-558B2F?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.2.1-558B2F?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-558B2F?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
