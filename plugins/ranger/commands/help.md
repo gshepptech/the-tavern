@@ -58,6 +58,7 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 - `/ranger:run <brief> --dry-run` — **preview.** See the ranked backlog and the top item's plan without changing anything. The recommended first contact.
 - `/ranger:run <brief> [flags]` — run **one** cycle and return. Keep it going with `/loop /ranger:run <brief>` (watched, Esc to stop) or `ranger-run.sh` (overnight).
 - `/ranger:run <brief> --preset ui` — run a curated checklist (`ui` / `ux` / `a11y` / `harden` / `perf`), skipping anything the app doesn't have.
+- `/ranger:run <brief> --sweep` — **the sprawl.** One survey-only pass over every domain under the shakeout lenses (correctness, UX, visual polish, flows, a11y) — scouts read, drivers run the real app — ending with a full ranked board and no build. `--sweep=all` covers all nine lenses. Then work the board down with `/loop` or overnight.
 - `/ranger:stop` — down tools. The clean exit.
 - `/ranger:resume [run-id]` — pick a stopped run back up: same backlog, rotation, and flags.
 - `/ranger:status` — what he's on right now. Read-only, safe mid-run.
@@ -69,6 +70,7 @@ If `cleric`, `seer` or `scout` are installed, the scout uses them for their spec
 |---|---|---|
 | *(none)* | commits locally to the **current branch** | — |
 | `--preset <name>` | full domain rotation | focus a curated checklist: `ui`, `ux`, `a11y`, `harden`, `perf` (skips items the app lacks) |
+| `--sweep[=all]` | rotation advances a few pairs per cycle | one survey-only pass over the whole grid now — no build, board stocked at the end (`=all` for all nine lenses) |
 | `--dry-run` | executes | previews only — one scout + top plan, no writes, no commit |
 | `--scouts=N` | 6 sweep in parallel | resize the survey team (1–8) |
 | `--planners=N` | 3 plan in parallel | resize the plan pool (1–4) |

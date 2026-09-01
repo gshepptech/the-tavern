@@ -1,6 +1,6 @@
 ---
 description: "Run one Ranger cycle — survey, plan, review, build, verify, commit one item. Drive it continuously with /loop or the headless runner."
-argument-hint: "<brief> [--preset ui|ux|a11y|harden|perf] [--dry-run] [--scouts=N] [--planners=N] [--branch] [--merge-dev] [--ask] [--max-cycles=N] [--max-hours=N] [--unlimited] [--new]"
+argument-hint: "<brief> [--sweep[=all]] [--preset ui|ux|a11y|harden|perf] [--dry-run] [--scouts=N] [--planners=N] [--branch] [--merge-dev] [--ask] [--max-cycles=N] [--max-hours=N] [--unlimited] [--new]"
 allowed-tools: ["Bash(mkdir:*)", "Bash(cat:*)", "Bash(ls:*)", "Bash(date:*)", "Bash(test:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(echo:*)", "Bash(printf:*)", "Bash(pwd:*)", "Bash(git:*)", "Bash(grep:*)", "Bash(osascript:*)", "Bash(python3:*)", "Read", "Write", "Edit", "Glob", "Grep", "Agent"]
 ---
 
@@ -36,6 +36,7 @@ Parse `$ARGUMENTS` into:
 - `flags.max_cycles` / `flags.max_hours`: numbers if present, else unset. `0` = unlimited.
 - `flags.unlimited`: `--unlimited` — accepted and ignored; uncapped is already the default. Never error on it.
 - `flags.new`: `--new` — force a fresh run even if a prior run is parked.
+- `flags.sweep`: `--sweep` -> `"core"`, `--sweep=all` -> `"all"`, else `null`. One uncapped, survey-only pass over the whole rotation before any build — see STEP 3-SWEEP. `core` covers the five lenses a pre-release shakeout is about (`correctness`, `ui-ux`, `visual-polish`, `flows`, `a11y`); `all` covers all nine.
 - `flags.headless`: `--headless` — used by `ranger-run.sh`; init then return without running a cycle (the runner drives cycles).
 
 ---
@@ -46,7 +47,7 @@ Read `.ranger/active-run.json`.
 
 **1a. A run is armed and `active`.** (marker non-empty, its `state.json` is `status: active`.)
 - If its `session_id` is set and is **not** this session -> a run is active in another session. Say so (`/ranger:status`, `/ranger:stop`) and **stop**.
-- Otherwise this is a **continuation** tick. Skip init; go to STEP 3.
+- Otherwise this is a **continuation** tick. If `flags.sweep` is set, write it into `state.sweep` first — a sweep can be armed mid-run, and the mature run's risen `floor` is deliberately kept: a sweep on a seasoned run should not re-admit work the run has already outgrown. Skip init; go to STEP 3.
 
 **1b. `--dry-run`.** Do not arm anything. Generate a `RUN_ID`, `mkdir -p "$RUN_DIR/items"`, write `state.json` with `status: "dry_run"`. Run the preflight-light (just the git check). Spawn one `ranger:scout` in `recon` mode (STEP 3a inputs, plus the preset checklist if any) -> write `backlog.json`. Do **not** write `.ranger/FACTS.md`; a preview stays inside its own run directory, and "nothing was changed" has to stay true. Triage every item the scout returns (STEP 3b) so the preview shows what each would actually cost. For the top item, spawn `ranger:planner`, then `ranger:checker`, then `ranger:reviewer` (`mode: "plan"`). A dry run previews with a single scout deliberately — it is a cheap look, not a rehearsal of the full crew. Print the preview below and **stop** — nothing was changed:
 
@@ -196,6 +197,7 @@ Write `$RUN_DIR/state.json`:
   "backlog_watermark": <scouts + 2>,
   "backlog_cap": 40,
   "floor": 6,
+  "sweep": <flags.sweep or null>,
   "lean_cycles": 0,
   "max_cycles": <resolved, 0=unlimited>,
   "max_seconds": <resolved round(max_hours*3600), 0=unlimited>,
@@ -231,7 +233,44 @@ First, **terminal checks** — caps are enforced here, at the top of every cycle
 - If `max_cycles > 0` and `cycle >= max_cycles` -> set `status: "capped"`, go to STEP 4.
 - If `max_seconds > 0` and elapsed since `started_at` >= `max_seconds` -> set `status: "capped"`, go to STEP 4.
 
-Otherwise run the cycle. Update `state.json` (`phase`, `item`, `stall_count`) at every transition.
+Otherwise run the cycle. **If `state.sweep` is set, the cycle IS the sweep — do STEP 3-SWEEP and end the turn; 3a-3h do not run.** Update `state.json` (`phase`, `item`, `stall_count`) at every transition.
+
+### STEP 3-SWEEP — the sprawl (`state.sweep` is set)
+
+When `state.sweep` is non-null, this cycle is a **sweep**: one survey-only pass over the whole map, ending with a stocked, ranked board and **no build**. It exists for the moment before you hand a thing to other people — you do not want one item fixed per cycle while the rotation ambles toward the corner holding the launch-blocking defect; you want every corner looked at *now* and the verdicts on one board.
+
+A sweep changes what a cycle covers, never what counts as a find. The floor, the artifact rule, dedup, quarantine and YIELD all apply unchanged — a sprawl that lowers the evidence bar just fills the board with plausible fiction faster.
+
+**The lens set.** `"core"` -> `correctness`, `ui-ux`, `visual-polish`, `flows`, `a11y` — the five a pre-release shakeout is about. `"all"` -> all nine.
+
+**The grid.** If `domain_rotation.domains` is empty, run recon first (exactly as 3a does), then proceed. Build every `domain × lens` pair in the lens set, lens-major. Skip pairs that are **swept and cold** per YIELD; include everything else, swept or not — a sweep is the one deliberate re-look.
+
+**Modality follows the lens.** This is the point of the sweep, so do not flatten it to scouts:
+
+| lens | agent | why |
+|---|---|---|
+| `correctness`, `security`, `performance`, `dx` | `ranger:scout` (assigned) | what these find lives in the source |
+| `ui-ux`, `visual-polish`, `flows`, `a11y`, `feature-gap` | `ranger:driver` (survey) | a 12px control, a `display:none` error, an unreachable submit — invisible in source, and reading harder raises confidence in the wrong answer |
+
+A driver's `assignment` names the domain **and the lens as its focus** — "the scan flow, judged as a first-time user's experience" reads differently from "the scan flow, judged for visual polish" — plus what `facts` says about starting the app. Pass drivers the same `floor` and `cycle` scouts get. A domain the driver cannot reach (no UI, no endpoint, no CLI) falls back to a scout for that pair; say so in the journal.
+
+**Waves.** Dispatch `flags.scouts` pairs at a time, each wave in ONE message. Between waves: merge, dedup against done/open titles, drop below-floor, quarantine hypotheses, and stamp `swept`/`yield` — exactly as 3a does. Two deliberate differences from 3a, both because a sweep front-loads a whole rotation's worth of finding:
+
+1. **The watermark and `backlog_cap` do not gate dispatch.** The sweep walks the whole grid regardless of depth — stopping at a full pool would defeat it. Run 3a-prune ONCE, at the end, so the board the user reads is already tidied; if depth still exceeds the cap after pruning, keep the overflow and say so in the debrief rather than silently discarding ranked work.
+2. **A dead agent's pair is re-queued once** at the back of the sweep, then dropped with a journal line. The rotation-based retry rules assume later cycles will return; a sweep may not get one.
+
+**The sweep debrief.** When the grid is exhausted, clear `state.sweep`, leave the run `active`, append the tally to the journal, print this once, and **end the turn** — the next tick finds the pipeline stocked, skips 3a, and starts building:
+
+```
+Sweep complete — <N> pairs (<S> scouts · <D> drivers) over <domains> domains.
+Board: <ready> ready · <quarantined> quarantined · <dropped below floor> under the floor · floor <floor>
+Top of the board:
+  <top 5: score · domain/lens · title>
+Hot ground: <up to 3 pairs by yield>   Clean: <count of pairs that returned nothing>
+Work it down: /loop /ranger:run <brief>   ·   overnight: scripts/ranger-run.sh <brief>
+```
+
+A sweep is expensive by design — `core` on a 13-domain app is ~65 read-only agents. That is the trade the flag names: you are buying the whole map at once. `--scouts=N` is still the spend dial; the waves just take longer at N=2.
 
 A backlog item moves `ready` -> `planned` -> `approved` -> `in_flight` -> `done`, or sideways to `dropped` / `failed` / `quarantined`. An item filed without an artifact enters as `hypothesis` and is quarantined on arrival — it joins the lifecycle at `ready` only once something reproduces it. Steps 3a–3c keep the `ready` and `approved` pools stocked; only 3e touches the tree.
 

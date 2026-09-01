@@ -132,7 +132,7 @@ Do not want to clone anything? A profile is only a list of plugin names, so this
 | **[Scout](plugins/scout/README.md)** `v0.2.1` | The inspector — end-to-end Playwright test authoring and maintenance through a real browser | yes | `/scout:init`, `/scout:write`, `/scout:crawl`, `/scout:matrix`, `/scout:audit`, `/scout:record` |
 | **[Tactician](plugins/tactician/README.md)** `v0.2.1` | The rigger — on-demand generator of self-contained Workflow orchestration scripts | yes | `/tactician:make` |
 | **[Seer](plugins/seer/README.md)** `v0.2.0` | The surveyor — macro-architecture and design-cohesion review; is this shaped right, or accreted? | yes | `/seer:review` |
-| **[Ranger](plugins/ranger/README.md)** `v0.6.1` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
+| **[Ranger](plugins/ranger/README.md)** `v0.7.0` | The foreman — one prompt, then walk away; a self-directing loop that never stops and never runs out of work | yes | `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status` |
 
 <div align="center">
 

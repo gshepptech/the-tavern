@@ -6,7 +6,7 @@
 
 **The foreman who never leaves the site. One prompt, then walk away.**
 
-[![Version](https://img.shields.io/badge/version-0.6.1-F9A825?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.7.0-F9A825?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-1E88E5?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -205,6 +205,7 @@ It holds the north star (what the project is optimising for right now, so a marg
 | flag | default | with the flag |
 |---|---|---|
 | `--preset <name>` | sweeps every domain in rotation | focuses one curated checklist: `ui`, `ux`, `a11y`, `harden`, `perf` |
+| `--sweep[=all]` | the rotation advances a few pairs per cycle | one survey-only pass over the whole domain grid, drivers on the experiential lenses, ending with a ranked board and no build (`=all` = all nine lenses) |
 | `--dry-run` | executes for real | previews only — one scout + top plan, no writes, no commit |
 | `--scouts=N` | 6 sweep in parallel | resize the survey team (clamped 1–8) |
 | `--planners=N` | 1 | resize the pre-plan pool, which now feeds escalations and `risky` items only (clamped 1–4) |

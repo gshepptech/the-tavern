@@ -52,7 +52,7 @@ PLUGIN_PATH_REF = re.compile(r"plugins/([a-z0-9_-]+)/(?:agents|commands|skills|s
 MODEL_INTERPRETED = {
     "ranger": {"--dry-run", "--branch", "--merge-dev", "--ask", "--max-cycles",
                "--max-hours", "--unlimited", "--new", "--headless", "--preset",
-               "--scouts", "--planners"},
+               "--scouts", "--planners", "--sweep"},
     "sellsword": {"--thorough", "--yolo", "--allow-production"},
     "cleric": {"--apply", "--auto", "--dry-run"},
     "scout": {"--headed", "--update-snapshots"},
