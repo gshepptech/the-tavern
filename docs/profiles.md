@@ -175,8 +175,8 @@ web app in front of you.
 
 **The honest cost.** This is the most expensive profile to run and the only one
 that does not work out of the box. Smith needs `/smith:setup` once per project,
-which writes the Playwright and Serena MCP servers into `.mcp.json` (Smith's
-own server ships inside the plugin) and needs `python3` and `uv` on PATH, and
+which writes the Playwright MCP server into `.mcp.json` (Smith's own server
+ships inside the plugin) and needs `python3` and `uv` on PATH, and
 then a restart of Claude Code. A clean three-casting Smith run is roughly
 15 to 20 agents, most of them Opus, and the GRIND loop is not bounded by
 default: each cycle adds up to three Opus teammates and re-runs the whole
