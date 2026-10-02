@@ -178,8 +178,8 @@ that does not work out of the box. Smith needs `/smith:setup` once per project,
 which writes the Playwright MCP server into `.mcp.json` (Smith's own server
 ships inside the plugin) and needs `python3` and `uv` on PATH, and
 then a restart of Claude Code. A clean three-casting Smith run is roughly
-15 to 20 agents, most of them Opus, and the GRIND loop is not bounded by
-default: each cycle adds up to three Opus teammates and re-runs the whole
+15 to 20 agents, all on the session's model, and the GRIND loop is not bounded by
+default: each cycle adds up to three teammates and re-runs the whole
 inspect suite until defects hit zero. Set `--max-cycles=N` on your first run
 against an unfamiliar codebase. Smith has no approval gates by design, so if
 you want to review each step before the next one, this is the wrong tool.
