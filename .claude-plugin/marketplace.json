@@ -10,7 +10,7 @@
       "name": "sage",
       "source": "./plugins/sage",
       "description": "Turns a vague feature idea into a locked, buildable spec. Researches your codebase first, then interviews you with grounded questions and writes a spec with typed invariants and citations. Plans only, never writes code.",
-      "version": "5.1.1",
+      "version": "6.0.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -28,7 +28,7 @@
       "name": "smith",
       "source": "./plugins/smith",
       "description": "Builds a spec out autonomously. Decomposes it into parallel work, builds in waves, then verifies through independent streams and grinds defects to zero before it will call the work done.",
-      "version": "4.5.1",
+      "version": "5.0.0",
       "category": "development",
       "author": {
         "name": "gshepptech"

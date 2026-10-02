@@ -284,8 +284,9 @@ say "Next:"
 
 case " $plugins " in *" smith "*)
   say "  - Smith needs one-time project setup: run '/smith:setup', then restart"
-  say "    Claude Code. It writes three MCP servers into .mcp.json and needs"
-  say "    python3 on PATH. Smith will not build until you have done this."
+  say "    Claude Code. It writes the Playwright and Serena MCP servers into"
+  say "    .mcp.json and needs python3 and uv on PATH. Smith's own MCP server"
+  say "    ships inside the plugin."
   ;;
 esac
 case " $plugins " in *" scout "*)

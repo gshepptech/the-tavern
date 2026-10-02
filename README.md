@@ -124,8 +124,8 @@ Do not want to clone anything? A profile is only a list of plugin names, so this
 
 | Who | Trade | Runs alone | Key commands |
 |---|---|---|---|
-| **[Sage](plugins/sage/README.md)** `v5.1.1` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
-| **[Smith](plugins/smith/README.md)** `v4.5.1` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume` |
+| **[Sage](plugins/sage/README.md)** `v6.0.0` | The draftsman — codebase-aware spec engine; a grounded interview that yields a locked, classified spec | yes | `/sage:plan`, `/sage:resume`, `/sage:cleanup` |
+| **[Smith](plugins/smith/README.md)** `v5.0.0` | The builder — autonomous build-verify-fix loop; decompose, validate, build in waves, inspect, grind, assay | yes | `/smith:setup`, `/smith:start`, `/smith:status`, `/smith:stop`, `/smith:resume`, `/smith:update` |
 | **[Warden](plugins/warden/README.md)** `v0.5.1` | Keeps the work plumb — methodical-mode guardrails; a pre-response checklist plus Stop-hook gates on every ad-hoc turn | yes | `/warden:on`, `/warden:off`, `/warden:casual`, `/warden:trust-me`, `/warden:status` |
 | **[Sellsword](plugins/sellsword/README.md)** `v0.4.0` | The general contractor — a multi-agent crew that owns an outcome; investigate, plan, execute, verify | yes | `/sellsword:do`, `/sellsword:goal`, `/sellsword:list`, `/sellsword:resume`, `/sellsword:cancel` |
 | **[Cleric](plugins/cleric/README.md)** `v0.2.1` | The sweep — careful low-risk cleanup across 7 focused tracks, auto-applying only high-confidence changes | yes | `/cleric:run`, `/cleric:apply`, `/cleric:status` |
