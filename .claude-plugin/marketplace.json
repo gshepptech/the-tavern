@@ -166,6 +166,24 @@
         "maintenance",
         "multi-agent"
       ]
+    },
+    {
+      "name": "tinker",
+      "source": "./plugins/tinker",
+      "description": "Builds a spec lean. Freezes a done-checklist with an oracle per requirement, builds with one builder or a few slices, then has independent checkers run the real system, check spec against code and measure test strength. A refute-first validator confirms each finding; fixes need tests that fail before and pass after.",
+      "version": "0.1.0",
+      "category": "development",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/tinker/README.md",
+      "keywords": [
+        "build",
+        "spec-driven",
+        "verification",
+        "workflow",
+        "qa"
+      ]
     }
   ]
 }
