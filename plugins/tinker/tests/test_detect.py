@@ -99,6 +99,12 @@ def test_unit_test_command_named_for_contrast_is_not_the_integration_check(tmp_p
     assert r["command"] == "mage metrics" and not r["exists"]
 
 
+def test_make_target_named_integration_with_no_makefile_is_one_the_build_writes(tmp_path):
+    r = detect.integration(tmp_path, "- **Verification:** `make test-integration` and `make e2e`\n")["found"]
+    assert r["command"] == "make test-integration" and not r["exists"]
+    assert r["dry_run"] is None and "the build writes it" in r["source"]
+
+
 def test_bare_run_command_on_a_docker_line(tmp_path):
     (tmp_path / "Makefile").write_text("e2e:\n\tdocker compose up\n")
     r = detect.integration(tmp_path, "- Run make e2e: it boots the stack in Docker and must pass.\n")["found"]

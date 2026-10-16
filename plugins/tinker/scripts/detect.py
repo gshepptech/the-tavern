@@ -279,11 +279,16 @@ def integration(root: Path, spec_text: str) -> dict:
         t = by_cmd.get(_norm_cmd(c))
         if t:
             return {"found": describe(root, t["cmd"], t["cwd"], f"the spec names `{c}`; {t['why']}", t["text"]), "asked": True}
+    # A task-runner command whose target the repo does not define yet: the name alone
+    # (`make test-integration`) does not prove the check exists, so it falls through
+    # to the "build writes it" case rather than being dry-started against a missing target.
+    runners = ("make", "mage", "just", "npm", "pnpm", "yarn", "bun")
     for c in named:
-        if any((Path(root) / p.replace("/...", "").rstrip("/")).exists() for p in _paths_in(c)) or INTEG_WORDS.search(c):
+        if any((Path(root) / p.replace("/...", "").rstrip("/")).exists() for p in _paths_in(c)) or (
+                INTEG_WORDS.search(c) and c.split()[0] not in runners):
             return {"found": describe(root, c, "", f"the spec names `{c}`"), "asked": True}
     for c in named:
-        if c.split()[0] in ("make", "mage", "just", "npm", "pnpm", "yarn", "bun"):
+        if c.split()[0] in runners:
             # A suite the build will write: it will run like the project's other such suites.
             kin = "\n".join(t["text"] for t in tg if INTEG_WORDS.search(t["name"]) and t["cmd"].split()[0] == c.split()[0])
             return {"found": describe(root, c, "", f"the spec names `{c}`; no such target exists yet, so the build writes it",
