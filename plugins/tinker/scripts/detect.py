@@ -287,7 +287,9 @@ def integration(root: Path, spec_text: str) -> dict:
         if any((Path(root) / p.replace("/...", "").rstrip("/")).exists() for p in _paths_in(c)) or (
                 INTEG_WORDS.search(c) and c.split()[0] not in runners):
             return {"found": describe(root, c, "", f"the spec names `{c}`"), "asked": True}
-    for c in named:
+    # Prefer a target whose name says what it checks over a dev loop or composite gate
+    # named earlier on the same lines (`make dev-up` before `make test-integration`).
+    for c in sorted(named, key=lambda c: not INTEG_WORDS.search(c)):
         if c.split()[0] in runners:
             # A suite the build will write: it will run like the project's other such suites.
             kin = "\n".join(t["text"] for t in tg if INTEG_WORDS.search(t["name"]) and t["cmd"].split()[0] == c.split()[0])

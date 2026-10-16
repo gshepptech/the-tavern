@@ -105,6 +105,13 @@ def test_make_target_named_integration_with_no_makefile_is_one_the_build_writes(
     assert r["dry_run"] is None and "the build writes it" in r["source"]
 
 
+def test_a_target_named_for_integration_beats_a_dev_loop_named_first(tmp_path):
+    spec = ("- **Verification:** `make check` and `make dev-up` then curl\n"
+            "- **Verification:** `make test-integration` and `make e2e`\n")
+    r = detect.integration(tmp_path, spec)["found"]
+    assert r["command"] == "make test-integration" and not r["exists"]
+
+
 def test_bare_run_command_on_a_docker_line(tmp_path):
     (tmp_path / "Makefile").write_text("e2e:\n\tdocker compose up\n")
     r = detect.integration(tmp_path, "- Run make e2e: it boots the stack in Docker and must pass.\n")["found"]
