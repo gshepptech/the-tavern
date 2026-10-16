@@ -1,0 +1,18 @@
+{
+  "name": "tinker",
+  "version": "0.1.0",
+  "description": "A lean spec-to-code build workflow. One Workflow script: preflight in code, one builder (slices only when the spec is over budget), then a code check beside one spec-to-code check, and at most two batched fix rounds. Three agents, a counted and capped number of agent calls, no MCP server.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/tinker/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "build",
+    "spec-driven",
+    "verification",
+    "workflow",
+    "lean"
+  ]
+}
