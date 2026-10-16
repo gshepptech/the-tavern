@@ -144,7 +144,7 @@ def cmd_init(root: Path, a) -> dict:
     out = {"ok": True, "stop": "", "run": a.run, "run_dir": str(rdir), "base_commit": base, "branch": branch,
            "seal": sl["status"], "ids": len(index["ids"]), "commands": commands, "measure": size,
            "mode": "single" if size["fits"] else "plan", "warnings": warnings, "epoch": 0,
-           "finder": found["asked"] and not found["found"], "blocked": ""}
+           "finder": found["asked"] and not found["found"], "blocked": "", "plan": _plan_summary(load_state(rdir), rdir)}
     if not out["finder"]:
         pf = land.preflight(root, rdir, found["found"])
         out.update({"integration": pf["integration"], "blocked": pf["stop"], "preflight": pf["ran"]})
