@@ -8,6 +8,7 @@
     tinker commit      --run NAME --as ACTOR -m MESSAGE [PATH ...]
     tinker integration --run NAME
     tinker verify      --run NAME --round N
+    tinker merge-spec  --run NAME --parts N
     tinker resume      --run NAME
     tinker report      --run NAME
     tinker index       --spec PATH
@@ -78,7 +79,8 @@ def _plan_summary(state: dict, rdir: Path) -> dict | None:
             "slices": [{"id": sid, "title": s.get("title", ""), "requirement_ids": s.get("requirement_ids", []),
                         "files": s.get("files", []), "depends_on": s.get("depends_on", []),
                         "brief": str(rdir / "slices" / f"{sid}.md") if (rdir / "slices" / f"{sid}.md").is_file() else ""}
-                       for sid, s in (plan.get("slices") or {}).items()]}
+                       for sid, s in (plan.get("slices") or {}).items()],
+            "shares": gates.shares(plan, read_json(rdir / "spec-index.json", {}) or {})}
 
 
 def cmd_init(root: Path, a) -> dict:
@@ -201,6 +203,33 @@ def _spec_open(rdir: Path, rnd: int) -> list[dict] | None:
             if isinstance(r, dict) and r.get("status") != "fixed" and r.get("id") in gaps]
 
 
+def cmd_merge_spec(rdir: Path, parts: int) -> dict:
+    """Join the round-1 spec checkers' files into checks/spec-r1.json, gaps renumbered G-001.. in share order.
+
+    A share whose file is missing or unreadable leaves its requirements
+    without a verdict, which the report shows as not checked."""
+    merged = {"round": 1, "method_note": "", "verdicts": [], "gaps": [], "scenario_coverage": [], "patterns": []}
+    missing, notes = [], []
+    for k in range(1, parts + 1):
+        part = read_json(rdir / "checks" / f"spec-r1-{k}.json")
+        if not isinstance(part, dict) or not isinstance(part.get("verdicts"), list):
+            missing.append(k)
+            continue
+        merged["verdicts"] += [v for v in part["verdicts"] if isinstance(v, dict)]
+        for g in part.get("gaps") or []:
+            if isinstance(g, dict):
+                merged["gaps"].append({**g, "id": f"G-{len(merged['gaps']) + 1:03d}", "share": k, "share_id": g.get("id")})
+        for key in ("scenario_coverage", "patterns"):
+            v = part.get(key)
+            merged[key] += v if isinstance(v, list) else [v] if v else []
+        if part.get("method_note"):
+            notes.append(f"share {k}: {part['method_note']}")
+    merged["method_note"] = "\n".join(notes)
+    merged["missing_shares"] = missing
+    write_json(rdir / "checks" / "spec-r1.json", merged)
+    return {"ok": True, "missing": missing, "open": _spec_open(rdir, 1)}
+
+
 def cmd_resume(root: Path, a, rdir: Path) -> dict:
     state = load_state(rdir)
     branch = git(root, "rev-parse", "--abbrev-ref", "HEAD").stdout.strip()
@@ -247,6 +276,8 @@ def _dispatch(root: Path, a) -> dict:
         return land.integration(root, rdir)
     if a.cmd == "verify":
         return land.verify(root, rdir, a.round)
+    if a.cmd == "merge-spec":
+        return cmd_merge_spec(rdir, a.parts)
     if a.cmd == "report":
         return {"ok": True, **report.build(root, rdir)}
     return {"ok": False, "error": f"unknown command {a.cmd}"}
@@ -284,6 +315,9 @@ def _parser() -> argparse.ArgumentParser:
     s.add_argument("--as", dest="actor", required=True)
     s.add_argument("-m", dest="message", required=True)
     s.add_argument("paths", nargs="*")
+    s = sub.add_parser("merge-spec")
+    s.add_argument("--run", required=True)
+    s.add_argument("--parts", type=int, required=True)
     s = sub.add_parser("verify")
     s.add_argument("--run", required=True)
     s.add_argument("--round", type=int, required=True)

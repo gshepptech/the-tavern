@@ -131,3 +131,22 @@ def test_job_runs_detached_and_returns_the_result_when_done(run):
 
 def test_usage_error_exits_2(repo):
     assert subprocess.run([sys.executable, str(PLUGIN / "scripts" / "tinker.py"), "bogus"], capture_output=True).returncode == 2
+
+
+def test_merge_spec_joins_shares_and_renumbers_gaps(run):
+    root, name, rdir = run
+    write_json(rdir / "checks" / "spec-r1-1.json", {"verdicts": [{"requirement_id": "FR-001", "verdict": "WRONG"}],
+                                                    "gaps": [{"id": "G-001", "file": "calc.py", "requirement_ids": ["FR-001"]}], "patterns": ["p1"]})
+    write_json(rdir / "checks" / "spec-r1-2.json", {"verdicts": [{"requirement_id": "FR-002", "verdict": "PARTIAL"}],
+                                                    "gaps": [{"id": "G-001", "file": "", "requirement_ids": ["FR-002"]}], "method_note": "n2"})
+    r = j(root, "merge-spec", "--run", name, "--parts", "3")
+    assert r["ok"] and r["missing"] == [3]
+    assert [g["id"] for g in r["open"]] == ["G-001", "G-002"] and r["open"][1]["requirement_ids"] == ["FR-002"]
+    merged = json.loads((rdir / "checks" / "spec-r1.json").read_text())
+    assert [v["requirement_id"] for v in merged["verdicts"]] == ["FR-001", "FR-002"] and merged["patterns"] == ["p1"]
+    assert merged["gaps"][1]["share"] == 2 and merged["gaps"][1]["share_id"] == "G-001" and "share 2: n2" in merged["method_note"]
+
+
+def test_init_hands_the_workflow_its_spec_check_shares(repo):
+    r = j(repo, "init", "--spec", "spec.md", "--run", "sh1")
+    assert r["plan"]["shares"] == [load_state(repo / "tinker-archive" / "sh1")["plan"]["slices"]["all"]["requirement_ids"]]

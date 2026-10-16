@@ -90,12 +90,16 @@ const SCENARIOS = {
   // A slice starts when its own dependencies finish, not when its whole wave before it has.
   chains: { plan: CHAINS, delays: { 'build:slow': 50 } },
   'resume-build': { plan: SPLIT, resume: { steps_done: ['init', 'preflight', 'plan'], built: ['core'] } },
+  // A large spec: round 1 is judged in two shares side by side, joined in code, then re-checked by one checker.
+  shares: { shares: [['FR-1'], ['FR-2']], rounds: [{ failures: [], open: [gap('G-001')] }, { failures: [], open: [] }] },
+  // One share's checker produces nothing: its requirements are reported unchecked.
+  'shares-missing': { shares: [['FR-1'], ['FR-2']], mergeMissing: [2] },
   // Resumed after a preflight stop: the check is re-run before anything else.
   'resume-preflight': { resume: { steps_done: ['init', 'plan'], built: [] } },
 }
 const sc = SCENARIOS[scenarioName]
 if (!sc) throw new Error(`unknown scenario ${scenarioName}`)
-const plan = sc.plan || SINGLE
+const plan = { ...(sc.plan || SINGLE), ...(sc.shares ? { shares: sc.shares } : {}) }
 const integ = sc.integration ? { command: 'make e2e', cwd: '', exists: true } : null
 
 const events = [], labels = [], phases = [], prompts = {}, options = {}, commands = []
@@ -103,7 +107,7 @@ let planner = 0
 
 const cmdOf = prompt => {
   const line = prompt.split('\n').find(l => l.startsWith('    ')) || ''
-  const m = line.match(/--root '[^']*'(?: --calls '((?:[^']|'\\'')*)')?(?: --job (\S+))? (\w+)(.*)$/)
+  const m = line.match(/--root '[^']*'(?: --calls '((?:[^']|'\\'')*)')?(?: --job (\S+))? ([\w-]+)(.*)$/)
   return m ? { calls: m[1] ? JSON.parse(m[1].replace(/'\\''/g, "'")) : null, job: m[2] || '', name: m[3], rest: m[4] } : { name: '?', rest: '' }
 }
 const flag = (rest, f) => { const m = rest.match(new RegExp(`--${f} (\\S+)`)); return m ? m[1].replace(/'/g, '') : '' }
@@ -114,7 +118,7 @@ const tinker = ({ name, rest }) => {
     case 'init':
       return sc.initStop ? { ok: false, stop: sc.initStop } : { ok: true, stop: '', run: 'r', run_dir: '/p/tinker-archive/r', base_commit: 'base0000000', epoch: 0,
         ids: 2, commands: { build: [{ cmd: 'go build ./...', cwd: '' }], lint: [], test: [{ cmd: 'go test ./...', cwd: '' }] }, warnings: [],
-        measure: { entries: 12, read: 3000, new: 50, fits: !sc.plan }, mode: sc.plan ? 'plan' : 'single', plan: sc.plan ? null : SINGLE,
+        measure: { entries: 12, read: 3000, new: 50, fits: !sc.plan }, mode: sc.plan ? 'plan' : 'single', plan: sc.plan ? null : plan,
         finder: !!sc.finder, blocked: sc.initBlocked || '', integration: sc.finder ? undefined : integ }
     case 'resume':
       return { ok: true, stop: '', run: 'r', run_dir: '/p/tinker-archive/r', base_commit: 'base0000000', epoch: 1, max_rounds: sc.maxRounds ?? 2,
@@ -125,6 +129,8 @@ const tinker = ({ name, rest }) => {
       const r = Number(flag(rest, 'round'))
       return { ok: true, round: r, head: `head-r${r}`, failures: round(r).failures, checks: [], integration: null }
     }
+    case 'merge-spec':
+      return { ok: true, missing: sc.mergeMissing || [], open: round(1).open }
     case 'report':
       return { ok: true, report: '/p/tinker-archive/r/report.md', counts: { MET: 2, 'NOT MET': 0, 'NOT CHECKED': 0 }, fixed: 1, open_gaps: 0, failures: 0, total: '31m00s' }
     default:

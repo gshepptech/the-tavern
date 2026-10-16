@@ -182,3 +182,19 @@ def test_single_plan_owns_everything():
     p = gates.single_plan(INDEX)
     assert p["mode"] == "single" and p["waves"] == [["all"]] and p["slices"]["all"]["owns_all"]
     assert p["slices"]["all"]["requirement_ids"] == INDEX["ids"]
+
+
+def test_shares_keep_slices_together_and_cover_every_id_once():
+    ids = [f"FR-{i:03d}" for i in range(1, 61)]
+    plan = {"waves": [["b"], ["a"]], "slices": {"a": {"requirement_ids": ids[:30]}, "b": {"requirement_ids": ids[30:50] + ids[:2]}}}
+    sh = gates.shares(plan, {"ids": ids})
+    assert len(sh) == 3 and [len(x) for x in sh] == [20, 20, 20]
+    assert sh[0] == ids[30:50]  # the first wave's slice leads, its own IDs together
+    assert sorted(sum(sh, [])) == ids  # every ID once, the unowned ones (FR-051..060) included
+
+
+def test_shares_one_checker_for_a_small_spec_and_at_most_three():
+    assert gates.shares(gates.single_plan({"ids": ["FR-1", "FR-2"]}), {"ids": ["FR-1", "FR-2"]}) == [["FR-1", "FR-2"]]
+    big = [f"FR-{i}" for i in range(200)]
+    assert len(gates.shares(gates.single_plan({"ids": big}), {"ids": big})) == 3
+    assert gates.shares({}, {"ids": []}) == [[]]

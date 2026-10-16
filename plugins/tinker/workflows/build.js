@@ -15,19 +15,16 @@ export const meta = {
 // The script has no filesystem: each code step is a `tinker` command
 // (scripts/tinker.py) that a low-effort clerk agent runs and copies back.
 const A = args || {}
-const PLUGIN = A.plugin_root, ROOT = A.project_root, RUN = A.run
+const PLUGIN = A.plugin_root, ROOT = A.project_root, RUN = A.run, RESUME = !!A.resume
 if (!PLUGIN || !ROOT || !RUN) return { status: 'error', message: 'tinker-build needs args.plugin_root, args.project_root and args.run; launch it with /tinker:build' }
-const RESUME = !!A.resume
 let MAX_ROUNDS = Number.isInteger(A.max_rounds) && A.max_rounds >= 0 ? A.max_rounds : 2
 let CAP = Number.isInteger(A.max_agents) && A.max_agents >= 4 ? A.max_agents : 40
 const q = s => `'${String(s).replace(/'/g, `'\\''`)}'`
-const T = `${q(`${PLUGIN}/scripts/tinker`)} --root ${q(ROOT)}`
-const RR = `--run ${q(RUN)}`
+const T = `${q(`${PLUGIN}/scripts/tinker`)} --root ${q(ROOT)}`, RR = `--run ${q(RUN)}`
 
 let RDIR = '', EPOCH = 0, BASE = '', COMMANDS = {}, INTEG = null, PLAN = null, SPLIT = false, slice = {}, R = 0
 const concerns = [], timeline = [], calls = { total: 0, by: {} }
-const note = m => { timeline.push(m); log(m) }
-const concern = m => { concerns.push(m); note(`concern: ${m}`) }
+const note = m => { timeline.push(m); log(m) }, concern = m => { concerns.push(m); note(`concern: ${m}`) }
 class Stop { constructor(status, message) { this.status = status; this.message = message } }
 const result = (status, message, extra) => ({ status, message, run: RUN, run_dir: RDIR, agent_calls: calls, concerns, timeline, ...(extra || {}) })
 
@@ -49,8 +46,7 @@ const all = async thunks => {
   return out.map(x => x.v)
 }
 
-const str = d => ({ type: 'string', description: d })
-const strs = d => ({ type: 'array', items: { type: 'string' }, description: d })
+const str = d => ({ type: 'string', description: d }), strs = d => ({ type: 'array', items: { type: 'string' }, description: d })
 const obj = props => ({ type: 'object', properties: props, required: Object.keys(props) })
 const LINE = obj({ output: str('the final JSON line the command printed, copied exactly') })
 const BUILDER = obj({ status: { type: 'string', enum: ['complete', 'blocked', 'spec_problem'] }, commits: strs(), tests_added: strs(),
@@ -149,10 +145,16 @@ Other slices may be building in this tree at the same time; you own only: ${slic
   const bad = (await Promise.allSettled(Object.values(job))).find(x => x.status === 'rejected'); if (bad) throw bad.reason
 
   // ------------------------------------------------------------ Verify and fix
-  const specCheck = (rnd, recheck) => soft('spec-checker', `${recheck ? `Re-check only these gaps after fix round ${rnd - 1}: ${recheck.map(g => g.id).join(', ')}. Each is defined in ${RDIR}/checks/spec-r1.json.` : 'Check every requirement in the spec against the code, in one pass.'}
+  // Round 1 is judged by one checker per share of the requirements, side by side, joined in code.
+  const specCheck = (rnd, recheck, k, ids) => soft('spec-checker', `${recheck ? `Re-check only these gaps after fix round ${rnd - 1}: ${recheck.map(g => g.id).join(', ')}. Each is defined in ${RDIR}/checks/spec-r1.json.`
+    : ids ? `Judge only these requirements, share ${k} of ${PLAN.shares.length}; other checkers judge the rest at the same time: ${ids.join(', ')}.${k === 1 ? ' You also own the displacement audit.' : ' Skip the displacement audit; share 1 owns it.'}` : 'Check every requirement in the spec against the code, in one pass.'}
 ${ctx()}
 The code this build added or changed: git diff ${BASE}..HEAD.
-Write your result to ${RDIR}/checks/spec-r${rnd}.json.`, { label: `spec:r${rnd}`, phase: 'Verify', agentType: 'tinker:spec-checker', effort: 'max', schema: GAPS })
+Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { label: `spec:r${rnd}${k ? `:${k}` : ''}`, phase: 'Verify', agentType: 'tinker:spec-checker', effort: 'max', schema: GAPS })
+  const shares = PLAN.shares || [], firstCheck = async () => { if (shares.length < 2) return specCheck(1)
+    const got = await all(shares.map((ids, i) => () => specCheck(1, null, i + 1, ids))), m = await clerk('merge-spec', 'Verify', `merge-spec ${RR} --parts ${shares.length}`)
+    if (m.missing.length) concern(`spec check shares ${m.missing.join(', ')} produced nothing; their requirements are reported unchecked`)
+    return got.some(Boolean) ? m : null }
   // Code assigns each failure and gap to the slice that owns its file, then its requirement, then its test names.
   const owns = (s, f) => !!f && s.files.some(e => e.endsWith('/') ? f.startsWith(e) : f === e)
   const assign = items => {
@@ -173,7 +175,7 @@ Write your result to ${RDIR}/checks/spec-r${rnd}.json.`, { label: `spec:r${rnd}`
     phase('Verify')
     const [v, s] = await all([
       () => rd.verify ? { failures: rd.verify } : clerk(`verify:r${R}`, 'Verify', `verify ${RR} --round ${R}`, `verify-r${R}`),
-      () => rd.spec ? { open: rd.spec } : R > 1 && !open.length ? { open: [] } : specCheck(R, R > 1 ? open : null),
+      () => rd.spec ? { open: rd.spec } : R > 1 && !open.length ? { open: [] } : R > 1 ? specCheck(R, open) : firstCheck(),
     ])
     const failures = v.failures || []
     if (s) open = s.open || []

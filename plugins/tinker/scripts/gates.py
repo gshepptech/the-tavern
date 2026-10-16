@@ -10,6 +10,8 @@
                     planner agent wrote because the spec did not fit. On a pass
                     it writes one brief per slice, assembled from the spec index
                     and the plan by code, so no agent paraphrases the spec into it.
+``shares``          splits the requirements among the round-1 spec checkers that
+                    run side by side, keeping each slice's requirements together.
 
 Copied from tinker's gates.py; tinker's probe and contract checks are gone.
 """
@@ -118,6 +120,26 @@ def single_plan(index: dict) -> dict:
     return {"mode": "single", "waves": [["all"]],
             "slices": {"all": {"title": "the whole spec", "files": [], "requirement_ids": list(index.get("ids") or []),
                                "depends_on": [], "owns_all": True}}}
+
+
+SHARE_SIZE = 20  # requirements one spec checker judges before a second one is worth starting
+MAX_SHARES = 3
+
+
+def shares(plan: dict, index: dict) -> list[list[str]]:
+    """The requirement IDs each round-1 spec checker judges, in plan order.
+
+    Every ID is in exactly one share. A slice's requirements stay together
+    where the cut allows, so one checker sees the code that implements them;
+    IDs no slice names follow in spec order. A spec under SHARE_SIZE
+    requirements gets one checker."""
+    order = []
+    for sid in [x for wave in plan.get("waves") or [] for x in wave]:
+        order += [r for r in ((plan.get("slices") or {}).get(sid) or {}).get("requirement_ids") or [] if r not in order]
+    order += [r for r in index.get("ids") or [] if r not in order]
+    n = max(1, min(MAX_SHARES, len(order) // SHARE_SIZE))
+    size = -(-len(order) // n) if order else 0
+    return [order[i:i + size] for i in range(0, len(order), size)] if order else [[]]
 
 
 def _anchor_ok(root: Path, at: str) -> str:

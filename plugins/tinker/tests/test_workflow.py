@@ -218,3 +218,20 @@ def test_resume_after_a_preflight_stop_reruns_preflight():
     d = _run("resume-preflight")
     assert d["labels"][:3] == ["clerk:resume", "clerk:preflight", "build:all"]
     assert _cmds(d)[1] == "[preflight-e1] preflight --run 'r'"
+
+
+def test_large_spec_is_checked_in_shares_side_by_side_then_joined():
+    d = _run("shares")
+    assert d["labels"][2:6] == ["clerk:verify:r1", "spec:r1:1", "spec:r1:2", "clerk:merge-spec"]
+    p1, p2 = d["prompts"]["spec:r1:1"], d["prompts"]["spec:r1:2"]
+    assert "Judge only these requirements, share 1 of 2" in p1 and ": FR-1." in p1 and "You also own the displacement audit." in p1
+    assert ": FR-2." in p2 and "Skip the displacement audit" in p2 and "checks/spec-r1-2.json" in p2
+    assert "[merge-spec" not in _cmds(d)[2] and "merge-spec --run 'r' --parts 2" in _cmds(d)[2]
+    assert "Fix every one of these: G-001." in d["prompts"]["fix:all:r1"]
+    assert "Re-check only these gaps after fix round 1: G-001." in d["prompts"]["spec:r2"]
+    assert d["result"]["agent_calls"]["by"]["spec-checker"] == 3
+
+
+def test_a_share_that_produces_nothing_is_a_concern():
+    d = _run("shares-missing")
+    assert any("spec check shares 2 produced nothing" in c for c in d["result"]["concerns"])
