@@ -110,6 +110,14 @@ def test_split_plans_then_builds_waves_in_order(split):
     assert split["result"]["agent_calls"]["by"] == {"clerk": 3, "planner": 1, "builder": 3, "spec-checker": 1}
 
 
+def test_a_slice_starts_when_its_own_dependencies_finish_not_its_wave():
+    d = _run("chains")
+    ev = d["events"]
+    assert ev.index("end:build:core") < ev.index("start:build:api") < ev.index("end:build:slow")
+    assert ev.index("end:build:slow") < ev.index("start:build:late")
+    assert d["result"]["agent_calls"]["by"]["builder"] == 4
+
+
 def test_plan_refused_then_revised_gets_its_errors():
     d = _run("plan-revised")
     assert d["labels"][:3] == ["clerk:init", "plan", "plan:rev1"]

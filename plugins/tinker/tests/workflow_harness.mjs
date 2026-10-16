@@ -42,6 +42,13 @@ const SPLIT = { mode: 'split', waves: [['core'], ['api', 'cli']], slices: [
   { id: 'api', title: 'api', requirement_ids: ['FR-2'], files: ['api/'], depends_on: ['core'], brief: '/b/api.md' },
   { id: 'cli', title: 'cli', requirement_ids: ['FR-2', 'FR-3'], files: ['cli/main.go'], depends_on: ['core'], brief: '/b/cli.md' }] }
 
+// Two chains in two waves: api needs only core, late needs only slow; slow is the slowest builder.
+const CHAINS = { mode: 'split', waves: [['core', 'slow'], ['api', 'late']], slices: [
+  { id: 'core', title: 'core', requirement_ids: ['FR-1'], files: ['core/'], depends_on: [], brief: '/b/core.md' },
+  { id: 'slow', title: 'slow', requirement_ids: ['FR-2'], files: ['slow/'], depends_on: [], brief: '/b/slow.md' },
+  { id: 'api', title: 'api', requirement_ids: ['FR-3'], files: ['api/'], depends_on: ['core'], brief: '/b/api.md' },
+  { id: 'late', title: 'late', requirement_ids: ['FR-4'], files: ['late/'], depends_on: ['slow'], brief: '/b/late.md' }] }
+
 const fail = (id, extra) => ({ id, kind: 'checks', title: `failure ${id}`, names: [], file: '', ...extra })
 const gap = (id, extra) => ({ id, file: 'a.go', requirement_ids: ['FR-1'], ...extra })
 
@@ -80,6 +87,8 @@ const SCENARIOS = {
   'resume-fix': { resume: { steps_done: ['init', 'preflight', 'plan', 'verify:1'], built: ['all'],
     rounds: { 1: { verify: [fail('V1-1')], spec: [gap('G-001')], fixed: false } } }, rounds: [null, { failures: [], open: [] }] },
   // Resumed with wave 1 of 2 built: only wave 2 builds.
+  // A slice starts when its own dependencies finish, not when its whole wave before it has.
+  chains: { plan: CHAINS, delays: { 'build:slow': 50 } },
   'resume-build': { plan: SPLIT, resume: { steps_done: ['init', 'preflight', 'plan'], built: ['core'] } },
   // Resumed after a preflight stop: the check is re-run before anything else.
   'resume-preflight': { resume: { steps_done: ['init', 'plan'], built: [] } },
@@ -89,7 +98,7 @@ if (!sc) throw new Error(`unknown scenario ${scenarioName}`)
 const plan = sc.plan || SINGLE
 const integ = sc.integration ? { command: 'make e2e', cwd: '', exists: true } : null
 
-const labels = [], phases = [], prompts = {}, options = {}, commands = []
+const events = [], labels = [], phases = [], prompts = {}, options = {}, commands = []
 let planner = 0
 
 const cmdOf = prompt => {
@@ -140,7 +149,12 @@ const agent = async (prompt, opts = {}) => {
     const errs = (sc.planErrors || [])[planner++]
     return { output: JSON.stringify(errs ? { ok: true, passed: false, errors: errs } : { ok: true, passed: true, errors: [], warnings: [], notes: [], plan }) }
   }
-  if (label.startsWith('build:')) return { status: 'complete', commits: ['abc'], tests_added: [], needs_files: [], integration: 'make e2e: 0', decisions: [], notes: '' }
+  if (label.startsWith('build:')) {
+    events.push(`start:${label}`)
+    await new Promise(r => setTimeout(r, (sc.delays || {})[label] || 0))
+    events.push(`end:${label}`)
+    return { status: 'complete', commits: ['abc'], tests_added: [], needs_files: [], integration: 'make e2e: 0', decisions: [], notes: '' }
+  }
   if (label.startsWith('spec:')) return { file: 's.json', open: round(Number(label.split(':r')[1])).open }
   if (label.startsWith('fix:')) return { file: 'f.json', fixed: [], disputed: [], blocked: [] }
   return { output: '{}' }
@@ -157,4 +171,4 @@ const result = await fn(agent, parallel, pipeline, phase, log, {
   resume: sc.resume ? 'r' : '',
 }, { total: null, spent: () => 0, remaining: () => Infinity }, async () => { throw new Error('nested workflows unused') })
 
-process.stdout.write(JSON.stringify({ meta, result, phases, labels, prompts, options, commands, schemaProblems, syntaxFile }))
+process.stdout.write(JSON.stringify({ meta, result, phases, events, labels, prompts, options, commands, schemaProblems, syntaxFile }))

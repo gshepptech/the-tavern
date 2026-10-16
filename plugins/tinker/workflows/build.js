@@ -5,7 +5,7 @@ export const meta = {
   phases: [
     { title: 'Preflight', detail: 'seal, clean tree, commands, size, the integration check can start here' },
     { title: 'Plan', detail: 'only when the spec is over one builder\'s budget' },
-    { title: 'Build', detail: 'one builder, or one per slice in waves' },
+    { title: 'Build', detail: 'one builder, or one per slice, each starting once its dependencies are built' },
     { title: 'Verify', detail: 'code check and spec-to-code check, side by side' },
     { title: 'Fix', detail: 'one fixer per slice with every failure and gap' },
     { title: 'Report', detail: 'verdict per requirement, timings, agent calls' },
@@ -136,16 +136,17 @@ When the check prints "passed": true, or you cannot make it pass, put its last J
   // ---------------------------------------------------------------------- Build
   phase('Build')
   const built = new Set(st.built || [])
-  for (const wave of PLAN.waves) {
-    const todo = wave.filter(id => !built.has(id))
-    const reps = await all(todo.map(id => () => soft('builder', `${SPLIT ? `Build slice ${id} (${slice[id].title}). Your brief: ${slice[id].brief}. The whole spec, for context only: ${RDIR}/spec.md.`
+  const job = {} // a slice starts once its own dependencies are built, not its whole wave; waves are in dependency order
+  for (const id of PLAN.waves.flat()) job[id] = built.has(id) ? Promise.resolve() : Promise.all((slice[id].depends_on || []).map(d => job[d])).then(async () => {
+    const r = await soft('builder', `${SPLIT ? `Build slice ${id} (${slice[id].title}). Your brief: ${slice[id].brief}. The whole spec, for context only: ${RDIR}/spec.md.`
       : `Build the whole spec: ${RDIR}/spec.md is your brief, verbatim.${slice[id].brief ? ` The planner's code anchors and patterns are in ${slice[id].brief}.` : ''}`}
 ${ctx()}
 ${integLine(`integ-${id}`)}
 Commit with: ${T} commit ${RR} --as ${id} -m "<message>" [paths...]${SPLIT ? `
-Other slices may be building in this tree at the same time; you own only: ${slice[id].files.join(', ')}.` : ''}`, { label: `build:${id}`, phase: 'Build', agentType: 'tinker:builder', model: 'opus', schema: BUILDER })))
-    reps.forEach((r, i) => { if (r && r.status !== 'complete') concern(`builder of ${todo[i]} reported ${r.status}: ${[r.notes, ...(r.needs_files || [])].filter(Boolean).join('; ')}`) })
-  }
+Other slices may be building in this tree at the same time; you own only: ${slice[id].files.join(', ')}.` : ''}`, { label: `build:${id}`, phase: 'Build', agentType: 'tinker:builder', model: 'opus', schema: BUILDER })
+    if (r && r.status !== 'complete') concern(`builder of ${id} reported ${r.status}: ${[r.notes, ...(r.needs_files || [])].filter(Boolean).join('; ')}`)
+  })
+  const bad = (await Promise.allSettled(Object.values(job))).find(x => x.status === 'rejected'); if (bad) throw bad.reason
 
   // ------------------------------------------------------------ Verify and fix
   const specCheck = (rnd, recheck) => soft('spec-checker', `${recheck ? `Re-check only these gaps after fix round ${rnd - 1}: ${recheck.map(g => g.id).join(', ')}. Each is defined in ${RDIR}/checks/spec-r1.json.` : 'Check every requirement in the spec against the code, in one pass.'}
