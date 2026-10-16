@@ -184,6 +184,24 @@
         "workflow",
         "qa"
       ]
+    },
+    {
+      "name": "tinker",
+      "source": "./plugins/tinker",
+      "description": "Builds a spec lean, in about an hour. One builder that must run the integration check and read the result, then a code check beside one spec-to-code checker, and at most two batched fix rounds whose tests fail before and pass after. Three agents and a capped, counted number of agent calls.",
+      "version": "0.1.0",
+      "category": "development",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/tinker/README.md",
+      "keywords": [
+        "build",
+        "spec-driven",
+        "verification",
+        "workflow",
+        "lean"
+      ]
     }
   ]
 }
