@@ -60,6 +60,19 @@ def test_init_blocks_when_the_integration_check_cannot_start(repo, monkeypatch):
     assert "preflight" not in load_state(repo / "tinker-archive" / "e")["steps_done"]
 
 
+def test_preflight_on_resume_names_the_check_again_from_the_changed_repository(repo, monkeypatch):
+    write(repo, "Makefile", "build:\n\ttrue\n\ntest:\n\tpython3 tests/run.py\n\ne2e:\n\tdocker compose up\n")
+    write(repo, "spec.md", "- FR-1: x\n- AC-1: the end-to-end check `make e2e` passes.\n")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "e2e")
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    assert "docker info" in j(repo, "init", "--spec", "spec.md", "--run", "g")["blocked"]
+    write(repo, "Makefile", "build:\n\ttrue\n\ntest:\n\tpython3 tests/run.py\n\ne2e:\n\tpython3 tests/e2e.py\n")
+    git(repo, "add", "-A"); git(repo, "commit", "-qm", "no docker")
+    p = j(repo, "preflight", "--run", "g")
+    assert not p["blocked"] and not any(n["command"] == "docker info" for n in p["integration"]["needs"])
+    assert "preflight" in load_state(repo / "tinker-archive" / "g")["steps_done"]
+
+
 def test_init_asks_for_the_finder_and_preflight_takes_its_answer(repo):
     write(repo, "spec.md", "- FR-1: x\n- AC-1: an integration test proves it.\n")
     git(repo, "add", "-A"); git(repo, "commit", "-qm", "s")

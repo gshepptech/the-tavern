@@ -159,7 +159,11 @@ def cmd_preflight(root: Path, a, rdir: Path) -> dict:
     elif a.command:
         integ = detect.describe(root, a.command, a.cwd, "named by the finder agent")
     else:
-        integ = state.get("integration")
+        # A resume after "fix this, then continue": the repository may have changed since
+        # init named the check, so name it again from the stored spec; a check the finder
+        # agent named stays when detection finds nothing.
+        found = detect.integration(root, (rdir / "spec.md").read_text(encoding="utf-8"))
+        integ = found["found"] or state.get("integration")
     pf = land.preflight(root, rdir, integ, a.need or [])
     return {"ok": True, "blocked": pf["stop"], "integration": pf["integration"], "ran": pf["ran"],
             "warnings": pf.get("warnings") or []}
