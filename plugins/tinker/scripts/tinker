@@ -1,0 +1,3 @@
+#!/bin/bash
+# tinker's code steps. Usage: tinker [--root DIR] [--job KEY] [--calls JSON] <command> [args]; see tinker.py.
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/tinker.py" "$@"
