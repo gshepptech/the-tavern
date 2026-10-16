@@ -88,3 +88,23 @@ def test_one_integration_target_and_no_command_in_the_spec(tmp_path):
 def test_asked_but_nothing_to_match_needs_the_finder(tmp_path):
     (tmp_path / "Makefile").write_text("e2e:\n\techo\nintegration:\n\techo\n")
     assert detect.integration(tmp_path, "An integration test proves it.\n") == {"found": None, "asked": True}
+
+
+def test_unit_test_command_named_for_contrast_is_not_the_integration_check(tmp_path):
+    (tmp_path / "go.mod").write_text("module x\n")
+    (tmp_path / "magefile.go").write_text("//go:build mage\npackage main\n\nfunc Test() error {\n\treturn sh.RunV(\"go\", \"test\", \"./...\")\n}\n")
+    spec = ("- **Verification:** mage metrics (needs Docker)\n"
+            "Integration suites live in `tests/<tag>/`. Unit tests run with `mage test` (`go test ./...`).\n")
+    r = detect.integration(tmp_path, spec)["found"]
+    assert r["command"] == "mage metrics" and not r["exists"]
+
+
+def test_bare_run_command_on_a_docker_line(tmp_path):
+    (tmp_path / "Makefile").write_text("e2e:\n\tdocker compose up\n")
+    r = detect.integration(tmp_path, "- Run make e2e: it boots the stack in Docker and must pass.\n")["found"]
+    assert r["command"] == "make e2e" and r["exists"]
+
+
+def test_only_the_unit_test_named_falls_through_to_nothing(tmp_path):
+    (tmp_path / "go.mod").write_text("module x\n")
+    assert detect.integration(tmp_path, "Integration is out of scope; run `go test ./...`.\n") == {"found": None, "asked": True}

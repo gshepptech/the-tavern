@@ -8,7 +8,10 @@ and each immediate subdirectory are checked, so a repo with ``web/`` and
 found, since a Makefile target can mean anything. (Copied from tinker.)
 
 ``integration`` is tinker's: it reads the spec for a command on a line that
-talks about an integration, end-to-end, acceptance or smoke check, and the
+talks about an integration, end-to-end, acceptance or smoke check, or about
+Docker, or that is a ``Verification:`` line, backticked or written bare after
+"run", and skips the project's unit-test command, which such lines often name
+for contrast ("unit tests run with `mage test`"). It also reads the
 repository for the targets that run such checks (Makefile, magefile,
 package.json scripts, justfile). It also names what the check needs before it
 can start here: its runner on PATH, a Docker daemon when its definition uses
@@ -133,6 +136,9 @@ RUNNERS = ("make", "mage", "npm", "pnpm", "yarn", "bun", "npx", "just", "task", 
            "cargo", "mvn", "gradle", "./gradlew", "dotnet", "bash", "sh", "docker", "tox", "nox", "uv")
 NEEDS_DOCKER = re.compile(r"docker|testcontainers|\bkind\b|compose|podman", re.IGNORECASE)
 SPAN = re.compile(r"`([^`\n]+)`")
+BARE = re.compile(r"(?:\b(?:run|runs|running)|verification:)[\s*_]+((?:make|mage|just|task)\s+[a-z][\w:.-]*)", re.IGNORECASE)
+VERIFY_LINE = re.compile(r"\bverification:", re.IGNORECASE)
+UNIT_NAMES = {"test", "tests", "unit", "unittest", "check"}
 
 
 def _make_targets(d: Path, rel: str) -> list[dict]:
@@ -197,16 +203,27 @@ def _norm_cmd(cmd: str) -> str:
 
 
 def _spec_commands(spec_text: str) -> list[str]:
-    """Backticked commands on spec lines that talk about an integration or end-to-end check."""
+    """Commands on spec lines that talk about an integration, end-to-end or Docker check, or verify one.
+
+    A command is backticked, or written bare after "run" or "Verification:"
+    when its runner is a task runner (``Run mage metrics: it boots…``)."""
     out = []
     for line in spec_text.splitlines():
-        if not INTEG_WORDS.search(line):
+        if not (INTEG_WORDS.search(line) or NEEDS_DOCKER.search(line) or VERIFY_LINE.search(line)):
             continue
-        for span in SPAN.findall(line):
-            span = span.strip()
+        spans = [s.strip() for s in SPAN.findall(line)] + [m.group(1).rstrip(":.") for m in BARE.finditer(SPAN.sub("", line))]
+        for span in spans:
             if span.split(" ")[0] in RUNNERS and len(span.split()) >= 2 and span not in out:
                 out.append(span)
     return out
+
+
+def _is_unit_test(cmd: str, unit: set[str]) -> bool:
+    """The project's unit-test command, or a task-runner target named like one: not an integration check."""
+    words = _norm_cmd(cmd).split()
+    if _norm_cmd(cmd) in unit:
+        return True
+    return len(words) == 2 and words[0] in ("make", "mage", "just", "task") and words[1] in UNIT_NAMES
 
 
 def _paths_in(cmd: str) -> list[str]:
@@ -256,7 +273,8 @@ def integration(root: Path, spec_text: str) -> dict:
         return {"found": None, "asked": False}
     tg = targets(root)
     by_cmd = {_norm_cmd(t["cmd"]): t for t in tg}
-    named = _spec_commands(spec_text)
+    unit = {_norm_cmd(c["cmd"]) for c in detect(root)["test"]}
+    named = [c for c in _spec_commands(spec_text) if not _is_unit_test(c, unit)]
     for c in named:
         t = by_cmd.get(_norm_cmd(c))
         if t:
