@@ -55,9 +55,11 @@ def owner_of(state: dict, path: str) -> str:
     return ""
 
 
-def may_commit(state: dict, actor: str, path: str) -> str:
+def may_commit(state: dict, actor: str, path: str, also: tuple[str, ...] = ()) -> str:
     """"" when ``actor`` may commit ``path``, else why not. A fixer may also
-    commit a file no slice owns: a failure can sit outside every slice."""
+    commit a file no slice owns, since a failure can sit outside every slice,
+    and a file of a slice in ``also``: the slices no fixer works on this round,
+    so no two fixers ever write the same file."""
     if path.startswith(f"{ARCHIVE}/"):
         return "the run directory is never committed"
     kind, _, sid = actor.partition(":")
@@ -65,7 +67,7 @@ def may_commit(state: dict, actor: str, path: str) -> str:
     if slice_id not in _slices(state):
         return f"unknown actor {actor!r}"
     owner = owner_of(state, path)
-    if owner == slice_id or (kind == "fix" and not owner):
+    if owner == slice_id or (kind == "fix" and (not owner or owner in also)):
         return ""
     return f"owned by {owner or 'no slice'}"
 
@@ -85,11 +87,11 @@ def _changed_paths(root: Path) -> list[str]:
     return [p for p in out if not p.startswith(f"{ARCHIVE}/")]
 
 
-def commit(root: Path, rdir: Path, actor: str, message: str, paths: list[str]) -> dict:
+def commit(root: Path, rdir: Path, actor: str, message: str, paths: list[str], also: tuple[str, ...] = ()) -> dict:
     state = load_state(rdir)
     explicit = [p[2:] if p.startswith("./") else p for p in paths]
     targets = explicit or _changed_paths(root)
-    refused = {p: why for p in targets if (why := may_commit(state, actor, p))}
+    refused = {p: why for p in targets if (why := may_commit(state, actor, p, also))}
     if explicit and refused:
         return {"ok": False, "error": "refused: you may not commit these files", "refused": refused}
     targets = [p for p in targets if p not in refused]
@@ -104,6 +106,8 @@ def commit(root: Path, rdir: Path, actor: str, message: str, paths: list[str]) -
     sha = head(root)
     with update_state(rdir) as st:
         st.setdefault("commits", {}).setdefault(actor, []).append(sha)
+        if also:
+            st.setdefault("commit_also", {})[sha] = list(also)
     return {"ok": True, "commit": sha, "files": targets, "left_uncommitted": refused}
 
 
@@ -235,7 +239,8 @@ def verify(root: Path, rdir: Path, rnd: int) -> dict:
         actors = {s: a for a, shas in (state.get("commits") or {}).items() for s in shas}
         for c in _commits(root, base):
             for f in _files(root, c):
-                why = "not made with `tinker commit`" if c not in actors else may_commit(state, actors[c], f)
+                why = ("not made with `tinker commit`" if c not in actors
+                       else may_commit(state, actors[c], f, tuple((state.get("commit_also") or {}).get(c) or ())))
                 if why:
                     fail("ownership", f"commit {c[:10]} changes {f}: {why}", file=f)
     for f, line, rid in ids_in_production(root, base, set(index.get("ids") or [])):

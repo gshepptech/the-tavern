@@ -5,7 +5,7 @@
     tinker init        --spec PATH --run NAME [--max-rounds N] [--max-agents N] [--no-branch]
     tinker preflight   --run NAME [--command CMD [--cwd DIR] [--need CMD ...] | --none]
     tinker plan        --run NAME
-    tinker commit      --run NAME --as ACTOR -m MESSAGE [PATH ...]
+    tinker commit      --run NAME --as ACTOR [--also SLICES] -m MESSAGE [PATH ...]
     tinker integration --run NAME
     tinker verify      --run NAME --round N
     tinker merge-spec  --run NAME --parts N
@@ -271,7 +271,7 @@ def _dispatch(root: Path, a) -> dict:
     if a.cmd == "plan":
         return cmd_plan(root, rdir)
     if a.cmd == "commit":
-        return land.commit(root, rdir, a.actor, a.message, a.paths)
+        return land.commit(root, rdir, a.actor, a.message, a.paths, tuple(x for x in a.also.split(",") if x))
     if a.cmd == "integration":
         return land.integration(root, rdir)
     if a.cmd == "verify":
@@ -314,6 +314,7 @@ def _parser() -> argparse.ArgumentParser:
     s.add_argument("--run", required=True)
     s.add_argument("--as", dest="actor", required=True)
     s.add_argument("-m", dest="message", required=True)
+    s.add_argument("--also", default="", help="fixers: slices no fixer works on this round, comma-separated")
     s.add_argument("paths", nargs="*")
     s = sub.add_parser("merge-spec")
     s.add_argument("--run", required=True)

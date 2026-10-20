@@ -191,6 +191,15 @@ def test_split_failures_and_gaps_go_to_the_owning_slice():
     assert "against slice core: V1-2." in p["fix:core:r1"]  # by test name
     assert "against slice api: G-001." in p["fix:api:r1"]  # by file
     assert "Your slice's brief: /b/cli.md" in p["fix:cli:r1"]
+    assert "--as fix:cli -m" in p["fix:cli:r1"] and "--also" not in p["fix:cli:r1"]  # every slice has a fixer this round
+
+
+def test_round_two_routes_a_gap_by_its_round_one_file_and_frees_idle_slices():
+    d = _run("split-recheck")
+    p = d["prompts"]
+    assert "against slice api: G-001." in p["fix:api:r2"]  # the re-check's reply left the file out
+    assert "--as fix:api --also core,cli -m" in p["fix:api:r2"] and "may also commit their files" in p["fix:api:r2"]
+    assert "against slice core: G-002." in p["fix:core:r1"]  # a test file beside core's listed file
 
 
 def test_agent_cap_stops_before_the_next_agent_and_still_reports():

@@ -81,6 +81,10 @@ const SCENARIOS = {
   // A split's failures and gaps go to the slices that own them.
   'split-fix': { plan: SPLIT, rounds: [{ failures: [fail('V1-1', { file: 'cli/main.go' }), fail('V1-2', { names: ['github.com/x/core'] }), fail('V1-3')],
     open: [gap('G-001', { file: 'api/h.go' }), gap('G-002', { file: '', requirement_ids: ['FR-3'] })] }, { failures: [], open: [] }] },
+  // Round 2's re-check names a gap without its file; it still goes to the slice round 1's file named.
+  'split-recheck': { plan: { ...SPLIT, slices: SPLIT.slices.map(s => s.id === 'core' ? { ...s, files: ['core/x.go'] } : s) },
+    rounds: [{ failures: [], open: [gap('G-001', { file: 'api/h.go', requirement_ids: [] }), gap('G-002', { file: 'core/x_test.go', requirement_ids: [] })] },
+      { failures: [], open: [{ id: 'G-001', file: '', requirement_ids: [] }] }, { failures: [], open: [] }] },
   // The agent cap stops the run before the fixer; the report still runs.
   capped: { rounds: [{ failures: [fail('V1-1')], open: [] }], maxAgents: 5 },
   // Resumed after round 1 was checked: straight to the fixer.

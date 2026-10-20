@@ -155,19 +155,14 @@ Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { la
     const got = await all(shares.map((ids, i) => () => specCheck(1, null, i + 1, ids))), m = await clerk('merge-spec', 'Verify', `merge-spec ${RR} --parts ${shares.length}`)
     if (m.missing.length) concern(`spec check shares ${m.missing.join(', ')} produced nothing; their requirements are reported unchecked`)
     return got.some(Boolean) ? m : null }
-  // Code assigns each failure and gap to the slice that owns its file, then its requirement, then its test names.
-  const owns = (s, f) => !!f && s.files.some(e => e.endsWith('/') ? f.startsWith(e) : f === e)
-  const assign = items => {
-    const by = {}
-    for (const x of items) {
-      const s = !SPLIT ? PLAN.slices[0] : PLAN.slices.find(s => owns(s, x.file))
-        || PLAN.slices.find(s => (x.requirement_ids || []).some(r => s.requirement_ids.includes(r)))
-        || PLAN.slices.find(s => (x.names || []).some(n => s.files.some(e => n.includes(e.replace(/\/$/, '')))))
-        || PLAN.slices[PLAN.slices.length - 1]
-      ;(by[s.id] = by[s.id] || []).push(x.id)
-    }
-    return by
-  }
+  // Code assigns each item to the slice that owns its file, then its file's directory, then its requirement, then its test names.
+  const owns = (s, f) => !!f && s.files.some(e => e.endsWith('/') ? f.startsWith(e) : f === e), dir = f => f.replace(/\/?[^/]*$/, '')
+  const sameDir = (s, f) => !!f && s.files.some(e => !e.endsWith('/') && dir(e) === dir(f))
+  const assign = items => items.reduce((by, x) => { const s = !SPLIT ? PLAN.slices[0] : PLAN.slices.find(s => owns(s, x.file)) || PLAN.slices.find(s => sameDir(s, x.file))
+    || PLAN.slices.find(s => (x.requirement_ids || []).some(r => s.requirement_ids.includes(r)))
+    || PLAN.slices.find(s => (x.names || []).some(n => s.files.some(e => n.includes(e.replace(/\/$/, ''))))) || PLAN.slices[PLAN.slices.length - 1]
+    ;(by[s.id] = by[s.id] || []).push(x.id); return by }, {})
+  const known = {} // a gap keeps the file and requirements round 1 gave it: a re-check's reply may leave them out
   const rounds = st.rounds || {}
   let open = []
   for (R = 1; ; R++) {
@@ -178,18 +173,20 @@ Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { la
       () => rd.spec ? { open: rd.spec } : R > 1 && !open.length ? { open: [] } : R > 1 ? specCheck(R, open) : firstCheck(),
     ])
     const failures = v.failures || []
-    if (s) open = s.open || []
+    if (s) open = (s.open || []).map(g => known[g.id] || (known[g.id] = g))
     else concern(`the spec check of round ${R} produced nothing; ${R === 1 ? 'requirements are reported unchecked' : 'its gaps keep their last status'}`)
     note(`round ${R}: ${failures.length} code-check failures, ${open.length} open gaps`)
     if (!failures.length && !open.length) break
     if (R > MAX_ROUNDS) { concern(`after ${MAX_ROUNDS} fix rounds these remain: ${[...failures, ...open].map(x => x.id).join(', ')}`); break }
     if (rd.fixed) continue
     phase('Fix')
-    await all(Object.entries(assign([...failures, ...open])).map(([sid, ids]) => () => soft('fixer', `Fix every one of these${SPLIT ? ` against slice ${sid}` : ''}: ${ids.join(', ')}.
+    const by = assign([...failures, ...open]), free = SPLIT ? PLAN.slices.map(x => x.id).filter(id => !by[id]) : []
+    await all(Object.entries(by).map(([sid, ids]) => () => soft('fixer', `Fix every one of these${SPLIT ? ` against slice ${sid}` : ''}: ${ids.join(', ')}.
 Failures (V${R}-n), with the commands' output: ${RDIR}/checks/verify-r${R}.json. Gaps (G-n): ${RDIR}/checks/spec-r1.json${R > 1 ? `, with this round's re-check evidence in ${RDIR}/checks/spec-r${R}.json` : ''}.${SPLIT ? ` Your slice's brief: ${slice[sid].brief}` : ''}
 ${ctx()}
 ${integLine(`integ-fix-${sid}-r${R}`)}
-Commit with: ${T} commit ${RR} --as fix:${sid} -m "<message>" [paths...]
+Commit with: ${T} commit ${RR} --as fix:${sid}${free.length ? ` --also ${free.join(',')}` : ''} -m "<message>" [paths...]${free.length ? `
+No fixer works on slices ${free.join(', ')} this round, so you may also commit their files.` : ''}
 Write ${RDIR}/fixes/r${R}-${sid}.json.`, { label: `fix:${sid}:r${R}`, phase: 'Fix', agentType: 'tinker:fixer', model: 'opus', schema: FIXER })))
   }
   return await finish()

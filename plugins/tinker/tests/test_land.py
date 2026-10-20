@@ -121,3 +121,15 @@ def test_fixcheck_pins_behavioural_fixes_only(run):
     fx = [f for f in r["failures"] if f["kind"] == "fixcheck"]
     assert len(fx) == 1 and "G-002" in fx[0]["title"] and "passes before the fix" in fx[0]["title"]
     assert [f["id"] for f in r["failures"]] == ["V2-1"]
+
+
+def test_a_fixer_may_commit_files_of_slices_no_fixer_works_on(run):
+    root, name, rdir = _split(run)
+    state = load_state(rdir)
+    assert land.may_commit(state, "fix:s1", "sub.py", ("s2",)) == ""
+    assert land.may_commit(state, "s1", "sub.py", ("s2",)) == "owned by s2"  # builders never
+    write(root, "sub.py", "x = 1\n")
+    r = j(root, "commit", "--run", name, "--as", "fix:s1", "--also", "s2", "-m", "fix across slices", "sub.py")
+    assert r["ok"] and load_state(rdir)["commit_also"][r["commit"]] == ["s2"]
+    v = j(root, "verify", "--run", name, "--round", "1")
+    assert not any(f["kind"] == "ownership" for f in v["failures"])  # verify honours the allowance the commit had
