@@ -24,8 +24,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import checks
-from common import (ARCHIVE, ID_RE, git, git_retry, head, is_doc_file, is_test_file, load_state, mark,
-                    read_json, tail, update_state, write_json)
+from common import (ARCHIVE, ID_RE, branch_and_tag_refs, git, git_retry, head, is_doc_file, is_test_file, load_state, mark,
+                    read_json, tail, unit_of, update_state, write_json)
 from gates import _norm, overlaps
 
 
@@ -38,9 +38,10 @@ def _entry_owns(entry: str, path: str) -> bool:
 
 
 def owner_of(state: dict, path: str) -> str:
-    """The slice that owns ``path``: a listed file or directory, else the slice
-    whose listed file sits in the same directory when ``path`` is a test file
-    (tests live with their unit). "" when none does."""
+    """The slice that owns ``path``: a listed file or directory, else, for a
+    test file, the slice whose listed file in the same directory is the unit it
+    tests (`Foo.test.tsx` and `Foo.tsx`), else the slice with any listed file in
+    that directory. "" when none does."""
     slices = _slices(state)
     for sid, s in slices.items():
         if s.get("owns_all"):
@@ -48,10 +49,14 @@ def owner_of(state: dict, path: str) -> str:
         if any(_entry_owns(e, path) for e in s.get("files") or []):
             return sid
     if is_test_file(path):
-        d = str(Path(path).parent).lower()
-        for sid, s in slices.items():
-            if any(str(Path(e.rstrip("/")).parent).lower() == d for e in s.get("files") or [] if not e.endswith("/")):
+        d, unit = str(Path(path).parent).lower(), unit_of(path)
+        beside = [(sid, e) for sid, s in slices.items() for e in s.get("files") or []
+                  if not e.endswith("/") and str(Path(e).parent).lower() == d]
+        for sid, e in beside:
+            if unit_of(e) == unit:
                 return sid
+        if beside:
+            return beside[0][0]
     return ""
 
 
@@ -258,11 +263,18 @@ def verify(root: Path, rdir: Path, rnd: int) -> dict:
         if irec.get("exit") != 0:
             fail("integration", f"the integration check `{integ['command']}` fails (exit {irec.get('exit')})",
                  tail(irec.get("tail", ""), 60), irec.get("failures"))
-    out = {"ok": True, "round": rnd, "head": sha, "failures": failures,
+    # A new branch or tag is reported, never failed: in a shared repository another session may have made it,
+    # and a fixer told to remove it could delete someone's work.
+    start = set(state.get("refs_at_start") or [])
+    new_refs = [r for r in branch_and_tag_refs(root) if r not in start and r != f"refs/heads/{state.get('branch')}"] if start else []
+    out = {"ok": True, "round": rnd, "head": sha, "failures": failures, "new_refs": new_refs,
            "checks": [{k: r[k] for k in ("cmd", "status", "new")} for r in results],
            "integration": {k: irec.get(k) for k in ("command", "exit", "seconds", "head")} if irec else None}
     write_json(rdir / "checks" / f"verify-r{rnd}.json", out)
     with update_state(rdir) as st:
         st.setdefault("round_base", {})[str(rnd)] = sha
         mark(st, f"verify:{rnd}", failures=len(failures))
+        note = f"branches or tags appeared while the run was going: {', '.join(new_refs)}. tinker's agents must not make them; check who did before removing any"
+        if new_refs and note not in (st.get("concerns") or []):
+            st.setdefault("concerns", []).append(note)
     return out

@@ -55,3 +55,22 @@ def test_report_lists_remaining_failures_from_the_last_round(run):
     r = j(root, "report", "--run", name)
     assert r["failures"] == 1
     assert "nothing was committed since the base commit" in (rdir / "report.md").read_text()
+
+
+def test_report_lists_what_the_fixer_was_stopped_from_changing(run):
+    root, name, rdir = _built(run)
+    j(root, "verify", "--run", name, "--round", "1")
+    write_json(rdir / "checks" / "spec-r1.json", {"verdicts": [], "gaps": [
+        {"id": "G-001", "requirement_ids": ["FR-001"], "title": "old test contradicts the spec", "file": "calc_test.py"},
+        {"id": "G-002", "requirement_ids": ["FR-002"], "title": "fixed one", "file": "calc.py"}]})
+    write_json(rdir / "fixes" / "r1-all.json", {"fixes": [{"item": "G-001", "outcome": "blocked", "note": "first try"}]})
+    write_json(rdir / "fixes" / "r2-all.json", {"fixes": [
+        {"item": "G-001", "outcome": "blocked", "note": "the test predates the build and the spec removes what it checks"},
+        {"item": "V2-1", "outcome": "disputed", "note": "not a regression"},
+        {"item": "G-002", "outcome": "fixed", "note": ""}]})
+    write_json(rdir / "checks" / "spec-r2.json", {"rechecked": [{"id": "G-002", "status": "fixed", "evidence": "ok"}]})
+    r = j(root, "report", "--run", name)
+    md = (rdir / "report.md").read_text()
+    assert "**2 need your call**" in md and "## Needs your call" in md
+    assert "**G-001** (blocked): the test predates the build" in md and "**V2-1** (disputed)" in md
+    assert "first try" not in md  # only the last fix round counts

@@ -198,3 +198,13 @@ def test_shares_one_checker_for_a_small_spec_and_at_most_three():
     big = [f"FR-{i}" for i in range(200)]
     assert len(gates.shares(gates.single_plan({"ids": big}), {"ids": big})) == 3
     assert gates.shares({}, {"ids": []}) == [[]]
+
+
+def test_measure_skips_dependency_and_hidden_directories(run):
+    root, name, rdir = run
+    (root / "web" / "node_modules" / "pkg").mkdir(parents=True)
+    (root / "web" / "node_modules" / "pkg" / "index.js").write_text("x\n" * 5000)
+    (root / "web" / ".cache").mkdir()
+    (root / "web" / ".cache" / "c.js").write_text("x\n" * 5000)
+    (root / "web" / "app.js").write_text("a\nb\n")
+    assert gates.read_loc(root, ["web/"]) == 2

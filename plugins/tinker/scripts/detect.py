@@ -27,7 +27,7 @@ import re
 import shutil
 from pathlib import Path
 
-SKIP_DIRS = {"node_modules", "vendor", ".git", "tinker-archive", "dist", "build", "target", ".venv", "venv"}
+from common import SKIP_DIRS  # noqa: E402
 
 
 def _cmd(cmd: str, cwd: str, why: str) -> dict:

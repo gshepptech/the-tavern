@@ -42,6 +42,29 @@ def is_test_file(rel: str) -> bool:
     return bool(TEST_FILE.search(rel))
 
 
+# Dependency, build and tool directories: never the project's own code.
+SKIP_DIRS = {"node_modules", "vendor", ".git", "tinker-archive", "dist", "build", "target", ".venv", "venv", "__pycache__"}
+_TEST_AFFIX = re.compile(r"^test_|(_test|_spec|Tests?|Spec)$")
+
+
+def unit_of(rel: str) -> str:
+    """The unit a file belongs to, by name: a test and the source it tests share one.
+
+    `AISettings.settings.test.tsx`, `AISettings.test.tsx` and `AISettings.tsx`
+    are all `aisettings`; `foo_test.go` and `foo.go` are `foo`; `test_foo.py`
+    is `foo`; `FooTest.java` is `foo`."""
+    return _TEST_AFFIX.sub("", Path(rel).name.split(".")[0]).lower()
+
+
+def skipped(rel: str) -> bool:
+    """True when ``rel`` sits under a dependency, build or hidden directory."""
+    return any(part in SKIP_DIRS or part.startswith(".") for part in Path(rel).parts[:-1])
+
+
+def branch_and_tag_refs(root: Path) -> list[str]:
+    return sorted(x for x in git(root, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/tags").stdout.splitlines() if x)
+
+
 def is_doc_file(rel: str) -> bool:
     return rel.lower().endswith(DOC_SUFFIXES) or rel.startswith("docs/")
 

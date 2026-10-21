@@ -133,3 +133,25 @@ def test_a_fixer_may_commit_files_of_slices_no_fixer_works_on(run):
     assert r["ok"] and load_state(rdir)["commit_also"][r["commit"]] == ["s2"]
     v = j(root, "verify", "--run", name, "--round", "1")
     assert not any(f["kind"] == "ownership" for f in v["failures"])  # verify honours the allowance the commit had
+
+
+def test_a_test_belongs_to_the_slice_whose_unit_it_tests_not_the_first_in_its_folder():
+    state = {"plan": {"slices": {
+        "identity": {"files": ["web/settings/AuthSettings.tsx"]},
+        "storage": {"files": ["web/settings/StorageSettings.tsx", "web/settings/BackupSettings.tsx"]},
+        "core": {"files": ["pkg/foo.go"]}}}}
+    assert land.owner_of(state, "web/settings/StorageSettings.settings.test.tsx") == "storage"
+    assert land.owner_of(state, "web/settings/BackupSettings.test.tsx") == "storage"
+    assert land.owner_of(state, "web/settings/AuthSettings.test.tsx") == "identity"
+    assert land.owner_of(state, "web/settings/Shared.test.tsx") == "identity"  # no unit match: the folder's first slice
+    assert land.owner_of(state, "pkg/foo_test.go") == "core"
+
+
+def test_verify_reports_new_branches_as_a_concern_and_never_fails_on_them(run):
+    root, name, rdir = run
+    write(root, "calc.py", SUB)
+    assert j(root, "commit", "--run", name, "--as", "all", "-m", "sub")["ok"]
+    git(root, "branch", "made-by-someone")
+    v = j(root, "verify", "--run", name, "--round", "1")
+    assert v["new_refs"] == ["refs/heads/made-by-someone"] and not any(f["kind"] == "refs" for f in v["failures"])
+    assert any("made-by-someone" in c and "check who did" in c for c in load_state(rdir)["concerns"])

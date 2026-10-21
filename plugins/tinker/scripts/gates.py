@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from common import ID_RE, is_doc_file, read_json
+from common import ID_RE, is_doc_file, read_json, skipped
 
 # S4: "<= 8 key_files entries (a directory entry counts as one ...), <= ~800 LOC
 # to read, <= ~1,500 LOC new." The "~" is read as 25% headroom.
@@ -63,7 +63,8 @@ def _text_lines(path: Path) -> int:
 
 
 def read_loc(root: Path, entries: list[str]) -> int:
-    """Lines of the existing files a slice owns: a builder reads what it changes."""
+    """Lines of the existing files a slice owns: a builder reads what it changes.
+    Dependency, build and hidden directories under a named directory are not its code."""
     total = 0
     for e in entries:
         p = Path(root) / e.strip("/")
@@ -71,6 +72,8 @@ def read_loc(root: Path, entries: list[str]) -> int:
             total += _text_lines(p)
         elif p.is_dir():
             for f in p.rglob("*"):
+                if skipped(str(f.relative_to(root))):
+                    continue
                 if f.is_file() and f.suffix not in (".png", ".jpg", ".gif", ".ico", ".lock", ".sum") and f.stat().st_size < 1_000_000:
                     total += _text_lines(f)
     return total

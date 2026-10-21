@@ -46,6 +46,25 @@ def _gaps(rdir: Path) -> tuple[dict, dict]:
     return verdicts, gaps
 
 
+def _needs_call(rdir: Path, gaps: dict) -> list[dict]:
+    """What a fixer would not or could not change in the last fix round, for a person to decide.
+
+    A blocked or disputed fix of a gap still open, or of any failure: tinker's
+    rules stopped the fixer (a test that predates the build, a file it may not
+    commit, a requirement about how the work is delivered), so retrying will
+    not settle it."""
+    rounds = sorted({p.name.split("-")[0] for p in (rdir / "fixes").glob("r*-*.json")}, key=lambda r: int(r[1:]) if r[1:].isdigit() else 0)
+    if not rounds:
+        return []
+    out = []
+    for path in sorted((rdir / "fixes").glob(f"{rounds[-1]}-*.json")):
+        for fx in (read_json(path, {}) or {}).get("fixes") or []:
+            item = str(fx.get("item", ""))
+            if fx.get("outcome") in ("blocked", "disputed") and (item not in gaps or gaps[item]["status"] != "fixed"):
+                out.append({"item": item, "outcome": fx["outcome"], "note": fx.get("note") or ""})
+    return out
+
+
 def _duration(a: str, b: str) -> str:
     try:
         s = (datetime.fromisoformat(b.replace("Z", "+00:00")) - datetime.fromisoformat(a.replace("Z", "+00:00"))).total_seconds()
@@ -101,7 +120,7 @@ def build(root: Path, rdir: Path) -> dict:
             "mode": (state.get("plan") or {}).get("mode"), "counts": counts, "requirements": rows,
             "gaps": list(gaps.values()), "failures": (last or {}).get("failures") or [],
             "integration": (last or {}).get("integration"), "rounds": len(vr), "steps": steps, "total": total,
-            "agents": _calls(state),
+            "agents": _calls(state), "needs_call": _needs_call(rdir, gaps),
             "concerns": (state.get("concerns") or []) + [x for c in (state.get("agent_calls") or {}).values()
                                                          for x in c.get("concerns") or []]}
     write_json(rdir / "report.json", data)
@@ -132,6 +151,8 @@ def _markdown(d: dict) -> str:
            f"- Agent calls: {ag['total']} of a cap of {ag['cap']}"
            f"{' over ' + str(ag['invocations']) + ' invocations' if ag['invocations'] > 1 else ''}"
            f" ({', '.join(f'{k} {v}' for k, v in sorted(ag['by'].items()))})."]
+    if d.get("needs_call"):
+        out.append(f"- **{len(d['needs_call'])} need your call**: tinker's rules stopped the fixer, so another round would not settle them.")
     integ = d.get("integration")
     if integ:
         stale = "" if integ.get("head") == d["head"] else f" (on {str(integ.get('head'))[:10]}, not the final commit)"
@@ -145,6 +166,9 @@ def _markdown(d: dict) -> str:
         if r["gaps"]:
             ev += f" / gaps {', '.join(r['gaps'])}{' (all fixed)' if r['fixed'] else ''}"
         out.append(f"| {r['id']} | {r['status']} | {_cell(ev)} |")
+    if d.get("needs_call"):
+        out += ["", "## Needs your call", ""]
+        out += [f"- **{x['item']}** ({x['outcome']}): {_clip(x['note'], 500)}" for x in d["needs_call"]]
     if d["failures"]:
         out += ["", "## Remaining failures (last code check)", ""]
         for f in d["failures"]:

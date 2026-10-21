@@ -37,6 +37,9 @@ passes before the fix is reported as not pinned and goes to the next round.
 
 ## Rules
 
+- **Never create, move, rename or delete a branch or tag, and never check out another branch.** The run's branch is
+  the only ref you touch, and only through tinker's commit command. A requirement about how the work is delivered
+  (branches, pull requests, releases, deploys) is a person's job: set `outcome` to `blocked` and say so in `note`.
 - Commit with the exact commit command your prompt gives you. In a split build that is your slice's files, new test
   files beside them, files no slice owns, and the files of any slice your prompt says no fixer works on this round
   (the command carries `--also` for them). A file of a slice another fixer is working on stays that fixer's.

@@ -38,6 +38,9 @@ the cross-slice contract, code anchors and a pattern to mirror). The spec is the
 
 ## Rules
 
+- **Never create, move, rename or delete a branch or tag, and never check out another branch.** The run's branch is
+  the only ref you touch, and only through tinker's commit command. A requirement about how the work is delivered
+  (branches, pull requests, releases, deploys) is a person's job: name it in `notes` and leave it.
 - **Commit with** `<tinker> commit --run <run> --as <your slice id> -m "<message>" [paths...]`. In a split build it
   commits only files your slice owns and refuses the rest. Commit messages say what changed and why; no requirement
   IDs, no tool names.

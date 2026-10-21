@@ -44,7 +44,7 @@ import land  # noqa: E402
 import report  # noqa: E402
 import seal  # noqa: E402
 import spec_index  # noqa: E402
-from common import ARCHIVE, git, head, load_state, mark, read_json, run_dir, update_state, write_json  # noqa: E402
+from common import ARCHIVE, branch_and_tag_refs, git, head, load_state, mark, read_json, run_dir, update_state, write_json  # noqa: E402
 
 
 def _slug(text: str) -> str:
@@ -138,7 +138,7 @@ def cmd_init(root: Path, a) -> dict:
         st.update({"run": a.run, "root": str(root), "spec": str(spec), "spec_sha": index["sha256"], "base_commit": base,
                    "branch": branch, "max_rounds": a.max_rounds, "max_agents": a.max_agents, "commands": commands,
                    "measure": size, "integration_asked": found["asked"], "integration": found["found"],
-                   "untracked_at_start": untracked, "concerns": list(warnings), "resumes": 0})
+                   "untracked_at_start": untracked, "refs_at_start": branch_and_tag_refs(root), "concerns": list(warnings), "resumes": 0})
         mark(st, "init")
         if size["fits"]:
             st["plan"] = gates.single_plan(index)

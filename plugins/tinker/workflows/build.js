@@ -155,10 +155,11 @@ Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { la
     const got = await all(shares.map((ids, i) => () => specCheck(1, null, i + 1, ids))), m = await clerk('merge-spec', 'Verify', `merge-spec ${RR} --parts ${shares.length}`)
     if (m.missing.length) concern(`spec check shares ${m.missing.join(', ')} produced nothing; their requirements are reported unchecked`)
     return got.some(Boolean) ? m : null }
-  // Code assigns each item to the slice that owns its file, then its file's directory, then its requirement, then its test names.
+  // Code assigns each item to the slice that owns its file, then the unit its test file tests, then its directory, its requirement, its test names.
   const owns = (s, f) => !!f && s.files.some(e => e.endsWith('/') ? f.startsWith(e) : f === e), dir = f => f.replace(/\/?[^/]*$/, '')
-  const sameDir = (s, f) => !!f && s.files.some(e => !e.endsWith('/') && dir(e) === dir(f))
-  const assign = items => items.reduce((by, x) => { const s = !SPLIT ? PLAN.slices[0] : PLAN.slices.find(s => owns(s, x.file)) || PLAN.slices.find(s => sameDir(s, x.file))
+  const unit = f => f.replace(/^.*\//, '').split('.')[0].replace(/^test_|(_test|_spec|Tests?|Spec)$/, '').toLowerCase()
+  const sameDir = (s, f, u) => !!f && s.files.some(e => !e.endsWith('/') && dir(e) === dir(f) && (!u || unit(e) === unit(f)))
+  const assign = items => items.reduce((by, x) => { const s = !SPLIT ? PLAN.slices[0] : PLAN.slices.find(s => owns(s, x.file)) || PLAN.slices.find(s => sameDir(s, x.file, 1)) || PLAN.slices.find(s => sameDir(s, x.file))
     || PLAN.slices.find(s => (x.requirement_ids || []).some(r => s.requirement_ids.includes(r)))
     || PLAN.slices.find(s => (x.names || []).some(n => s.files.some(e => n.includes(e.replace(/\/$/, ''))))) || PLAN.slices[PLAN.slices.length - 1]
     ;(by[s.id] = by[s.id] || []).push(x.id); return by }, {})
