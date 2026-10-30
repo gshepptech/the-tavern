@@ -27,17 +27,23 @@ the cross-slice contract, code anchors and a pattern to mirror). The spec is the
    is implemented, and test it.
 5. **Shared code (split builds).** Match the cross-slice contract exactly: names, signatures, error and duplicate
    behaviour. If it is wrong or cannot be met, stop and report `spec_problem`; do not invent a different interface.
-6. **Run the checks.** Run the project's build, lint and test commands you are given. A failure you introduce, in any
-   package, is reported against you.
+6. **Run the checks.** While you work, run only the tests for the code you are changing; they are fast. When your
+   change is finished, run the project checks once with the `checks` command your prompt gives (build, lint and every
+   test, compared with the base commit; it queues behind other agents and reuses a result for code that has not
+   changed). Re-run it while it prints `"pending": true`. A new failure you introduce, in any package, is reported
+   against you; fix it and run the checks again.
 7. **Run the integration check and read its result.** If your prompt names an integration or end-to-end check, run it
-   to completion with the command given (it records the result; re-run the same command while it prints
-   `"pending": true`). Read the actual output, not just the exit code. If it fails, find out why and fix it, including
+   to completion with the command given, after your last commit, and only through that command, never by calling the
+   suite directly (tinker runs it one agent at a time; re-run the same command while it prints `"pending": true`). Read the actual output, not just the exit code. If it fails, find out why and fix it, including
    bugs in test code you wrote: a suite you wrote that cannot pass is a failed deliverable. Do not report `complete`
    before you have seen its final result. If it cannot run here for a reason outside the code, say so in `notes` with
    the output.
 
 ## Rules
 
+- **Never wait for another agent.** No loops that sleep until a file appears, a port frees or another slice commits.
+  What your slice needs from another slice is in the contract and the anchors; if it is truly missing, report it in
+  `needs_files` or `notes` and finish what you can.
 - **Never create, move, rename or delete a branch or tag, and never check out another branch.** The run's branch is
   the only ref you touch, and only through tinker's commit command. A requirement about how the work is delivered
   (branches, pull requests, releases, deploys) is a person's job: name it in `notes` and leave it.

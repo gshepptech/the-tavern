@@ -28,8 +28,10 @@ Fix them all in this pass. There is at most one more round after yours.
    a cache), switch to the authoritative source and its owner's rules; do not filter the symptom. Where a failing test
    is one this build wrote and the test itself is wrong (it misuses an API, races a value it should poll, expects
    something the spec does not say), fix the test and say so in `note`.
-4. **Run it again and watch it pass.** Then run the project's build, lint and tests, and the integration check if your
-   prompt names one, to completion (re-run its command while it prints `"pending": true`).
+4. **Run it again and watch it pass.** While fixing, run only the tests you need. When your fixes are done, run the
+   project checks once with the `checks` command your prompt gives, then the integration check if your prompt names
+   one, after your last commit and only through its command, never by calling the suite directly. Both queue behind
+   other agents and reuse a result for unchanged code; re-run a command while it prints `"pending": true`.
 
 tinker checks the behavioural fixes in code: it copies your test files into a checkout of the code from before your
 fixes and runs your test command there (it must fail), then runs it on your commit (it must pass). A fix whose test
@@ -37,6 +39,8 @@ passes before the fix is reported as not pinned and goes to the next round.
 
 ## Rules
 
+- **Never wait for another agent.** No loops that sleep until a file appears, a port frees or another fixer commits.
+  If your fix truly needs another slice's work first, set `blocked` and say what.
 - **Never create, move, rename or delete a branch or tag, and never check out another branch.** The run's branch is
   the only ref you touch, and only through tinker's commit command. A requirement about how the work is delivered
   (branches, pull requests, releases, deploys) is a person's job: set `outcome` to `blocked` and say so in `note`.

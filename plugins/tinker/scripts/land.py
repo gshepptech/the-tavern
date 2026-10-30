@@ -25,7 +25,7 @@ from pathlib import Path
 
 import checks
 from common import (ARCHIVE, ID_RE, branch_and_tag_refs, git, git_retry, head, is_doc_file, is_test_file, load_state, mark,
-                    read_json, tail, unit_of, update_state, write_json)
+                    queued, read_json, tail, tree_key, unit_of, update_state, write_json)
 from gates import _norm, overlaps
 
 
@@ -157,15 +157,53 @@ def preflight(root: Path, rdir: Path, integ: dict | None, extra_needs: list[str]
 # Integration and verify
 # ---------------------------------------------------------------------------
 def integration(root: Path, rdir: Path) -> dict:
+    """Run the spec's end-to-end check, one agent at a time, and reuse a result already taken on the same code.
+
+    Agents building side by side used to start the suite at once and fight over its ports and the machine; in one
+    P1.1 run fixers ran it 9-11 times each and spent minutes in loops waiting for a port to free."""
     integ = load_state(rdir).get("integration") or {}
     if not integ.get("command"):
         return {"ok": True, "ran": False, "why": "the spec names no integration check"}
-    r = checks.run_command(integ["command"], Path(root) / (integ.get("cwd") or ""), int(integ.get("timeout_s") or 3600))
-    rec = {"command": integ["command"], "cwd": integ.get("cwd") or "", "exit": r["exit"], "seconds": r["seconds"],
-           "head": head(root), "tail": r["tail"], "failures": r["failures"]}
-    write_json(Path(rdir) / "checks" / "integration-latest.json", rec)
-    return {"ok": r["exit"] == 0, "ran": True, **{k: rec[k] for k in ("command", "exit", "seconds", "head", "failures")},
+    latest_path = Path(rdir) / "checks" / "integration-latest.json"
+    with queued(Path(rdir) / "integration.lock"):
+        key = tree_key(root, f"{ARCHIVE}/")
+        latest = read_json(latest_path) or {}
+        if latest.get("tree") == key:
+            return {"ok": latest.get("exit") == 0, "ran": False, "reused": True, "tree": key,
+                    **{k: latest.get(k) for k in ("command", "exit", "seconds", "head", "failures")}, "tail": tail(latest.get("tail", ""), 40)}
+        r = checks.run_command(integ["command"], Path(root) / (integ.get("cwd") or ""), int(integ.get("timeout_s") or 3600))
+        rec = {"command": integ["command"], "cwd": integ.get("cwd") or "", "exit": r["exit"], "seconds": r["seconds"],
+               "head": head(root), "tree": key, "tail": r["tail"], "failures": r["failures"]}
+        write_json(latest_path, rec)
+    return {"ok": r["exit"] == 0, "ran": True, **{k: rec[k] for k in ("command", "exit", "seconds", "head", "tree", "failures")},
             "tail": tail(r["tail"], 40)}
+
+
+def agent_checks(root: Path, rdir: Path) -> dict:
+    """The project's build, lint and test commands on the working tree as it is now, for a builder or fixer.
+
+    One agent at a time, and a result taken on the same code is reused: in the ux-35 run agents ran the full web
+    suite 254 times, often several at once on one machine. A failure is reported as new only when the base commit
+    does not fail the same way, as verify does."""
+    state = load_state(rdir)
+    out_dir = Path(rdir) / "checks"
+    with queued(Path(rdir) / "checks.lock"):
+        key = tree_key(root, f"{ARCHIVE}/")
+        cached = read_json(out_dir / f"agent-{key}.json")
+        if cached:
+            return {**cached, "reused": True}
+        results = []
+        for c in [c for k in ("build", "lint", "test") for c in state.get("commands", {}).get(k, [])]:
+            r = checks.run_command(c["cmd"], Path(root) / (c.get("cwd") or ""))
+            entry = {"cmd": c["cmd"], "cwd": c.get("cwd", ""), "exit": r["exit"], "seconds": r["seconds"], "new": [], "status": "pass"}
+            if r["exit"] != 0:
+                base_r = checks.run_at(root, rdir, state["base_commit"], c)
+                new = (r["failures"] or [f"`{c['cmd']}` exits {r['exit']}"]) if base_r["exit"] == 0 else sorted(set(r["failures"]) - set(base_r["failures"]))
+                entry.update(new=new, status="new_failures" if new else "pre_existing", tail=tail(r["tail"], 40))
+            results.append(entry)
+        rec = {"ok": not any(e["status"] == "new_failures" for e in results), "tree": key, "head": head(root), "checks": results}
+        write_json(out_dir / f"agent-{key}.json", rec)
+    return {**rec, "reused": False}
 
 
 def _commits(root: Path, base: str) -> list[str]:

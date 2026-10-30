@@ -87,13 +87,15 @@ def _cache_key(commit: str, cmd: str, cwd: str) -> str:
 
 def run_at(root: Path, rdir: Path, commit: str, command: dict, timeout: int = DEFAULT_TIMEOUT) -> dict:
     """Run one command at a commit: in the working tree when the commit is HEAD
-    and the tree is clean of tracked changes, else in a detached worktree."""
+    and the tree has no changes at all, else in a detached worktree. Untracked
+    files count: a new test file an agent has not committed yet is not part of
+    the commit, and a result cached for the commit must not include it."""
     cwd_rel = command.get("cwd") or ""
     path = Path(rdir) / "checks" / f"{_cache_key(commit, command['cmd'], cwd_rel)}.json"
     cached = read_json(path)
     if cached is not None:
         return cached
-    dirty = git(root, "status", "--porcelain", "--untracked-files=no").stdout.strip()
+    dirty = git(root, "status", "--porcelain", "--untracked-files=normal").stdout.strip()
     if commit == head(root) and not dirty:
         result = run_command(command["cmd"], Path(root) / cwd_rel, timeout)
     else:

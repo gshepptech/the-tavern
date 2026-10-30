@@ -7,6 +7,7 @@
     tinker plan        --run NAME
     tinker commit      --run NAME --as ACTOR [--also SLICES] -m MESSAGE [PATH ...]
     tinker integration --run NAME
+    tinker checks      --run NAME
     tinker verify      --run NAME --round N
     tinker merge-spec  --run NAME --parts N
     tinker resume      --run NAME
@@ -44,7 +45,7 @@ import land  # noqa: E402
 import report  # noqa: E402
 import seal  # noqa: E402
 import spec_index  # noqa: E402
-from common import ARCHIVE, branch_and_tag_refs, git, head, load_state, mark, read_json, run_dir, update_state, write_json  # noqa: E402
+from common import ARCHIVE, branch_and_tag_refs, git, head, load_state, mark, read_json, run_dir, tree_key, update_state, write_json  # noqa: E402
 
 
 def _slug(text: str) -> str:
@@ -274,6 +275,8 @@ def _dispatch(root: Path, a) -> dict:
         return land.commit(root, rdir, a.actor, a.message, a.paths, tuple(x for x in a.also.split(",") if x))
     if a.cmd == "integration":
         return land.integration(root, rdir)
+    if a.cmd == "checks":
+        return land.agent_checks(root, rdir)
     if a.cmd == "verify":
         return land.verify(root, rdir, a.round)
     if a.cmd == "merge-spec":
@@ -302,7 +305,7 @@ def _parser() -> argparse.ArgumentParser:
     s.add_argument("--no-branch", action="store_true")
     s = sub.add_parser("index")
     s.add_argument("--spec", required=True)
-    for name in ("resume", "integration", "report", "plan"):
+    for name in ("resume", "integration", "checks", "report", "plan"):
         sub.add_parser(name).add_argument("--run", required=True)
     s = sub.add_parser("preflight")
     s.add_argument("--run", required=True)
@@ -330,6 +333,11 @@ def _job(root: Path, a, argv: list[str]) -> dict:
     jobs = run_dir(root, a.run) / "jobs"
     jobs.mkdir(parents=True, exist_ok=True)
     out, pid_file = jobs / f"{a.job}.json", jobs / f"{a.job}.pid"
+    if out.exists() and a.cmd in ("integration", "checks"):
+        # A finished check is an answer about the code it ran on; once the code changes, run it again.
+        done = read_json(out, {}) or {}
+        if done.get("tree") and done.get("tree") != tree_key(root, f"{ARCHIVE}/"):
+            out.unlink()
     if not out.exists():
         alive = False
         if pid_file.exists():

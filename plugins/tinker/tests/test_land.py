@@ -155,3 +155,25 @@ def test_verify_reports_new_branches_as_a_concern_and_never_fails_on_them(run):
     v = j(root, "verify", "--run", name, "--round", "1")
     assert v["new_refs"] == ["refs/heads/made-by-someone"] and not any(f["kind"] == "refs" for f in v["failures"])
     assert any("made-by-someone" in c and "check who did" in c for c in load_state(rdir)["concerns"])
+
+
+def test_integration_runs_one_at_a_time_and_reuses_a_result_for_unchanged_code(run):
+    root, name, rdir = run
+    with update_state(rdir) as st:
+        st["integration"] = {"command": f"echo ran >> {rdir}/runs.log", "cwd": ""}
+    first = j(root, "integration", "--run", name)
+    assert first["ran"] and first["tree"]
+    again = j(root, "integration", "--run", name)
+    assert again["reused"] and not again["ran"] and (rdir / "runs.log").read_text().count("ran") == 1
+    write(root, "calc.py", SUB)  # the code changed: run it again
+    assert j(root, "integration", "--run", name)["ran"]
+
+
+def test_agent_checks_report_new_failures_and_reuse_results(run):
+    root, name, rdir = run
+    r = j(root, "checks", "--run", name)
+    assert r["ok"] and not r["reused"] and all(c["status"] == "pass" for c in r["checks"])
+    assert j(root, "checks", "--run", name)["reused"]
+    write(root, "tests/test_bad.py", "assert False\n")
+    bad = j(root, "checks", "--run", name)
+    assert not bad["ok"] and not bad["reused"] and any(c["status"] == "new_failures" for c in bad["checks"])

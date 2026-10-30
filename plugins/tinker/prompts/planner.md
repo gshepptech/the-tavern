@@ -64,8 +64,9 @@ The rules are generic and apply to any spec and any codebase.
 - **Ownership (S1-S3).** Every requirement ID in the spec index is owned by at least one slice. A slice that writes
   behaviour (`kind: "behaviour"`) owns at least one ID; only a `kind: "docs"` slice that writes documentation only
   may own none. A clause co-owned by more than 2 slices needs `split_reason[ID]` on an owner. Files never overlap
-  between slices (a directory entry covers everything under it). Tests live with their unit: a test file in the same
-  directory as a file a slice owns belongs to that slice.
+  between slices (a directory entry covers everything under it). Tests live with their unit: a test file belongs to the slice
+  that owns the file it tests by name (`Foo.test.tsx` and `Foo.tsx`), else to a slice with a file in its directory.
+  A docs slice starts after every behaviour slice; tinker adds that ordering itself.
 - **Shape (S5).** `depends_on` names known slices with no cycle. Waves follow from it: foundation, then owners in
   parallel, then integration.
 - **Contract (S6).** With more than one slice, `contract_block` holds the exact signatures, names, config keys and

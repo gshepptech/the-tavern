@@ -61,6 +61,33 @@ def skipped(rel: str) -> bool:
     return any(part in SKIP_DIRS or part.startswith(".") for part in Path(rel).parts[:-1])
 
 
+def tree_key(root: Path, skip: str = "") -> str:
+    """HEAD plus every uncommitted change, as one hash: two runs with the same key ran on the same code."""
+    h = hashlib.sha256(head(root).encode())
+    status = git(root, "status", "--porcelain=v1", "-z", "--untracked-files=all").stdout.split("\0")
+    for entry in sorted(e for e in status if len(e) > 3):
+        rel = entry[3:]
+        if skip and rel.startswith(skip):
+            continue
+        h.update(entry.encode())
+        f = Path(root) / rel
+        if f.is_file():
+            h.update(f.read_bytes())
+    return h.hexdigest()[:16]
+
+
+@contextmanager
+def queued(path: Path):
+    """Hold an exclusive lock on ``path`` for the block: agents that share one machine take turns."""
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "a") as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
+
+
 def branch_and_tag_refs(root: Path) -> list[str]:
     return sorted(x for x in git(root, "for-each-ref", "--format=%(refname)", "refs/heads", "refs/tags").stdout.splitlines() if x)
 

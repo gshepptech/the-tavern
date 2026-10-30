@@ -75,7 +75,9 @@ Run directory: ${RDIR}
 Spec: ${RDIR}/spec.md; every requirement ID with its verbatim clause: ${RDIR}/spec-index.json
 Base commit of the build: ${BASE}
 Project commands: ${['build', 'lint', 'test'].map(k => `${k}: ${(COMMANDS[k] || []).map(c => `\`${c.cmd}\`${c.cwd ? ` in ${c.cwd}/` : ''}`).join(', ') || 'none detected'}`).join('; ')}`
-const integLine = key => INTEG ? `Integration check: \`${INTEG.command}\`${INTEG.cwd ? ` in ${INTEG.cwd}/` : ''}${INTEG.exists === false ? ' (it does not exist yet; the spec asks for it to be written)' : ''}. Run it to completion with: ${T} --job ${key}-e${EPOCH} integration ${RR}` : 'The spec names no integration check.'
+const checksLine = key => `Project checks (build, lint, all tests; one agent at a time, reused when the code has not changed): ${T} --job ${key}-e${EPOCH} checks ${RR}
+`
+const integLine = key => checksLine(key.replace(/^integ/, 'checks')) + (INTEG ? `Integration check: \`${INTEG.command}\`${INTEG.cwd ? ` in ${INTEG.cwd}/` : ''}${INTEG.exists === false ? ' (it does not exist yet; the spec asks for it to be written)' : ''}. Run it to completion with: ${T} --job ${key}-e${EPOCH} integration ${RR}` : 'The spec names no integration check.')
 
 const finish = async forced => {
   phase('Report')

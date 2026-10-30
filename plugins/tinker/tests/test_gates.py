@@ -1,3 +1,5 @@
+import json
+
 from conftest import single_plan
 
 import gates
@@ -208,3 +210,16 @@ def test_measure_skips_dependency_and_hidden_directories(run):
     (root / "web" / ".cache" / "c.js").write_text("x\n" * 5000)
     (root / "web" / "app.js").write_text("a\nb\n")
     assert gates.read_loc(root, ["web/"]) == 2
+
+
+def test_a_docs_slice_starts_after_every_behaviour_slice(run):
+    root, _, rdir = run
+    p = _split()
+    p["slices"].append({"id": "docs", "title": "docs", "kind": "docs", "requirement_ids": [], "files": ["README.md"],
+                        "anchors": [{"at": "calc.py:1", "fact": "add lives here"}], "new_loc": 50})
+    _plan(rdir, p)
+    r = gates.check_plan(root, rdir, INDEX)
+    assert r["ok"], r["errors"]
+    assert r["waves"] == [["s1"], ["s2"], ["docs"]]
+    assert any("docs documents what the other slices build" in n for n in r["notes"])
+    assert json.loads((rdir / "plan.json").read_text())["slices"][2]["depends_on"] == ["s1", "s2"]

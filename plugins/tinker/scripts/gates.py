@@ -21,7 +21,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from common import ID_RE, is_doc_file, read_json, skipped
+from common import ID_RE, is_doc_file, read_json, skipped, write_json
 
 # S4: "<= 8 key_files entries (a directory entry counts as one ...), <= ~800 LOC
 # to read, <= ~1,500 LOC new." The "~" is read as 25% headroom.
@@ -248,6 +248,16 @@ def check_plan(root: Path, rdir: Path, index: dict) -> dict:
                 for fb in slices[b].get("files") or []:
                     if overlaps(fa, fb):
                         errors.append(f"{a} and {b} both own {fa if len(fa) >= len(fb) else fb}")
+    # A docs slice describes what the behaviour slices build, so it starts after all of them. Left in an early
+    # wave, its builder sits polling for files that do not exist yet (47 minutes of sleep loops in one P1.1 run).
+    behaviour = [x for x, s in slices.items() if s.get("kind", "behaviour") == "behaviour"]
+    for sid, s in slices.items():
+        if s.get("kind") == "docs":
+            missing = [b for b in behaviour if b not in (s.get("depends_on") or [])]
+            if missing:
+                s["depends_on"] = list(s.get("depends_on") or []) + missing
+                notes.append(f"{sid} documents what the other slices build, so it now starts after {', '.join(missing)}")
+                write_json(Path(rdir) / "plan.json", plan)
     waves, cyc = _waves(slices) if not errors else ([], "")
     if cyc:
         errors.append(cyc)
@@ -299,7 +309,9 @@ def check_plan(root: Path, rdir: Path, index: dict) -> dict:
 def _seam_errors(plan: dict, slices: dict) -> list[str]:
     errors = []
     seams = plan.get("seams") or []
-    edges = {tuple(sorted((a, d))) for a, s in slices.items() for d in s.get("depends_on") or []}
+    # A docs slice only describes what others built; waiting for them is ordering, not shared behaviour.
+    docs = {x for x, s in slices.items() if s.get("kind") == "docs"}
+    edges = {tuple(sorted((a, d))) for a, s in slices.items() for d in s.get("depends_on") or [] if a not in docs and d not in docs}
     covered_pairs = set()
     contract = plan.get("contract_block") or ""
     for n, sm in enumerate(seams):
