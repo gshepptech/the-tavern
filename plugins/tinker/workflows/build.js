@@ -131,6 +131,22 @@ When the check prints "passed": true, or you cannot make it pass, put its last J
   slice = Object.fromEntries(PLAN.slices.map(s => [s.id, s]))
   note(SPLIT ? `${PLAN.slices.length} slices in ${PLAN.waves.length} waves` : 'one builder')
 
+  // ------------------------------------------------- Spec checks (defined before Build: a slice is checked the moment it lands)
+  // A split build checks each slice as soon as its builder finishes, while the other slices are still building, on the
+  // requirements it owns; a single build checks once, in shares when the spec is large. Either way code joins the files.
+  const specCheck = (rnd, recheck, k, ids, sid) => soft('spec-checker', `${recheck ? `Re-check only these gaps after fix round ${rnd - 1}: ${recheck.map(g => g.id).join(', ')}. Each is defined in ${RDIR}/checks/spec-r1.json.`
+    : sid ? `Judge only the requirements slice ${sid} owns; its builder has just finished and other slices may still be building: ${ids.join(', ')}. You also own the displacement audit for this slice's files: ${slice[sid].files.join(', ')}.`
+    : ids ? `Judge only these requirements, share ${k} of ${PLAN.shares.length}; other checkers judge the rest at the same time: ${ids.join(', ')}.${k === 1 ? ' You also own the displacement audit.' : ' Skip the displacement audit; share 1 owns it.'}` : 'Check every requirement in the spec against the code, in one pass.'}
+${ctx()}
+The code this build added or changed: git diff ${BASE}..HEAD.
+Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { label: `spec:r${rnd}${sid ? `:${sid}` : k ? `:${k}` : ''}`, phase: 'Verify', agentType: 'tinker:spec-checker', effort: 'max', schema: GAPS })
+  const checked = SPLIT ? PLAN.slices.filter(x => x.requirement_ids.length).map(x => x.id) : [], partOf = id => checked.indexOf(id) + 1
+  const landed = {}, sliceCheck = id => (landed[id] = landed[id] || (!checked.includes(id) || (st.slice_checks || []).includes(partOf(id)) ? Promise.resolve(true) : specCheck(1, null, partOf(id), slice[id].requirement_ids, id)))
+  const shares = SPLIT ? checked : PLAN.shares || [], firstCheck = async () => { if (shares.length < 2) return specCheck(1)
+    const got = await all(shares.map((ids, i) => () => SPLIT ? sliceCheck(ids) : specCheck(1, null, i + 1, ids))), m = await clerk('merge-spec', 'Verify', `merge-spec ${RR} --parts ${shares.length}`)
+    if (m.missing.length) concern(`spec check ${SPLIT ? 'of slices' : 'shares'} ${m.missing.map(k => SPLIT ? checked[k - 1] : k).join(', ')} produced nothing; their requirements are reported unchecked`)
+    return got.some(Boolean) ? m : null }
+
   // ---------------------------------------------------------------------- Build
   phase('Build')
   const built = new Set(st.built || [])
@@ -143,20 +159,11 @@ ${integLine(`integ-${id}`)}
 Commit with: ${T} commit ${RR} --as ${id} -m "<message>" [paths...]${SPLIT ? `
 Other slices may be building in this tree at the same time; you own only: ${slice[id].files.join(', ')}.` : ''}`, { label: `build:${id}`, phase: 'Build', agentType: 'tinker:builder', model: 'opus', schema: BUILDER })
     if (r && r.status !== 'complete') concern(`builder of ${id} reported ${r.status}: ${[r.notes, ...(r.needs_files || [])].filter(Boolean).join('; ')}`)
+    if (SPLIT) sliceCheck(id) // started, not awaited: slices that depend on this one start now
   })
   const bad = (await Promise.allSettled(Object.values(job))).find(x => x.status === 'rejected'); if (bad) throw bad.reason
 
   // ------------------------------------------------------------ Verify and fix
-  // Round 1 is judged by one checker per share of the requirements, side by side, joined in code.
-  const specCheck = (rnd, recheck, k, ids) => soft('spec-checker', `${recheck ? `Re-check only these gaps after fix round ${rnd - 1}: ${recheck.map(g => g.id).join(', ')}. Each is defined in ${RDIR}/checks/spec-r1.json.`
-    : ids ? `Judge only these requirements, share ${k} of ${PLAN.shares.length}; other checkers judge the rest at the same time: ${ids.join(', ')}.${k === 1 ? ' You also own the displacement audit.' : ' Skip the displacement audit; share 1 owns it.'}` : 'Check every requirement in the spec against the code, in one pass.'}
-${ctx()}
-The code this build added or changed: git diff ${BASE}..HEAD.
-Write your result to ${RDIR}/checks/spec-r${rnd}${k ? `-${k}` : ''}.json.`, { label: `spec:r${rnd}${k ? `:${k}` : ''}`, phase: 'Verify', agentType: 'tinker:spec-checker', effort: 'max', schema: GAPS })
-  const shares = PLAN.shares || [], firstCheck = async () => { if (shares.length < 2) return specCheck(1)
-    const got = await all(shares.map((ids, i) => () => specCheck(1, null, i + 1, ids))), m = await clerk('merge-spec', 'Verify', `merge-spec ${RR} --parts ${shares.length}`)
-    if (m.missing.length) concern(`spec check shares ${m.missing.join(', ')} produced nothing; their requirements are reported unchecked`)
-    return got.some(Boolean) ? m : null }
   // Code assigns each item to the slice that owns its file, then the unit its test file tests, then its directory, its requirement, its test names.
   const owns = (s, f) => !!f && s.files.some(e => e.endsWith('/') ? f.startsWith(e) : f === e), dir = f => f.replace(/\/?[^/]*$/, '')
   const unit = f => f.replace(/^.*\//, '').split('.')[0].replace(/^test_|(_test|_spec|Tests?|Spec)$/, '').toLowerCase()

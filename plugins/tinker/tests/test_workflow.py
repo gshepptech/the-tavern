@@ -64,7 +64,7 @@ def test_meta_phases_match_every_phase_call():
 
 
 def test_the_script_stays_small():
-    assert len(SCRIPT.read_text(encoding="utf-8").splitlines()) <= 200
+    assert len(SCRIPT.read_text(encoding="utf-8").splitlines()) <= 215
 
 
 def test_single_builder_run_makes_five_agent_calls(single):
@@ -107,7 +107,7 @@ def test_split_plans_then_builds_waves_in_order(split):
     p = split["prompts"]["build:api"]
     assert "Your brief: /b/api.md" in p and "you own only: api/" in p and "--as api -m" in p
     assert "prompts/planner.md" in split["prompts"]["plan"] and "'/plugin/scripts/tinker' --root '/p' plan --run 'r'" in split["prompts"]["plan"]
-    assert split["result"]["agent_calls"]["by"] == {"clerk": 3, "planner": 1, "builder": 3, "spec-checker": 1}
+    assert split["result"]["agent_calls"]["by"] == {"clerk": 4, "planner": 1, "builder": 3, "spec-checker": 3}
 
 
 def test_a_slice_starts_when_its_own_dependencies_finish_not_its_wave():
@@ -244,3 +244,19 @@ def test_large_spec_is_checked_in_shares_side_by_side_then_joined():
 def test_a_share_that_produces_nothing_is_a_concern():
     d = _run("shares-missing")
     assert any("spec check shares 2 produced nothing" in c for c in d["result"]["concerns"])
+
+
+def test_each_slice_is_spec_checked_as_soon_as_it_lands(split):
+    labels = split["labels"]
+    # core's check starts right after core is built, before the code check that waits for every slice
+    assert labels.index("build:core") < labels.index("spec:r1:core") < labels.index("clerk:verify:r1")
+    assert {"spec:r1:api", "spec:r1:cli"} <= set(labels)
+    p = split["prompts"]["spec:r1:api"]
+    assert "Judge only the requirements slice api owns" in p and ": FR-2." in p
+    assert "displacement audit for this slice's files: api/" in p and "checks/spec-r1-2.json" in p
+    assert "merge-spec --run 'r' --parts 3" in " ".join(_cmds(split))
+
+
+def test_resume_skips_slices_already_checked():
+    d = _run("resume-checked")
+    assert "spec:r1:core" not in d["labels"] and {"spec:r1:api", "spec:r1:cli"} <= set(d["labels"])

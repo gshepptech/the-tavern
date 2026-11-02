@@ -98,6 +98,8 @@ const SCENARIOS = {
   shares: { shares: [['FR-1'], ['FR-2']], rounds: [{ failures: [], open: [gap('G-001')] }, { failures: [], open: [] }] },
   // One share's checker produces nothing: its requirements are reported unchecked.
   'shares-missing': { shares: [['FR-1'], ['FR-2']], mergeMissing: [2] },
+  // Resumed after the build with core's slice check already written: only api and cli are checked.
+  'resume-checked': { plan: SPLIT, resume: { steps_done: ['init', 'preflight', 'plan'], built: ['core', 'api', 'cli'], slice_checks: [1] } },
   // Resumed after a preflight stop: the check is re-run before anything else.
   'resume-preflight': { resume: { steps_done: ['init', 'plan'], built: [] } },
 }

@@ -252,7 +252,8 @@ def cmd_resume(root: Path, a, rdir: Path) -> dict:
             "max_agents": state.get("max_agents", 40), "commands": state.get("commands", {}),
             "integration": state.get("integration"), "measure": state.get("measure"),
             "finder": "preflight" not in done and bool(state.get("integration_asked")) and not state.get("integration"),
-            "plan": _plan_summary(state, rdir), "built": built, "rounds": rounds}
+            "plan": _plan_summary(state, rdir), "built": built, "rounds": rounds,
+            "slice_checks": sorted(int(p.stem.split("-")[-1]) for p in (rdir / "checks").glob("spec-r1-*.json") if p.stem.split("-")[-1].isdigit())}
 
 
 def _dispatch(root: Path, a) -> dict:

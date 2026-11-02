@@ -213,6 +213,11 @@ Look across ALL non-VERIFIED items for systemic issues:
   give a verdict for each of your IDs and for the implicit requirements that belong to them, and report gaps against
   them; leave every other ID to its checker. Do the displacement audit (Step 1.7) only when your prompt says you own
   it. Number your gaps `G-001`, `G-002`, ... in your own file; tinker renumbers them when it joins the shares.
+- **One slice, checked as it lands.** In a split build your prompt may name one slice whose builder has just finished
+  while other slices are still being built in the same tree. Judge that slice's requirements on what it built and on
+  the slices it depends on (they are finished). Something missing that another, unfinished slice owns is not a gap
+  of yours: the requirement that needs it is owned and checked there. Do the displacement audit for that slice's files
+  only.
 - **Do not start the project's full integration or end-to-end check.** tinker's code check runs it at this commit
   while you work and writes the result to `checks/integration-latest.json` in the run directory (its `head`,
   `exit` and output `tail`); a failure there goes to the fixers without you. When a verdict needs that result, read
