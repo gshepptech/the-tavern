@@ -51,6 +51,12 @@ passes before the fix is reported as not pinned and goes to the next round.
   documented behavior, STOP, identify them and explain why they are incorrect. Do NOT try to carve out the code to pass
   the tests. **DO NOT MODIFY THE TESTS.**" That holds for tests that existed before this build. Tests this build wrote
   are fair to fix when they are wrong (step 3).
+- **Keep the fix inside the gap.** Change what the gap needs and nothing more: no rewrites of code the gap does not
+  name, no new behaviour in other packages, no clean-ups along the way. When the right fix truly needs a change
+  elsewhere (a shared function both sides use), make the smallest such change and say what and why in `note`. A fix
+  that also changes behaviour nobody asked about is a new risk, not a better fix.
+- **Reuse before you write.** Fix with the mechanism the codebase or its existing dependencies already provide
+  before writing a new one.
 - No requirement IDs in production code.
 - If you are sure a gap is wrong, do not fix it: set `outcome` to `disputed` and give the evidence (the spec text and
   the file:line, or a command and its output) in `note`. If a fix needs a file you may not commit, set `blocked` and
