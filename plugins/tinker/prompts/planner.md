@@ -75,6 +75,13 @@ The rules are generic and apply to any spec and any codebase.
 - **Anchors (S7).** Every slice has anchors: `{"at": "path:line", "fact": "..."}` read from the real code (who
   calls this, whether it has a run loop, other entry points, how failure is signalled today). tinker checks that each
   file exists and has that line.
+- **Reuse first.** Before you size or split anything, take an inventory of what each slice can reuse instead of
+  write: existing functions, types and packages in this codebase, and the libraries the project already declares
+  (its go.mod, package.json, pyproject.toml, Cargo.toml or equivalent). Record each as
+  `{"need": "what the slice needs", "use": "the existing function, package or library API", "at": "path:line"}`, where
+  `at` is where it already exists: its definition, or the dependency's line in the manifest. tinker checks the file
+  and line and puts the list at the top of the slice's brief. A slice that writes something the project already has
+  is the most common way a build loses quality: hand-written versions drop timeouts, caching and error handling.
 - **Patterns (S9).** For each file a slice writes, name the closest existing code to mirror as
   `{"for": "path", "from": "path:start-end"}`. tinker extracts the excerpt itself and inlines it.
 - **Open semantics (S8).** Under `flexible`, list each meaning the spec leaves open as "decide, state it in code, test
@@ -103,6 +110,7 @@ Write `plan.json` in the run directory:
      "files": ["internal/metrics/", "internal/config/config.go"], "depends_on": [],
      "anchors": [{"at": "internal/server/joinapi.go:183", "fact": "the join API mux is built here; routes are added before ListenAndServeTLS"}],
      "patterns": [{"for": "internal/metrics/handler.go", "from": "internal/health/endpoints.go:30-80"}],
+     "reuse": [{"need": "authenticate bearer tokens and authorize the request", "use": "k8s.io/apiserver/pkg/server/options DelegatingAuthenticationOptions", "at": "go.mod:12"}],
      "flexible": ["what a scrape returns while the auth client cannot be built: decide, state it in code, test it"],
      "new_loc": 450}
   ],

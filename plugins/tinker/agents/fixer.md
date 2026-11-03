@@ -56,7 +56,8 @@ passes before the fix is reported as not pinned and goes to the next round.
   elsewhere (a shared function both sides use), make the smallest such change and say what and why in `note`. A fix
   that also changes behaviour nobody asked about is a new risk, not a better fix.
 - **Reuse before you write.** Fix with the mechanism the codebase or its existing dependencies already provide
-  before writing a new one.
+  before writing a new one. A REINVENTED gap is fixed by switching to the existing code it names and deleting the
+  re-written version, with a test that still holds on the switched code.
 - No requirement IDs in production code.
 - If you are sure a gap is wrong, do not fix it: set `outcome` to `disputed` and give the evidence (the spec text and
   the file:line, or a command and its output) in `note`. If a fix needs a file you may not commit, set `blocked` and

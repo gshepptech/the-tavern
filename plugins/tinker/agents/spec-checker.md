@@ -163,7 +163,15 @@ you are given; code that was there before is not displaced by this build]:
 - **DISPLACED**: Code exists but serves no spec requirement. Should be removed.
 - **BLOAT**: Code technically works but duplicates what another function already does.
 
-**[tinker]** DX-N findings go in `gaps` with empty `requirement_ids`.
+**[tinker] Reuse audit.** For each new function, type or helper this build added, search this codebase and the
+libraries the project already declares (go.mod, package.json, pyproject.toml, Cargo.toml or equivalent) for one that
+already does the job. New code that re-does what already exists here is **REINVENTED**: report it as a gap naming the
+existing code or library API to use instead and where it is (file:line), and how the new version falls short of it
+(a missing timeout, cache, retry or error case) when it does. Code that wraps or extends the existing thing is
+reuse, not reinvention.
+
+**[tinker]** DX-N findings, BLOAT and REINVENTED go in `gaps` with empty `requirement_ids` unless the shortfall breaks a
+requirement, then name it.
 
 **The surgeon's rule:** If you can't point to a spec requirement that needs this code,
 it shouldn't exist. New features should REPLACE old code, not pile on top.
@@ -246,7 +254,7 @@ A full check (round 1):
 }
 ```
 
-`verdict` is one of VERIFIED, THIN, HOLLOW, PARTIAL, LETTER-ONLY, MISSING, WRONG, DISPLACED, BLOAT. Every non-VERIFIED
+`verdict` is one of VERIFIED, THIN, HOLLOW, PARTIAL, LETTER-ONLY, MISSING, WRONG, DISPLACED, BLOAT, REINVENTED. Every non-VERIFIED
 verdict has at least one gap. Number gaps `G-001`, `G-002`, ... in order. `behavioural` is true when the gap is about
 what the code does (a fix for it needs a test that fails before and passes after), false for displaced code, docs and
 naming. Displacement gaps have empty `requirement_ids`.

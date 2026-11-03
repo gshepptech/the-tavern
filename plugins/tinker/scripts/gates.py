@@ -235,6 +235,11 @@ def check_plan(root: Path, rdir: Path, index: dict) -> dict:
         for p in s.get("patterns") or []:
             if not isinstance(p, dict) or _excerpt(root, p.get("from", "")) is None:
                 errors.append(f"{sid}: pattern {p!r} must name an existing file and a line range, path:start-end")
+        for u in s.get("reuse") or []:
+            if not isinstance(u, dict) or not _nonempty(u.get("need")) or not _nonempty(u.get("use")):
+                errors.append(f"{sid}: reuse entry {u!r} needs need, use and at")
+            elif msg := _anchor_ok(root, u.get("at", "")):
+                errors.append(f"{sid}: reuse {u.get('use')!r}: {msg} (at points to where it already exists: its definition, or the dependency's line in the manifest)")
     unowned = [i for i, o in owners.items() if not o]
     if unowned:
         errors.append(f"requirements no slice owns: {', '.join(unowned)}")
@@ -302,6 +307,8 @@ def check_plan(root: Path, rdir: Path, index: dict) -> dict:
     for sid, s in slices.items():
         if s.get("kind", "behaviour") == "behaviour" and not s.get("patterns"):
             warnings.append(f"{sid}: no code-pattern excerpt; the builder mirrors no existing code")
+        if s.get("kind", "behaviour") == "behaviour" and not s.get("reuse"):
+            warnings.append(f"{sid}: names nothing to reuse; its builder writes everything new")
     return {"ok": not errors, "errors": errors, "warnings": warnings, "notes": notes, "mode": mode,
             "slices": slices, "waves": waves if mode == "split" else [["all"]] if slices else [], "sizes": sizes, "total": total}
 
@@ -380,6 +387,10 @@ def render_briefs(root: Path, rdir: Path, index: dict, plan: dict, result: dict)
         if s.get("anchors"):
             parts.append("## Code anchors (facts read from the code)\n")
             parts.extend(f"- `{a.get('at')}`: {a.get('fact')}" for a in s["anchors"])
+            parts.append("")
+        if s.get("reuse"):
+            parts.append("## Reuse these: they already exist here (do not write your own)\n")
+            parts.extend(f"- {u.get('need')}: use `{u.get('use')}` (`{u.get('at')}`)" for u in s["reuse"])
             parts.append("")
         for p in s.get("patterns") or []:
             ex = _excerpt(root, p.get("from", ""))

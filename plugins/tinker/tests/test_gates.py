@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 from conftest import single_plan
 
@@ -223,3 +224,21 @@ def test_a_docs_slice_starts_after_every_behaviour_slice(run):
     assert r["waves"] == [["s1"], ["s2"], ["docs"]]
     assert any("docs documents what the other slices build" in n for n in r["notes"])
     assert json.loads((rdir / "plan.json").read_text())["slices"][2]["depends_on"] == ["s1", "s2"]
+
+
+def test_reuse_entries_must_point_at_code_that_exists_and_reach_the_brief(run):
+    root, _, rdir = run
+    p = _split()
+    p["slices"][0]["reuse"] = [{"need": "add two numbers", "use": "calc.add", "at": "calc.py:1"}]
+    p["slices"][1]["reuse"] = [{"need": "a parser", "use": "nowhere.parse", "at": "nowhere.py:3"}]
+    _plan(rdir, p)
+    r = gates.check_plan(root, rdir, INDEX)
+    assert any("s2: reuse 'nowhere.parse'" in e for e in r["errors"])
+    p["slices"][1].pop("reuse")
+    _plan(rdir, p)
+    r = gates.check_plan(root, rdir, INDEX)
+    assert r["ok"], r["errors"]
+    assert any("s2: names nothing to reuse" in w for w in r["warnings"])
+    briefs = gates.render_briefs(root, rdir, INDEX, json.loads((rdir / "plan.json").read_text()), r)
+    text = Path(briefs["briefs"]["s1"]).read_text()
+    assert "## Reuse these: they already exist here" in text and "add two numbers: use `calc.add` (`calc.py:1`)" in text

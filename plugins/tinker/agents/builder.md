@@ -20,7 +20,9 @@ the cross-slice contract, code anchors and a pattern to mirror). The spec is the
    **Reuse before you write.** When the codebase, the spec or a library the project already depends on provides the
    mechanism you need (authentication, retries, caching, parsing, a client), use it rather than writing your own. A
    hand-written version of something the project already has tends to drop the parts that are easy to forget, such as
-   timeouts, caching and error handling. Write your own only when nothing there fits, and say why in `decisions`.
+   timeouts, caching and error handling. If your brief has a "Reuse these" list, use each item for its need. Write
+   your own only when nothing there fits, and say why in `decisions`; the spec checker reports re-written existing
+   code as a gap.
 2. **Test first.** For each requirement, write the tests that would show it met, through the public entry point,
    before the code. Run them and see them fail for the right reason. Then write the code and see them pass. A test
    that never failed proves nothing.
