@@ -99,11 +99,13 @@ For EACH checklist item, in order:
 
 4. **Mental execution** — trace concrete inputs through the function line by line.
    Then try a bad input. [tinker: Then try the states the spec implies: a rotation, a restart, nothing on
-   disk, a partial write. And wherever the code calls something outside itself (a server, a database, a file, the
-   network, another process), try that dependency down, slow and returning an error: every such call needs a
-   bound on how long it waits, the failure must reach the caller as the right kind of error (unavailable is not
+   disk, a partial write. And wherever the code calls something that can hang or fail for reasons outside the
+   process (a remote server or API, a database, the network, another process), try that dependency down, slow and
+   returning an error: every such call needs a bound on how long it waits, the failure must reach the caller as the right kind of error (unavailable is not
    unauthorized, a timeout is not a success), and what the code reports or serves must stay true while the
-   dependency is out (it does not vanish, freeze on a stale value or block the caller).]
+   dependency is out (it does not vanish, freeze on a stale value or block the caller). Local work that returns
+   promptly (reading or stat-ing a local file, in-memory computation) needs none of this; do not report a missing
+   timeout or guard around it.]
 
 5. **Verdict** — one of :
    - **VERIFIED**: Code does what spec says. You traced the full chain with concrete
@@ -166,6 +168,10 @@ you are given; code that was there before is not displaced by this build]:
 **Verdict additions:**
 - **DISPLACED**: Code exists but serves no spec requirement. Should be removed.
 - **BLOAT**: Code technically works but duplicates what another function already does.
+
+**[tinker] Scope.** Code the build added that no requirement needs, including defensive machinery for failures that
+cannot happen (timeouts around local file reads, panics that nothing can raise) and behaviour changes in code the
+spec does not touch, is DISPLACED or BLOAT even when it works.
 
 **[tinker] Reuse audit.** For each new function, type or helper this build added, search this codebase and the
 libraries the project already declares (go.mod, package.json, pyproject.toml, Cargo.toml or equivalent) for one that

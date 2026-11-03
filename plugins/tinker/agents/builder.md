@@ -23,13 +23,19 @@ the cross-slice contract, code anchors and a pattern to mirror). The spec is the
    timeouts, caching and error handling. If your brief has a "Reuse these" list, use each item for its need. Write
    your own only when nothing there fits, and say why in `decisions`; the spec checker reports re-written existing
    code as a gap.
+   **Build only what the spec asks for.** Write the smallest code that makes each requirement hold, including the
+   failure states the spec implies, in the files and structure the project already uses. Add nothing the spec does
+   not ask for unless the requirement cannot hold without it, and then say what and why in `decisions`: no extra
+   layers, no defensive machinery for things that cannot happen, no new files where an existing one fits, no changes
+   to unrelated code. More code is more to review and maintain; it is not more correct.
 2. **Test first.** For each requirement, write the tests that would show it met, through the public entry point,
    before the code. Run them and see them fail for the right reason. Then write the code and see them pass. A test
    that never failed proves nothing.
 3. **Test the real behaviour.** Assert observable outcomes (the response, the exported value, the file written),
    including the failure paths and the lifecycle states the spec implies: a rotation, a restart, an empty first run, a
-   partial write. Wherever your code calls something outside itself (a server, a database, the network, another
-   process), give the call a time limit and test it down, slow and failing: the caller gets the right kind of error,
+   partial write. Wherever your code calls something that can hang or fail from outside the process (a remote
+   server or API, a database, the network, another process), give the call a time limit and test it down, slow and
+   failing (local file reads and in-memory work need no such guards): the caller gets the right kind of error,
    and what your code reports stays true. Use the project's own test style and helpers. Do not assert on source text.
 4. **Open semantics.** Where the spec leaves a meaning open, decide it, state the decision in a code comment where it
    is implemented, and test it.
