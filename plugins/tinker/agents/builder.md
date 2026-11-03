@@ -28,7 +28,9 @@ the cross-slice contract, code anchors and a pattern to mirror). The spec is the
    that never failed proves nothing.
 3. **Test the real behaviour.** Assert observable outcomes (the response, the exported value, the file written),
    including the failure paths and the lifecycle states the spec implies: a rotation, a restart, an empty first run, a
-   partial write. Use the project's own test style and helpers. Do not assert on source text.
+   partial write. Wherever your code calls something outside itself (a server, a database, the network, another
+   process), give the call a time limit and test it down, slow and failing: the caller gets the right kind of error,
+   and what your code reports stays true. Use the project's own test style and helpers. Do not assert on source text.
 4. **Open semantics.** Where the spec leaves a meaning open, decide it, state the decision in a code comment where it
    is implemented, and test it.
 5. **Shared code (split builds).** Match the cross-slice contract exactly: names, signatures, error and duplicate

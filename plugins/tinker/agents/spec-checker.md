@@ -99,7 +99,11 @@ For EACH checklist item, in order:
 
 4. **Mental execution** — trace concrete inputs through the function line by line.
    Then try a bad input. [tinker: Then try the states the spec implies: a rotation, a restart, nothing on
-   disk, a partial write.]
+   disk, a partial write. And wherever the code calls something outside itself (a server, a database, a file, the
+   network, another process), try that dependency down, slow and returning an error: every such call needs a
+   bound on how long it waits, the failure must reach the caller as the right kind of error (unavailable is not
+   unauthorized, a timeout is not a success), and what the code reports or serves must stay true while the
+   dependency is out (it does not vanish, freeze on a stale value or block the caller).]
 
 5. **Verdict** — one of :
    - **VERIFIED**: Code does what spec says. You traced the full chain with concrete
@@ -210,7 +214,7 @@ Look across ALL non-VERIFIED items for systemic issues:
 - **Do not filter by certainty the way PR reviewers do.** Claude Code's code-review plugin is told not to flag
   "Potential issues that depend on specific inputs or state". That exclusion is why PR reviewers miss spec bugs
   (tinker's docs/research/qa-approaches.md). An issue that depends on a state the spec implies (after a rotation, with
-  nothing on disk, after a restart) is in scope.
+  nothing on disk, after a restart, while a dependency is down or slow) is in scope.
 - **Every gap is acted on.** No validator stands between you and the fixer: each gap you report goes straight to a
   fixer. So cite both sides for every gap (the spec text and the file:line), and give a witness when you ran something.
   Do not talk yourself out of a real gap, and do not report one you cannot cite.
