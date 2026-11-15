@@ -273,7 +273,8 @@ Scout is the cheapest of the crew — most of the work happens in your own conve
 
 Scout stands alone, but if you're already running the rest of the crew:
 
-- **[Smith](../smith/README.md)** or **[Ranger](../ranger/README.md)** — hand either the "run `/scout:audit`, keep it green" loop as a build-verify-fix cycle.
+- **[Smith](../smith/README.md)** or **[Tinker](../tinker/README.md)** — build a feature from a spec, then lock its behaviour in with browser tests.
+- **[Ranger](../ranger/README.md)** — hand it the "run `/scout:audit`, keep it green" loop as part of an unattended sweep.
 - **[Seer](../seer/README.md)** — architecture review for the app Scout is testing, before Scout writes coverage against a shape that's about to change.
 
 ---
