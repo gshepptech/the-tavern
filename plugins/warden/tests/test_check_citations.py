@@ -6,7 +6,7 @@ runs the hook against each, and asserts the decision (block / pass) and the
 specific unverified citations the hook reports.
 
 Test cases:
-  1. KEYCLOAK   — assistant cites file:line that wasn't Read; expect BLOCK
+  1. KEYCLOAK — assistant cites file:line that wasn't Read; expect BLOCK
   2. CLEAN   — every cited file was Read in the turn; expect PASS
   3. FENCED  — citation appears only inside a ``` block; expect PASS (skipped)
   4. SUBAGENT — only a Task/Agent call touched the file; expect BLOCK
@@ -98,7 +98,7 @@ def run_hook(transcript_path: str, *, mode: str | None = "default") -> dict:
 
 # --- test cases -----------------------------------------------------------
 
-def test_shiro_failure_blocks():
+def test_keycloak_failure_blocks():
     """Reproduces the Keycloak failure: assistant cites a file:line it never Read."""
     t = write_transcript([
         msg("user", "How can we wire Keycloak scan results into the deployment report?"),
@@ -120,7 +120,7 @@ def test_shiro_failure_blocks():
     assert "handler.go:73" not in reason, f"handler.go was Read, should not be flagged: {reason}"
     # report.proto was NOT Read → must be flagged
     assert "report.proto:11" in reason, f"report.proto was not Read, should be flagged: {reason}"
-    print("  ✓ shiro_failure_blocks")
+    print("  ✓ keycloak_failure_blocks")
 
 
 def test_clean_response_passes():
@@ -600,7 +600,7 @@ def test_completion_fable_off_passes():
 
 def main() -> int:
     tests = [
-        test_shiro_failure_blocks,
+        test_keycloak_failure_blocks,
         test_clean_response_passes,
         test_fenced_block_skipped,
         test_subagent_read_does_not_count,
