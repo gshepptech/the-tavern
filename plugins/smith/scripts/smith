@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# smith's ledger: init, plan, slice, owners, record, done, round, status, report. See ledger.py.
+set -euo pipefail
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/ledger.py" "$@"

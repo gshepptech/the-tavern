@@ -1,0 +1,18 @@
+{
+  "name": "smith",
+  "version": "1.0.0",
+  "description": "Builds a spec to its requirements. A planner splits the spec into slices with explicit file ownership, builders work on independent slices in parallel waves, and verifiers that never see the builders' notes check every requirement and record the command and output. Failures go to fixers and are re-verified until everything passes or a round limit is hit. A stdlib ledger refuses to mark a requirement done without that evidence.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/smith/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "build",
+    "spec-driven",
+    "verification",
+    "multi-agent",
+    "parallel"
+  ]
+}
