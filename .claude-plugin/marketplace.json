@@ -1,7 +1,7 @@
 {
   "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "the-tavern",
-  "description": "The Tavern — a crew of AI builders for Claude Code. Sage draws it. Smith builds it.",
+  "description": "The Tavern: hire an AI crew for your quest. Fifteen Claude Code plugins that work alone or as a party.",
   "owner": {
     "name": "gshepptech"
   },
@@ -183,6 +183,94 @@
         "verification",
         "workflow",
         "lean"
+      ]
+    },
+    {
+      "name": "squire",
+      "source": "./plugins/squire",
+      "description": "A compact build, verify and fix loop for a small spec that already has requirement IDs and acceptance criteria. One test-first builder, a verifier that sees only the spec and the code and cites file:line for every verdict, a fixer limited to the listed gaps, and drift checks in code. Loops until clean or three fix rounds, then reports.",
+      "version": "1.0.0",
+      "category": "development",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/squire/README.md",
+      "keywords": [
+        "build",
+        "spec-driven",
+        "verification",
+        "workflow",
+        "tdd"
+      ]
+    },
+    {
+      "name": "scribe",
+      "source": "./plugins/scribe",
+      "description": "Writes and audits documentation for an application you built. /scribe:plan surveys the repository and proposes an overview, getting-started tutorial, how-to guides, reference and explanation pages plus a docs layout. /scribe:write writes the pages with every claim anchored to a file:line or a command that was run, then has a reader who knows nothing about the code report where each page loses them. /scribe:audit runs link, anchor, evidence, stale-command, reader and jargon gates over existing docs and returns a ranked punch list.",
+      "version": "1.0.0",
+      "category": "development",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/scribe/README.md",
+      "keywords": [
+        "documentation",
+        "docs",
+        "diataxis",
+        "audit",
+        "links"
+      ]
+    },
+    {
+      "name": "bard",
+      "source": "./plugins/bard",
+      "description": "An experiential UX review of a running web app. Uses the app in a real browser through Playwright MCP as named personas (first-time, power user, keyboard-only, mobile, low vision, or your own), one area at a time, across seven review lenses. Screenshots every defect, reads the console and network for silent failures, and writes a ranked report where every finding has steps to reproduce, a screenshot, a severity and a suggested fix.",
+      "version": "1.0.0",
+      "category": "testing",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/bard/README.md",
+      "keywords": [
+        "ux",
+        "usability",
+        "accessibility",
+        "playwright",
+        "review"
+      ]
+    },
+    {
+      "name": "monk",
+      "source": "./plugins/monk",
+      "description": "Keeps replies short and useful. Loads a seven-rule ruleset at session start (answer first, numbered steps, one next action, no preamble or sign-off, real time units, flat tone on failure, lists of five or fewer) and a one-line reminder on every prompt. An optional length gate sends an over-budget reply back once with instructions to shorten it. State is per session.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/monk/README.md",
+      "keywords": [
+        "response-style",
+        "hooks",
+        "brevity",
+        "output"
+      ]
+    },
+    {
+      "name": "raven",
+      "source": "./plugins/raven",
+      "description": "Posts Claude Code session events to Slack. When a reply finishes or Claude Code needs your attention, raven sends a colour-coded message to an incoming webhook with the prompt's first line, the opening of the reply, the folder, the git branch and the session id. Secrets are redacted before sending, repeats are suppressed, and a missing webhook or a Slack error is logged without ever blocking Claude.",
+      "version": "1.0.0",
+      "category": "productivity",
+      "author": {
+        "name": "gshepptech"
+      },
+      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/raven/README.md",
+      "keywords": [
+        "slack",
+        "notifications",
+        "hooks",
+        "webhook"
       ]
     }
   ]
