@@ -1,0 +1,6 @@
+{
+  "questboard": 1,
+  "plugin": "sage",
+  "reads": [],
+  "writes": ["spec"]
+}

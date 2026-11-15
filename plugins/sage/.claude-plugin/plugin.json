@@ -1,0 +1,18 @@
+{
+  "name": "sage",
+  "version": "1.0.0",
+  "description": "Turns a feature idea into a sealed spec. Researches the codebase first, asks only what the code cannot answer, then writes numbered requirements with acceptance criteria that can fail, explicit non-goals and a cited source for every requirement. A stdlib validator checks the spec and seals it with a content hash. Plans only; never writes product code.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/sage/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "spec",
+    "planning",
+    "requirements",
+    "interview",
+    "brownfield"
+  ]
+}

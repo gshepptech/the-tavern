@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# sage's deterministic steps: check, hash, seal, verify-seal, status. See validate-spec.py.
+set -euo pipefail
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/validate-spec.py" "$@"
