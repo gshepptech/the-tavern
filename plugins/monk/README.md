@@ -1,4 +1,6 @@
-# monk
+# Monk
+
+*The monk has taken a vow of brevity, and so do Claude's replies while it is installed.*
 
 **Keeps Claude Code's replies short: the answer first, one next action, and nothing padded around them.**
 
@@ -8,7 +10,7 @@
 
 ## What it does
 
-monk shapes how replies read. At session start it loads seven rules into the conversation, and on every prompt it adds
+Monk shapes how replies read. At session start it loads seven rules into the conversation, and on every prompt it adds
 a one-line reminder so the rules hold late in a long session. An optional length gate checks each finished reply and,
 when one runs over a word or list budget, sends it back once with instructions to cut it down.
 
@@ -24,8 +26,8 @@ off for a session, or exempt a single turn, when you want the long version.
   reply once with a message that says what to cut. It never blocks the same turn twice.
 - **Code is free.** Fenced code blocks count toward neither budget.
 - **One-turn exemption.** `/monk:verbose` lifts the rules and the gate for the current question or the next one.
-- **Per-session state.** Turning monk off in one session leaves every other session alone.
-- **Fails open.** A hook error is swallowed and logged to stderr; Claude Code carries on as if monk were not
+- **Per-session state.** Turning Monk off in one session leaves every other session alone.
+- **Fails open.** A hook error is swallowed and logged to stderr; Claude Code carries on as if Monk were not
   installed.
 
 ## Quick start

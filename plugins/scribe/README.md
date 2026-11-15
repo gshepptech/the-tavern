@@ -1,4 +1,6 @@
-# scribe
+# Scribe
+
+*The scribe writes down how your application works, and checks every line against the code.*
 
 **Writes documentation for an application you built, with every claim traced to the code, and audits the docs you
 already have.**
@@ -9,13 +11,13 @@ already have.**
 
 ## What it does
 
-scribe plans, writes and checks the documentation for a repository. It surveys the code to find what the application
+Scribe plans, writes and checks the documentation for a repository. It surveys the code to find what the application
 really does, proposes a page set split by what each reader needs (a first-run tutorial, how-to guides, reference,
 explanation), and writes those pages with every factual claim tied to the line of code or the command output it came
 from. A separate reader who knows nothing about the code then reads each page and reports where it got stuck.
 
 Generated docs usually fail in two ways: they describe what the code was meant to do rather than what it does, and
-they skip the step the author no longer notices. scribe deals with the first by refusing a claim it cannot anchor, and
+they skip the step the author no longer notices. Scribe deals with the first by refusing a claim it cannot anchor, and
 with the second by testing each page on a reader with no context. The same gates run over hand-written docs, so
 `/scribe:audit` is useful on its own.
 

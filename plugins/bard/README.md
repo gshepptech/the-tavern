@@ -1,5 +1,7 @@
 # Bard
 
+*The bard tries your app as different people would and tells you where each of them got stuck.*
+
 **A UX review of your running app, done by using it: named personas, a real browser, and a finding you can reproduce
 for everything that got in their way.**
 
@@ -48,7 +50,7 @@ Restart Claude Code so the browser tools load, start your app, then:
 /bard:run http://localhost:3000
 ```
 
-You need `python3` and Node.js (for the Playwright MCP server). Point bard at a development or staging instance:
+You need `python3` and Node.js (for the Playwright MCP server). Point Bard at a development or staging instance:
 personas fill in forms and submit them with obviously fake data unless you pass `--read-only`. They never pay, send
 messages to real people or delete anything they did not create.
 

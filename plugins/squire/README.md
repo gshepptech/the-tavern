@@ -1,5 +1,7 @@
 # Squire
 
+*The squire takes a small, well-defined task and sees it through, checking each step.*
+
 **A single-lane build, verify and fix loop for small specs that already say what done means.**
 
 [![version](https://img.shields.io/badge/version-1.0.0-1E88E5?style=flat-square)](.claude-plugin/plugin.json)
@@ -13,9 +15,9 @@ engineer's afternoon. You do not need a planner, slices or a dependency graph. Y
 and fixed until it is right. `/squire:build <spec>` does that. One builder writes the change test-first. A verifier that
 sees only the spec and the code gives every requirement a verdict with `file:line` evidence and runs the project's
 checks. A fixer fixes only what was listed. The loop repeats until nothing is open or three fix rounds are used, and
-then squire writes a report.
+then Squire writes a report.
 
-The failure squire is built against is drift: the build that grows a flag nobody asked for, stamps `// R-003` through
+The failure Squire is built against is drift: the build that grows a flag nobody asked for, stamps `// R-003` through
 the production code, or "fixes" a gap by adding something new. Drift is checked in code every round, and anything the
 spec does not need comes back as a gap to remove.
 
@@ -47,7 +49,7 @@ Both build a spec and verify it independently. They are sized for different jobs
 | Verification | one verifier re-checks every requirement each round | verifiers per slice, with a ledger of evidence |
 | Best for | a well-scoped change you could hand to one engineer | a feature big enough to need a plan |
 
-If a spec has more than fifteen requirements, squire still runs, but says that it may be better split.
+If a spec has more than fifteen requirements, Squire still runs, but says that it may be better split.
 
 ## Quick start
 
@@ -63,10 +65,10 @@ In a git repository whose tracked files are committed:
 ```
 
 You need `python3`, `git` and the project's own toolchain. The engine is a script for Claude Code's Workflow tool, so
-your Claude Code version must have Workflow available. squire works on a new branch, `squire/<run>`, and writes its files
+your Claude Code version must have Workflow available. Squire works on a new branch, `squire/<run>`, and writes its files
 to `squire-runs/<run>/`, which git ignores.
 
-A spec squire can read defines each requirement in a heading, a list item or a table row:
+A spec Squire can read defines each requirement in a heading, a list item or a table row:
 
 ```markdown
 ### R-001: Export orders as CSV
@@ -129,7 +131,7 @@ whether a check failure is new, what goes on the fixer's list) is made in `scrip
 | `done` | Every requirement MET, no gap open. |
 | `done_with_gaps` | The rounds ran out with gaps open; the report lists them. |
 | `unverified` | The verifier's file was refused twice, so the last round was not judged. |
-| `stopped` | squire refused to start. Nothing was built. |
+| `stopped` | Squire refused to start. Nothing was built. |
 
 Run directory:
 

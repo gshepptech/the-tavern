@@ -1,4 +1,6 @@
-# raven
+# Raven
+
+*The raven carries word to Slack when a session finishes or needs you.*
 
 **Posts Claude Code session events to Slack, so you know when a reply is done or a permission prompt is waiting.**
 
@@ -8,12 +10,12 @@
 
 ## What it does
 
-raven sends a Slack message through an incoming webhook when Claude Code finishes a reply or stops to wait for you.
+Raven sends a Slack message through an incoming webhook when Claude Code finishes a reply or stops to wait for you.
 Each message says which prompt it was, how the reply starts, and where it ran: folder, git branch and session id.
 Messages are colour-coded so a glance at the channel tells you whether anything needs you.
 
 Use it when you start a long task and walk away, or run several sessions at once and want one place that says
-which of them is waiting. raven never blocks Claude: a missing webhook or a Slack outage is written to a log and the
+which of them is waiting. Raven never blocks Claude: a missing webhook or a Slack outage is written to a log and the
 session carries on.
 
 ## Features
@@ -87,7 +89,7 @@ State lives in `$CLAUDE_PLUGIN_DATA` when Claude Code provides a plugin data dir
 `~/.claude/plugins/data/raven/`. The log is trimmed once it passes 256 KB.
 
 Redaction is pattern-based. It catches the common credential shapes listed above, not every secret a reply could
-contain. Point raven at a channel whose members could already see your terminal.
+contain. Point Raven at a channel whose members could already see your terminal.
 
 ## Development
 

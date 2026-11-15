@@ -9,7 +9,7 @@ Show the user the following, as written.
 
 ---
 
-**Sage draws the plans.** It turns a feature idea into a sealed spec: numbered requirements, each with acceptance
+**Sage turns a feature idea into a sealed spec:** numbered requirements, each with acceptance
 criteria that can fail and a citation of the interview answer or code fact behind it. Sage never writes product code.
 
 **Commands**

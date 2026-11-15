@@ -1,4 +1,6 @@
-# tinker
+# Tinker
+
+*The tinker builds from the plan with a small kit and a fixed budget.*
 
 **A lean spec-to-code build: one builder, a code check and a spec check, and at most two fix rounds.**
 
@@ -8,13 +10,13 @@
 
 ## What it does
 
-tinker builds a spec into code with as few agents as the job allows. You run `/tinker:build <spec>`. It checks the
+Tinker builds a spec into code with as few agents as the job allows. You run `/tinker:build <spec>`. It checks the
 environment, builds with one builder, has code run every check while one spec-checker reads the spec against the code,
 fixes what they found in one batch, and writes a report with a verdict and evidence for every requirement.
 
 A single agent with a good prompt gets most of a feature right. Where it tends to fall short is in two places: it
 reports success before its own integration suite has run, and it misses domain bugs that only show in a state the spec
-implies (after a rotation, after a restart, while a dependency is down). tinker adds exactly two things aimed at
+implies (after a rotation, after a restart, while a dependency is down). Tinker adds exactly two things aimed at
 those: the integration check is run to completion and read, by the builder and again by code, and a spec-checker
 reads the spec before the code and assumes the code is broken.
 
@@ -47,7 +49,7 @@ In a git repository with a clean working tree:
 /tinker:build docs/specs/metrics/spec.md
 ```
 
-You need `python3` and the project's own toolchain. tinker works on a new branch, `tinker/<run>`, commits there and
+You need `python3` and the project's own toolchain. Tinker works on a new branch, `tinker/<run>`, commits there and
 never pushes. Everything else it writes goes to `tinker-archive/<run>/`, which ignores itself in git.
 
 ## How it works

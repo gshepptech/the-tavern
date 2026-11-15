@@ -1,7 +1,9 @@
 # Smith
 
-**Smith builds to the plan.** It takes a spec with numbered requirements and acceptance criteria and builds it, with
-every requirement checked by a verifier that never saw how it was built.
+*The smith works from the written plan, splits the job across several hands, and has every piece checked before it leaves the shop.*
+
+**Builds a spec with numbered requirements and acceptance criteria, with every requirement checked by a verifier that
+never saw how it was built.**
 
 [![version](https://img.shields.io/badge/version-1.0.0-1E88E5?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-4C9A2A?style=flat-square)](../../LICENSE)

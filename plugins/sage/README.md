@@ -1,7 +1,8 @@
 # Sage
 
-**Sage draws the plans.** It turns a feature idea into a sealed spec that someone else can build without coming back
-to ask what you meant.
+*The sage listens to the quest and writes it down so nothing gets lost.*
+
+**Turns a feature idea into a sealed spec that someone else can build without coming back to ask what you meant.**
 
 [![version](https://img.shields.io/badge/version-1.0.0-1E88E5?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-4C9A2A?style=flat-square)](../../LICENSE)
