@@ -1,35 +1,41 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="200" viewBox="0 0 1200 200" role="img" aria-label="The Tavern — ten Claude Code plugins">
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="200" viewBox="0 0 1200 200" role="img" aria-label="The Tavern: fifteen Claude Code plugins that work alone or as a party">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#2563EB"/>
-      <stop offset="0.55" stop-color="#3B82F6"/>
-      <stop offset="1" stop-color="#0EA5E9"/>
+      <stop offset="0" stop-color="#2B1B12"/>
+      <stop offset="1" stop-color="#4A2E1C"/>
     </linearGradient>
-    <radialGradient id="glow" cx="0.12" cy="0.1" r="0.9">
-      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/>
-      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    <radialGradient id="glow" cx="0.1" cy="0.5" r="0.7">
+      <stop offset="0" stop-color="#F5B041" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#F5B041" stop-opacity="0"/>
     </radialGradient>
   </defs>
 
   <rect width="1200" height="200" rx="20" fill="url(#bg)"/>
   <rect width="1200" height="200" rx="20" fill="url(#glow)"/>
 
-  <!-- 10-tile plugin grid mark (2 rows x 5) -->
-  <g transform="translate(52,58)" fill="#ffffff">
-    <rect x="0" y="0" width="15" height="19" rx="3.5" opacity="0.95"/>
-    <rect x="20" y="0" width="15" height="19" rx="3.5" opacity="0.78"/>
-    <rect x="40" y="0" width="15" height="19" rx="3.5" opacity="0.78"/>
-    <rect x="60" y="0" width="15" height="19" rx="3.5" opacity="0.62"/>
-    <rect x="80" y="0" width="15" height="19" rx="3.5" opacity="0.62"/>
-    <rect x="0" y="25" width="15" height="19" rx="3.5" opacity="0.78"/>
-    <rect x="20" y="25" width="15" height="19" rx="3.5" opacity="0.62"/>
-    <rect x="40" y="25" width="15" height="19" rx="3.5" opacity="0.62"/>
-    <rect x="60" y="25" width="15" height="19" rx="3.5" opacity="0.5"/>
-    <rect x="80" y="25" width="15" height="19" rx="3.5" opacity="0.5"/>
+  <!-- hanging sign: wall bracket, two chains, a board with a mug -->
+  <g fill="none" stroke="#E8C48A" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 22 V66" stroke-width="5"/>
+    <path d="M32 34 H150" stroke-width="5"/>
+    <path d="M32 56 L66 34" stroke-width="3"/>
+    <path d="M62 34 V62" stroke-width="2" stroke-dasharray="3 3"/>
+    <path d="M128 34 V62" stroke-width="2" stroke-dasharray="3 3"/>
+  </g>
+  <rect x="46" y="62" width="98" height="98" rx="12" fill="#6B4226" stroke="#E8C48A" stroke-width="3"/>
+  <g transform="translate(70,84)" fill="none" stroke="#F5D08A" stroke-width="4" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M4 10 H40 V48 a6 6 0 0 1 -6 6 H10 a6 6 0 0 1 -6 -6 Z"/>
+    <path d="M40 18 h6 a6 6 0 0 1 6 6 v10 a6 6 0 0 1 -6 6 h-6"/>
+    <path d="M4 10 c2 -8 10 -8 12 -2 c2 -6 10 -6 12 0 c2 -6 10 -6 12 2"/>
   </g>
 
-  <text x="166" y="86" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="46" font-weight="800" fill="#ffffff" letter-spacing="-1">The Tavern</text>
-  <text x="168" y="124" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="500" fill="#ffffff" opacity="0.97">Sage draws it. Smith builds it. Warden keeps Claude honest.</text>
-  <rect x="168" y="142" width="472" height="28" rx="14" fill="#ffffff" opacity="0.16"/>
-  <text x="184" y="161" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#ffffff" opacity="0.95">Ten Claude Code plugins · spec → build → verify → ship</text>
+  <text x="186" y="92" font-family="Georgia, 'Times New Roman', serif" font-size="50" font-weight="700" fill="#FBEBD0">The Tavern</text>
+  <text x="188" y="128" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="20" font-weight="500" fill="#F3DDB8">Hire an AI crew for your quest.</text>
+  <rect x="188" y="144" width="520" height="28" rx="14" fill="#F5D08A" opacity="0.16"/>
+  <text x="204" y="163" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12.5" fill="#FBEBD0">fifteen Claude Code plugins · work alone or as a party</text>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="12" fill="#E8C48A" opacity="0.75" text-anchor="end">
+    <text x="1160" y="70">sage · smith · tinker · squire · sellsword</text>
+    <text x="1160" y="96">ranger · warden · seer · cleric · scout</text>
+    <text x="1160" y="122">bard · tactician · scribe · raven · monk</text>
+  </g>
 </svg>
