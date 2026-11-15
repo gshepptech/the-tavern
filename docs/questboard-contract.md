@@ -2,11 +2,11 @@
 
 An optional shared workspace so the plugins in this marketplace can tell each other what they learned about a project.
 
-Nine plugins, nine islands. Sage writes a spec to `sage-specs/`, Ranger keeps a backlog in `.ranger/runs/`, Cleric files assessments in `.cleric/runs/`, Seer drops casefiles in `.seer/casefiles/`, Sellsword keeps journals in `.sellsword/runs/`. None of them can see any of the others. Sage writes a spec and Smith reads it only because a human copied the path across.
+Each plugin keeps its own state. Sage writes a spec to `sage-specs/`, Ranger keeps a backlog in `.ranger/runs/`, Cleric files assessments in `.cleric/runs/`, Seer drops casefiles in `.seer/casefiles/`, Sellsword keeps journals in `.sellsword/runs/`. Without a shared place to look, none of them can see any of the others, and a spec reaches a builder only when a person copies the path across.
 
 This contract is the smallest thing that fixes that without breaking the promise the marketplace is built on:
 
-> Every one of them works entirely on its own. Install a single plugin, use it, and never touch the other eight.
+> Every one of them works entirely on its own. Install a single plugin, use it, and never touch the others.
 
 So: **read if present, write if useful.** A plugin that requires `.questboard/` is a bug. A plugin whose behaviour changes when `.questboard/` is absent, empty, or full of garbage is a bug. The workspace is a side channel, and a side channel that can break a run is worse than no side channel at all.
 
@@ -23,7 +23,7 @@ So: **read if present, write if useful.** A plugin that requires `.questboard/` 
 - [The reference implementation](#the-reference-implementation)
 - [The validator](#the-validator)
 - [Who is wired in, and who is not](#who-is-wired-in-and-who-is-not)
-- [Writing a tenth plugin against this](#writing-a-tenth-plugin-against-this)
+- [Writing a new plugin against this](#writing-a-new-plugin-against-this)
 - [What this deliberately does not do](#what-this-deliberately-does-not-do)
 
 ## The directory
@@ -218,11 +218,11 @@ This is the only place a malformed file is ever reported. Running it is a delibe
 
 ## Who is wired in, and who is not
 
-Six of the nine participate. The other three would be symmetry for its own sake.
+Six of the ten participate. For the other four, taking part would be symmetry for its own sake.
 
 ### Wired in
 
-**Sage writes `spec`.** The producing half of the one handoff in this marketplace that a human currently has to complete by hand. When a spec seals, Sage writes one note pointing at `spec.md`. Nothing else about `/sage:plan` changes, and the note is written after the deterministic gate has already passed, so a workspace problem cannot affect whether a spec seals.
+**Sage writes `spec`.** The producing half of the spec-to-build handoff, which would otherwise need a person to pass the path along. When a spec seals, Sage writes one note pointing at `spec.md`. Nothing else about `/sage:plan` changes, and the note is written after the deterministic gate has already passed, so a workspace problem cannot affect whether a spec seals.
 
 **Smith reads `spec` and writes `attempt`.** The consuming half. When `/smith:build` is given no spec path, it asks the workspace for the newest spec that still exists and builds from that, announcing the path in one line so the user can stop it if it picked wrong. An explicit path always wins and the workspace is not consulted at all. With no workspace, `/smith:build` without a path asks for one. When a run ends, Smith writes one `attempt` note pointing at its report, with outcome `done` or `failed`.
 
@@ -242,7 +242,9 @@ Six of the nine participate. The other three would be symmetry for its own sake.
 
 **Tactician** generates a standalone Workflow script and hands it over. It learns nothing about the project in the process and consumes nothing that would help it. There is no note it could honestly write.
 
-## Writing a tenth plugin against this
+**Tinker** always takes an explicit spec path and records everything about a run in its own `tinker-archive/<run>/` directory and on its `tinker/<run>` branch. It checks a Sage seal by reading the spec file itself, so it needs nothing from the workspace.
+
+## Writing a new plugin against this
 
 To read:
 
