@@ -26,9 +26,8 @@ ARCHIVE = "tinker-archive"
 ID_TOKEN = r"[A-Z][A-Z0-9]{0,7}-\d+(?:\.\d+)*"
 ID_RE = re.compile(rf"\b{ID_TOKEN}\b")
 
-# A test file, by the naming conventions the common runners collect
-# (copied from smith's mill_validate.TEST_FILE), plus files under a tests/,
-# test/, __tests__/ or spec/ directory.
+# A test file, by the naming conventions the common runners collect, plus files
+# under a tests/, test/, __tests__/ or spec/ directory.
 TEST_FILE = re.compile(
     r"(^|/)(test_[^/]+\.(py|c|cc|cpp)|[^/]+_test\.(py|go|rb|exs|dart|c|cc|cpp)|[^/]+_spec\.rb"
     r"|[^/]+\.(test|spec)\.[cm]?[jt]sx?|[^/]+(Test|Tests|Spec)\.(java|kt|kts|scala|groovy|cs|swift|php)"

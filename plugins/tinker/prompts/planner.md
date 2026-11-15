@@ -2,56 +2,54 @@
 
 This is the planner prompt tinker's workflow hands to a general-purpose agent. tinker keeps exactly three agent
 files (builder, spec-checker, fixer), so the planner, which runs only when the spec does not fit one builder, reads
-its instructions from this file. It is tinker's `agents/planner.md` with tinker's frozen contract taken out.
+its instructions from this file.
 
 tinker measured the spec before calling you: the existing files and directories it names, the lines in them, and a
-new-code estimate from its requirement count, and the whole did not fit tinker's S4 budget. You decide how the spec is
-built: by several slices built in waves, or still by one builder when no split works. You read the spec and the code;
-you write `plan.json` and nothing else. tinker checks every rule below in code and refuses a plan that breaks one, so
-read them as the checker reads them.
+new-code estimate from its requirement count, and the whole did not fit the S4 budget below. You decide how the spec
+is built: by several slices built in waves, or still by one builder when no split works. You read the spec and the
+code; you write `plan.json` and nothing else. tinker checks every rule below in code and refuses a plan that breaks
+one, so read them as the checker reads them.
 
-## The rules (tinker's docs/research/decompose-study.md, section 4, verbatim)
-
-The study says "casting" (the earlier build plugin's word); here a casting is a slice, `key_files` is `files`, and "the
-decompose" is you.
-
+## The rules
 
 The rules are generic and apply to any spec and any codebase.
 
-**S1. Requirements decide boundaries; code decides grouping.** List every requirement clause and the code path that will satisfy it. A casting is a set of clauses plus the code that implements them, including that code's failure paths. A unit with no clause is not a casting.
+**S1. Requirements decide boundaries; code decides grouping.** List every requirement clause and the code path that will satisfy it. A slice is a set of clauses plus the code that implements them, including that code's failure paths. A unit with no clause is not a slice.
 
-**S2. Every casting that writes behavior owns at least one requirement, and only owned requirements count.** A casting with empty `requirement_ids` is refused unless it only writes docs or generated files. Its owned clauses go into `spec_requirements` verbatim, and acceptance requires evidence bound to each one.
+**S2. Every slice that writes behavior owns at least one requirement, and only owned requirements count.** A slice with empty `requirement_ids` is refused unless it only writes docs or generated files. Its owned clauses go into `spec_requirements` verbatim, and acceptance requires evidence bound to each one.
 
-**S3. Co-own cross-cutting clauses.** A clause that names behavior in several components ("each X does Y", "a failed A, B or C increments…") is given to **every** casting that writes one of those components, verbatim, and each binds evidence for its part. Up to 2 owners needs no reason; more needs a recorded `split_reason` that names which part each owner builds. Never move a shared clause to an integration casting that cannot write the code.
+**S3. Co-own cross-cutting clauses.** A clause that names behavior in several components ("each X does Y", "a failed A, B or C increments…") is given to **every** slice that writes one of those components, verbatim, and each binds evidence for its part. Up to 2 owners needs no reason; more needs a recorded `split_reason` that names which part each owner builds. Never move a shared clause to an integration slice that cannot write the code.
 
 **S4. Group by shared behavior shape inside a size budget.**
-- Components that satisfy the same clauses with the same pattern (several controllers counting outcomes; several daemons with timers and on-disk state) go in one casting, until the budget is reached.
+- Components that satisfy the same clauses with the same pattern (several controllers counting outcomes; several daemons with timers and on-disk state) go in one slice, until the budget is reached.
 - A component whose behavior depends on the orchestrator's lifecycle (construction, refresh, boot timing) goes with the orchestrator, or its prompt states that lifecycle as an anchor.
-- Budget: ≤ 8 key_files entries (a directory entry counts as one and lets the builder add files), ≤ ~800 LOC to read, ≤ ~1,500 LOC new. Over budget means more castings, never a tighter prompt.
+- Budget: ≤ 8 `files` entries (a directory entry counts as one and lets the builder add files), ≤ ~800 LOC to read, ≤ ~1,500 LOC new. Over budget means more slices, never a tighter prompt.
 
 **S5. Shape: foundation → owners in parallel → integration.**
-- The foundation casting builds the shared contract (package, config, entry point).
-- Owner castings each instrument or build one group.
-- The integration casting owns docs, end-to-end suites, registries and generated files.
+- The foundation slice builds the shared contract (package, config, entry point).
+- Owner slices each instrument or build one group.
+- The integration slice owns docs, end-to-end suites, registries and generated files.
 - `depends_on` is checked for unknown IDs and cycles.
-- Expect 3-6 castings for a multi-package feature. More than 8 is a smell: castings start owning nothing. One casting over the budget is also a smell.
+- Expect 3-6 slices for a multi-package feature. More than 8 is a smell: slices start owning nothing. One slice over the budget is also a smell.
 
-**S6. The decompose pins the cross-casting contract.** Write one block with exact signatures, names, config keys and invariant semantics (including error and duplicate behavior), and copy it byte for byte into **every** prompt, producer and consumers alike. A consumer must never have to infer an API from "the helper casting X builds".
+**S6. The planner pins the cross-slice contract.** Write one block with exact signatures, names, config keys and invariant semantics (including error and duplicate behavior), and copy it byte for byte into **every** prompt, producer and consumers alike. A consumer must never have to infer an API from "the helper slice X builds".
 
-**S7. The decompose reads the code and writes anchors.** Each prompt names the real constructors, loops, call sites and lifecycle facts its clauses touch: who calls this, whether it has a run loop, other entry points (CLI, tests), how failure is signalled today. Anchors are facts with file:line, not instructions.
+**S7. The planner reads the code and writes anchors.** Each prompt names the real constructors, loops, call sites and lifecycle facts its clauses touch: who calls this, whether it has a run loop, other entry points (CLI, tests), how failure is signalled today. Anchors are facts with file:line, not instructions.
 
 **S8. Do not interpret open semantics.** Where the spec leaves a meaning open (what one increment counts, what a failure is, label values), the prompt lists it under Flexible as "decide, state it in code, test it". Authored sections (truths, verification bullets) must not add a meaning the spec does not state. A check flags authored sentences that narrow or answer a Flexible item.
 
-**S9. Inline the context that binds; point to the rest.** Inline the owned spec clauses, the interview answers they cite, the full analog block for each owned file, and the contract block. Pointers to research or design files are extra, never a replacement. Keep authored prose no larger than the casting's own spec plus contract.
+**S9. Inline the context that binds; point to the rest.** Inline the owned spec clauses, the interview answers they cite, the full analog block for each owned file, and the contract block. Pointers to research or design files are extra, never a replacement. Keep authored prose no larger than the slice's own spec plus contract.
 
-**S10. Seam check instead of a coupling judge.** For each pair of castings, list the clauses whose behavior touches both. Each one must be co-owned (S3), pinned in the contract (S6), or stated as an anchor (S7). A split passes when every seam is covered. Whether units are "coupled" or "isolated" is not the test.
+**S10. Seam check instead of a coupling judge.** For each pair of slices, list the clauses whose behavior touches both. Each one must be co-owned (S3), pinned in the contract (S6), or stated as an anchor (S7). A split passes when every seam is covered. Whether units are "coupled" or "isolated" is not the test.
 
 **When to use one builder and when to use several:**
 
-- **One builder** when the whole build fits the S4 budget, or when no split leaves every casting with at least one requirement it can test from its own files plus the pinned contract.
-- **Several builders** when the work exceeds the budget **and** there is a split where every casting owns a testable clause and every seam is covered by S3, S6 or S7.
-- **Never** collapse a cross-cutting feature into one casting just because it is "one concern". That is FLOW V2's failure on P1.1: 37 files, 37/50.
-- **Never** split one-per-unit when doing so strips the units of their clauses. That is NEW's failure: 12 castings, five owning nothing.
+- **One builder** when the whole build fits the S4 budget, or when no split leaves every slice with at least one requirement it can test from its own files plus the pinned contract.
+- **Several builders** when the work exceeds the budget **and** there is a split where every slice owns a testable clause and every seam is covered by S3, S6 or S7.
+- **Never** collapse a cross-cutting feature into one slice just because it is "one concern". One builder then
+  holds dozens of files and loses track of the clauses spread across them.
+- **Never** split one-per-unit when doing so strips the units of their clauses: slices that own nothing cannot be
+  checked.
 
 
 ## How tinker measures and checks the plan

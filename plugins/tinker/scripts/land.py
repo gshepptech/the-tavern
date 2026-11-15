@@ -15,8 +15,6 @@
                   (after a fix round) that each behavioural fix's test fails
                   before the fix and passes after it.
 
-``owner_of``, ``may_commit``, ``commit``, ``integration`` and the fix check are
-cut down from tinker's land.py; tinker's frozen tests and its QA commits are gone.
 """
 
 from __future__ import annotations

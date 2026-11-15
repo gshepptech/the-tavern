@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 """Check sage's seal on a spec before tinker builds from it.
 
-Copied from tinker, which copied it from smith's mill_mcp/tools/spec_seal.py and adapted it: the verifier
-override is $TINKER_SAGE_VERIFIER and the plugin root is this file's parent.
-
 sage seals a finished spec by writing one line into its frontmatter:
 
     sealed_by: validate-spec.py sha256:<hex>
 
 where <hex> is the sha256 of spec.md with every ``sealed_by:`` line removed
-from the frontmatter (sage's render_spec.spec_sha256). A spec edited after it
+from the frontmatter (the same hash sage's validate-spec.py computes). A spec edited after it
 was sealed no longer hashes to its seal.
 
 Three outcomes:
 
   sealed    the seal is present and holds. When sage's own verifier can be
             found (``sage verify-seal``), it runs too and must pass: it also
-            re-validates the spec against its embedded transcript.
+            re-runs sage's structural checks on the spec.
   unsealed  no ``sealed_by:`` line: an older or hand-written spec. tinker
             records a warning and builds it.
   broken    a ``sealed_by:`` line that is malformed, does not match the
@@ -31,7 +28,7 @@ newest installed sage next to this plugin's cache directory
 
 CLI (stdlib only):
 
-    spec_seal.py check SPEC_MD
+    seal.py check SPEC_MD
 
 prints one line and exits 0 for sealed or unsealed, 1 for broken, 2 for usage.
 The line starts ``SEAL_OK``, ``SEAL_NONE`` or ``SEAL_BROKEN``.
@@ -134,7 +131,7 @@ def check(spec: Path, full: bool = True) -> dict:
 
 def main(argv: list[str]) -> int:
     if len(argv) != 2 or argv[0] != "check":
-        print("usage: spec_seal.py check SPEC_MD", file=sys.stderr)
+        print("usage: seal.py check SPEC_MD", file=sys.stderr)
         return 2
     r = check(Path(argv[1]))
     tag = {"sealed": "SEAL_OK", "unsealed": "SEAL_NONE", "broken": "SEAL_BROKEN"}[r["status"]]

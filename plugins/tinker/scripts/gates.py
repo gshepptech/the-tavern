@@ -3,17 +3,16 @@
 ``measure``         sizes the work from the spec alone, before any agent runs:
                     the existing files and directories the spec names, the
                     lines a builder must read in them, and a new-code estimate
-                    from the number of requirements. When that fits tinker's
+                    from the number of requirements. When that fits the
                     S4 budget the run uses one builder and no planner.
-``check_plan``      the S1-S10 rules of tinker's docs/research/decompose-study.md
-                    section 4, the S4 size budget and the waves, for a plan the
-                    planner agent wrote because the spec did not fit. On a pass
+``check_plan``      the S1-S10 planning rules in prompts/planner.md, the S4
+                    size budget and the waves, for a plan the planner agent
+                    wrote because the spec did not fit. On a pass
                     it writes one brief per slice, assembled from the spec index
                     and the plan by code, so no agent paraphrases the spec into it.
 ``shares``          splits the requirements among the round-1 spec checkers that
                     run side by side, keeping each slice's requirements together.
 
-Copied from tinker's gates.py; tinker's probe and contract checks are gone.
 """
 
 from __future__ import annotations
@@ -23,7 +22,7 @@ from pathlib import Path
 
 from common import ID_RE, is_doc_file, read_json, skipped, write_json
 
-# S4: "<= 8 key_files entries (a directory entry counts as one ...), <= ~800 LOC
+# S4: "<= 8 files entries (a directory entry counts as one ...), <= ~800 LOC
 # to read, <= ~1,500 LOC new." The "~" is read as 25% headroom.
 MAX_ENTRIES = 8
 MAX_READ_LOC = 800

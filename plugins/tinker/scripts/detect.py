@@ -5,7 +5,7 @@ Detection reads files only; it runs nothing. Each command is
 ``{"cmd", "cwd", "why"}`` with ``cwd`` relative to the project root. The root
 and each immediate subdirectory are checked, so a repo with ``web/`` and
 ``api/`` gets both. A Makefile is used only where no language marker is
-found, since a Makefile target can mean anything. (Copied from tinker.)
+found, since a Makefile target can mean anything.
 
 ``integration`` is tinker's: it reads the spec for a command on a line that
 talks about an integration, end-to-end, acceptance or smoke check, or about

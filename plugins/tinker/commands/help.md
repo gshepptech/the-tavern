@@ -9,9 +9,9 @@ Explain the following to the user, compactly and in your own words.
 
 ## What tinker is
 
-A small spec-to-code build workflow: `/tinker:build <spec>`. It aims for about an hour per feature and the earlier build plugin's
-level of correctness, with a handful of agent calls. It is one Workflow script plus small Python helpers, with three
-agents and no MCP server.
+A small spec-to-code build workflow: `/tinker:build <spec>`. It aims for about an hour per feature, with a handful of
+agent calls and a check of every requirement against the code. It is one Workflow script plus small Python helpers,
+with three agents and no MCP server.
 
 ## The flow
 
@@ -20,11 +20,11 @@ agents and no MCP server.
    dry start, the build at the base commit). If code cannot name the check, one cheap agent does. A check that cannot
    start stops the run with the failing command and its output.
 2. **Plan**, in code first: if the spec fits one builder's budget, one builder. Only an over-budget spec gets a
-   planner, which splits it by tinker's S1-S10 rules, checked in code.
+   planner, which splits it by the S1-S10 planning rules, checked in code.
 3. **Build**: one Opus builder per slice (one for most specs), test-first, from the spec text verbatim. It must run the
    integration check and read its result before it reports.
 4. **Verify**, side by side: code runs build, lint, the full unit suite and the integration check against the base
-   commit; one spec-checker (the earlier build plugin's PROVE method) reads the spec, then the code, and reports every gap.
+   commit; one spec-checker reads the spec, then the code, and reports every gap.
 5. **Fix**: one fixer per slice gets every failure and gap at once; a behavioural fix needs a test that fails before
    and passes after. Code re-checks everything; the spec-checker re-checks only the gaps it reported. At most
    `--max-rounds` rounds.
@@ -37,4 +37,4 @@ agents and no MCP server.
 - `--max-agents N`: a hard cap on agent calls for the run (default 40); the report still runs when it is reached.
 - `--resume RUN`: continue a stopped run from its last completed step (on its `tinker/<run>` branch).
 
-The reasons for each step, and for what tinker leaves out of tinker, are in the plugin's README.
+The reasons for each step are in the plugin's README.

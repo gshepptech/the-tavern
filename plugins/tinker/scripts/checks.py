@@ -2,10 +2,9 @@
 
 ``new_failures`` is the commit check: a command that fails at HEAD is run
 again at the base commit in a detached worktree, and only failures HEAD has
-and the base does not count. The idea and the dependency-directory linking
-are smith's (mill_mcp/tools/commit_check.py, worktree_helpers.py); this is a
-smaller, language-neutral version that compares the failing names a run
-prints (test names, file: message pairs) instead of per-language checkers.
+and the base does not count. It is language-neutral: it compares the failing
+names a run prints (test names, file: message pairs) rather than parsing each
+runner's own report format.
 
 ``fail_before_pass_after`` is the Agentless rule ("The generated test should
 be able to be used to both reproduce the issue as well as to verify the issue

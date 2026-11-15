@@ -1,8 +1,8 @@
 // Runs plugins/tinker/workflows/build.js against a scripted stand-in for the
 // Workflow runtime, its agents, and the `tinker` commands the clerk runs, so
-// the script's routing is tested without a session. Adapted from tinker's
-// harness (itself adapted from smith's). The tinker commands themselves are
-// covered by the Python tests; here each one answers from the scenario.
+// the script's routing is tested without a session. The tinker commands
+// themselves are covered by the Python tests; here each one answers from the
+// scenario.
 //
 // usage: node workflow_harness.mjs <path to build.js> <scenario>
 // prints one JSON object: {meta, result, phases, labels, prompts, options, commands, schemaProblems, syntaxFile}

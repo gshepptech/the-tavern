@@ -1,7 +1,7 @@
 """Index a spec: every requirement ID and the verbatim text that defines it.
 
 The plan check, the slice briefs and the contract check all work from this
-index, so a slice owns spec text copied byte for byte (decompose study S1, S9)
+index, so a slice owns spec text copied byte for byte (planner rules S1, S9)
 rather than a writer's paraphrase of it.
 
 An ID is *defined* where it starts a list item, a table row, a heading or a
