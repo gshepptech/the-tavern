@@ -1,0 +1,18 @@
+{
+  "name": "scribe",
+  "version": "1.0.0",
+  "description": "Writes and audits documentation for an application you built. /scribe:plan surveys the repository and proposes an overview, getting-started tutorial, how-to guides, reference and explanation pages plus a docs layout. /scribe:write writes the pages with every claim anchored to a file:line or a command that was run, then has a reader who knows nothing about the code report where each page loses them. /scribe:audit runs link, anchor, evidence, stale-command, reader and jargon gates over existing docs and returns a ranked punch list.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/scribe/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "documentation",
+    "docs",
+    "diataxis",
+    "audit",
+    "links"
+  ]
+}
