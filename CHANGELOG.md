@@ -2,8 +2,37 @@
 
 All notable changes to this marketplace are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each plugin carries its own
-[semantic version](https://semver.org/), shown in the [crew table](README.md#the-crew), and
+[semantic version](https://semver.org/), shown in the [roster](README.md#the-roster), and
 entries are grouped by the date they reached `main`.
+
+## 2026-11-15
+
+### Changed
+- **The marketplace is The Tavern.** Install it with
+  `/plugin marketplace add gshepptech/the-tavern` and each plugin as `<name>@the-tavern`.
+  The fifteen regulars at their current versions: Sage 1.0.0, Smith 1.0.0, Tinker 0.1.0,
+  Squire 1.0.0, Sellsword 0.4.0, Ranger 0.7.1, Warden 0.5.1, Seer 0.2.0, Cleric 0.2.1,
+  Scout 0.2.1, Bard 1.0.0, Tactician 0.2.1, Scribe 1.0.0, Raven 1.0.0 and Monk 1.0.0.
+- The shared workspace is the quest board, `.questboard/`. See
+  [docs/questboard-contract.md](docs/questboard-contract.md).
+- Install profiles are `builder`, `lean`, `solo`, `review`, `unattended` and `full`. See
+  [docs/profiles.md](docs/profiles.md).
+- Ranger's orchestrating agent is called the lead throughout its prompts and docs.
+
+### Added
+- **Squire 1.0.0.** A single-lane build, verify and fix loop for small specs: one
+  test-first builder, a verifier that sees only the spec and the code, a fixer limited to
+  the listed gaps, and drift checks in code. `/squire:build`.
+- **Scribe 1.0.0.** Plans, writes and audits documentation, with every claim anchored to a
+  `file:line` or a command that was run, and a newcomer read of every page.
+  `/scribe:plan`, `/scribe:write`, `/scribe:audit`.
+- **Bard 1.0.0.** A UX review that uses the running app as named personas in a real
+  browser and writes a ranked report with a screenshot behind every finding. `/bard:run`.
+- **Raven 1.0.0.** Posts to a Slack incoming webhook when a reply finishes or Claude Code
+  is waiting for you, with secrets redacted and repeats suppressed. `/raven:test`.
+- **Monk 1.0.0.** Seven response-shaping rules loaded at session start, a one-line
+  reminder per prompt and an optional length gate. `/monk:gate-on`, `/monk:verbose`.
+- CI runs the Squire, Scribe, Bard, Raven and Monk test suites.
 
 ## 2026-11-14
 
@@ -23,13 +52,9 @@ entries are grouped by the date they reached `main`.
   top-level `return` or `await` no longer fails the syntax step.
 
 ### Changed
-- Sage and Smith replace the earlier spec and build plugins of the same names with a
-  smaller design built around a validator and a ledger. Their versions restart at 1.0.0.
 - **Ranger 0.7.1.** The looped-run preflight checks only Warden's strict gate.
 - The executable-bit check in CI applies to scripts with a shebang; imported modules are
   exempt.
-- The root README, contributing guide, install profiles and `.questboard` contract cover all
-  ten plugins.
 
 ## 2026-10-16
 
@@ -63,7 +88,7 @@ entries are grouped by the date they reached `main`.
   newest one, Ranger reads what has already been tried and records each attempt, and Sellsword,
   Cleric and Seer record findings they did not act on. Every plugin behaves the same when
   the directory is absent. See [docs/questboard-contract.md](docs/questboard-contract.md).
-- **Install profiles.** `daily`, `pipeline`, `review`, `unattended` and `all`, installed
+- **Install profiles.** Named sets of plugins, installed
   with `scripts/install-profile.sh` (`--list`, `--dry-run`, `--scope`, `--yes`) and checked
   against [docs/profiles.md](docs/profiles.md) in CI.
 - **Ranger 0.6.0.** Every backlog item carries an artifact: the command a scout ran and
@@ -122,7 +147,7 @@ entries are grouped by the date they reached `main`.
 ### Added
 - First public release of the marketplace, with:
   - **Warden 0.5.0**: methodical-mode hooks, a citation verifier and a two-tier critic.
-  - **Sellsword 0.2.0**: a five-agent crew that investigates, plans, executes and verifies.
+  - **Sellsword 0.2.0**: five agents that investigate, plan, execute and verify.
   - **Cleric 0.1.0**: low-risk cleanup across seven tracks.
   - **Scout 0.2.0**: Playwright end-to-end tests written by driving the real app.
   - **Tactician 0.2.0**: generated multi-agent Workflow scripts.
