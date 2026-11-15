@@ -379,7 +379,7 @@ esac
 
 say ""
 say "Each plugin's README is self-contained - full setup, commands and caveats:"
-say "  https://github.com/${MARKETPLACE_SOURCE}#per-plugin-docs"
+say "  https://github.com/${MARKETPLACE_SOURCE}#the-roster"
 say ""
 say "Not what you wanted? Nothing here is sticky:"
 for p in $plugins; do
