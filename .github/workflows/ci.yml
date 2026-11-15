@@ -109,6 +109,21 @@ jobs:
           - plugin: tinker
             dir: plugins/tinker
             deps: ""
+          - plugin: squire
+            dir: plugins/squire
+            deps: ""
+          - plugin: scribe
+            dir: plugins/scribe
+            deps: ""
+          - plugin: bard
+            dir: plugins/bard
+            deps: ""
+          - plugin: monk
+            dir: plugins/monk
+            deps: ""
+          - plugin: raven
+            dir: plugins/raven
+            deps: ""
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v5
