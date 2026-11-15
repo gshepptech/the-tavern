@@ -72,9 +72,9 @@ def test_allowed_by_default(guard, cmd):
 
 # --- evasion: the guard is worthless if a wrapper defeats it -----------------
 #
-# Every command below reached the network past the original guard, which only
-# inspected the outer command word and split on separators without regard for
-# quoting. The threat model is an unattended agent doing something unintended,
+# Each command below reaches the network through a wrapper, quoting trick or
+# separator that a check on the outer command word alone would miss. The threat
+# model is an unattended agent doing something unintended,
 # not a determined attacker - but a guardrail a stray `sh -c` walks through is
 # not a guardrail.
 
@@ -181,11 +181,10 @@ def test_hardening_still_allows_ordinary_work(guard, cmd):
 #
 # `status` only leaves "active" via /ranger:stop or the clean terminal path, so
 # a runner that is Ctrl-C'd or killed leaves it set. Headless runs deliberately
-# skip session scoping, so a dead one went on denying the USER's own pushes,
-# branches and PRs in that repo in every later session, with nothing on screen
-# explaining why. Two liveness signals now disarm it: a dead runner PID and a
-# stale state.json. Deliberately NOT a wall-clock signal - see
-# test_over_cap_but_still_active_run_still_guards for why.
+# skip session scoping. A dead headless run must not keep denying the user's
+# own pushes, branches and PRs in later sessions. Two liveness signals disarm
+# it: a dead runner PID and a stale state.json. Deliberately NOT a wall-clock
+# signal; see test_over_cap_but_still_active_run_still_guards.
 
 def test_dead_headless_run_stops_policing_when_its_pid_is_gone(guard, tmp_path):
     _arm(guard, mode="headless", session_id="DEAD")
