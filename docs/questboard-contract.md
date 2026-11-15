@@ -1,6 +1,6 @@
-# The .questboard contract
+# The quest board contract
 
-An optional shared workspace so the plugins in this marketplace can tell each other what they learned about a project.
+The quest board is `.questboard/`: an optional shared workspace where the regulars in this tavern pin notes for each other about what they learned on a project.
 
 Each plugin keeps its own state. Sage writes a spec to `sage-specs/`, Ranger keeps a backlog in `.ranger/runs/`, Cleric files assessments in `.cleric/runs/`, Seer drops casefiles in `.seer/casefiles/`, Sellsword keeps journals in `.sellsword/runs/`. Without a shared place to look, none of them can see any of the others, and a spec reaches a builder only when a person copies the path across.
 
@@ -218,7 +218,17 @@ This is the only place a malformed file is ever reported. Running it is a delibe
 
 ## Who is wired in, and who is not
 
-Six of the ten participate. For the other four, taking part would be symmetry for its own sake.
+Six of the fifteen participate. For the other nine, taking part would be symmetry for its own sake.
+
+| Regular | Reads | Writes |
+|---|---|---|
+| Sage | | `spec` |
+| Smith | `spec` | `attempt` |
+| Ranger | `spec`, `finding`, `attempt` | `attempt` |
+| Sellsword | | `finding` |
+| Cleric | | `finding` |
+| Seer | | `finding` |
+| Tinker, Squire, Warden, Monk, Scout, Bard, Tactician, Scribe, Raven | | |
 
 ### Wired in
 
@@ -241,6 +251,16 @@ Six of the ten participate. For the other four, taking part would be symmetry fo
 **Scout** produces `*.spec.ts` files in the repository. Those are already visible to every tool that can list a directory, and they are the actual artifact rather than a summary of one. A note would restate what `ls tests/` says, and would go stale the first time someone edits a spec.
 
 **Tactician** generates a standalone Workflow script and hands it over. It learns nothing about the project in the process and consumes nothing that would help it. There is no note it could honestly write.
+
+**Squire** is the same shape as Tinker at a smaller size. It takes an explicit spec path, keeps everything about a run in `squire-runs/<run>/` and on its `squire/<run>` branch, and needs nothing from the board.
+
+**Bard** writes a ranked UX report to `.bard/runs/<run>/` with a screenshot behind every finding. The report is the artifact a person acts on, and the next run re-drives the app rather than trusting an old report, so there is nothing a note would add.
+
+**Scribe** writes documentation pages into the repository, where every tool can already read them, and keeps its plan in `.scribe/plan.md`. Its audit is a punch list for a person, not raw material for another tool.
+
+**Raven** forwards session events to Slack. It learns nothing about the project and has no reader for anything on the board.
+
+**Monk** shapes how replies read, one turn at a time, like Warden. It has no project-level knowledge to contribute.
 
 **Tinker** always takes an explicit spec path and records everything about a run in its own `tinker-archive/<run>/` directory and on its `tinker/<run>` branch. It checks a Sage seal by reading the spec file itself, so it needs nothing from the workspace.
 
