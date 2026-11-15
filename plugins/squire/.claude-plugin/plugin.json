@@ -1,0 +1,18 @@
+{
+  "name": "squire",
+  "version": "1.0.0",
+  "description": "A compact build, verify and fix loop for a small spec that already has requirement IDs and acceptance criteria. One test-first builder, a verifier that sees only the spec and the code and cites file:line for every verdict, a fixer limited to the listed gaps, and drift checks in code. Loops until clean or three fix rounds, then reports.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/squire/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "build",
+    "spec-driven",
+    "verification",
+    "workflow",
+    "tdd"
+  ]
+}
