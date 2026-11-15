@@ -1,4 +1,4 @@
-name: 🐛 Bug report
+name: Bug report
 description: Something in a plugin isn't behaving as it should
 title: "[bug]: "
 labels: ["bug"]
@@ -9,19 +9,24 @@ body:
   - type: dropdown
     id: plugin
     attributes:
-      label: Which crew member?
+      label: Which regular?
       description: The plugin this bug is about.
       options:
         - sage
         - smith
         - tinker
-        - warden
+        - squire
         - sellsword
+        - ranger
+        - warden
+        - seer
         - cleric
         - scout
+        - bard
         - tactician
-        - seer
-        - ranger
+        - scribe
+        - raven
+        - monk
         - marketplace / install
         - not sure
     validations:
@@ -55,7 +60,7 @@ body:
     id: version
     attributes:
       label: Plugin / Claude Code version
-      placeholder: "e.g. smith v4.4.0, Claude Code 1.x"
+      placeholder: "e.g. smith v1.0.0, Claude Code 2.1"
   - type: textarea
     id: logs
     attributes:

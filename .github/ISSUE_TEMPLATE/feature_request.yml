@@ -1,26 +1,31 @@
-name: 💡 Feature request
-description: Suggest an improvement or a new tool for the crew
+name: Feature request
+description: Suggest an improvement or a new regular for the tavern
 title: "[feat]: "
 labels: ["enhancement"]
 body:
   - type: markdown
     attributes:
-      value: Got an idea to make the crew sharper? Lay it out below.
+      value: Have an idea that would make one of the regulars better? Describe it below.
   - type: dropdown
     id: plugin
     attributes:
-      label: Which crew member (or a new one)?
+      label: Which regular (or a new one)?
       options:
         - sage
         - smith
         - tinker
-        - warden
+        - squire
         - sellsword
+        - ranger
+        - warden
+        - seer
         - cleric
         - scout
+        - bard
         - tactician
-        - seer
-        - ranger
+        - scribe
+        - raven
+        - monk
         - a new plugin
         - the marketplace itself
     validations:

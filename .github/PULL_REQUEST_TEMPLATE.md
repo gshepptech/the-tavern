@@ -4,7 +4,7 @@
 
 <!-- A short summary. What and why, not just how. -->
 
-## Which crew member(s)?
+## Which regular(s)?
 
 <!-- e.g. smith, warden, marketplace-wide -->
 
@@ -19,4 +19,4 @@ Closes #
 - [ ] The other `.github/scripts/check_*.py` checks pass (see CONTRIBUTING.md)
 - [ ] `cd plugins/<name> && uv run --with pytest python -m pytest -q` passes (if the plugin has tests)
 - [ ] Bumped the plugin `version` and updated its `README.md` (if behavior changed)
-- [ ] Updated the root `README.md` Crew table / `CHANGELOG.md` (if user-facing)
+- [ ] Updated the root `README.md` roster table / `CHANGELOG.md` (if user-facing)
