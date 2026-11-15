@@ -1,0 +1,17 @@
+{
+  "name": "raven",
+  "version": "1.0.0",
+  "description": "Posts Claude Code session events to Slack. When a reply finishes or Claude Code needs your attention, raven sends a colour-coded message to an incoming webhook with the prompt's first line, the opening of the reply, the folder, the git branch and the session id. Secrets are redacted before sending, repeats are suppressed, and a missing webhook or a Slack error is logged without ever blocking Claude.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/raven/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "slack",
+    "notifications",
+    "hooks",
+    "webhook"
+  ]
+}
