@@ -64,7 +64,7 @@ in a single message** so they run in parallel:
 
 ```
 Slice <id>: <title>
-Requirements (quoted exactly from the spec, with acceptance criteria):
+Requirements (copied exactly from the ledger, with acceptance criteria):
 <for each requirement: its ID, text and criteria from the ledger>
 Files you own: <files>
 Brief: <brief>
