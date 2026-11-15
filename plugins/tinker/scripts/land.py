@@ -157,8 +157,8 @@ def preflight(root: Path, rdir: Path, integ: dict | None, extra_needs: list[str]
 def integration(root: Path, rdir: Path) -> dict:
     """Run the spec's end-to-end check, one agent at a time, and reuse a result already taken on the same code.
 
-    Agents building side by side used to start the suite at once and fight over its ports and the machine; in one
-    P1.1 run fixers ran it 9-11 times each and spent minutes in loops waiting for a port to free."""
+    Agents building side by side would otherwise start the suite at once and fight over its ports and the machine,
+    then spend minutes in loops waiting for a port to free."""
     integ = load_state(rdir).get("integration") or {}
     if not integ.get("command"):
         return {"ok": True, "ran": False, "why": "the spec names no integration check"}

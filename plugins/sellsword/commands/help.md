@@ -128,7 +128,7 @@ Recon also reads `.sellsword/access.yml` if present, for the same purpose — bo
 
 ## What Sellsword is NOT
 
-- Not a feature-builder pipeline (that's mill/blueprint)
-- Not a phase planner (that's gsd)
+- Not a spec-driven feature builder (that's Smith or Tinker, from a Sage spec)
+- Not a phase planner
 
 Sellsword is "I have a problem, go own it."
