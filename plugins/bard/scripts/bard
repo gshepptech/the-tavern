@@ -1,0 +1,3 @@
+#!/bin/bash
+# bard's code steps. Usage: bard [--root DIR] <command> [args]; see bard.py.
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/bard.py" "$@"
