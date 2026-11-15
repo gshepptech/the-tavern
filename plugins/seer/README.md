@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="seer.svg" alt="Seer — the surveyor" width="100%"/>
+<img src="seer.svg" alt="Seer, one of the regulars at The Tavern" width="100%"/>
 
 # Seer
 
@@ -12,20 +12,22 @@
 
 </div>
 
-> The senior-engineer design-cohesion critique — not bug-hunting, not lint. Seer reads a codebase the way a gumshoe reads a crime scene, deduces the real design problem from the detail that's out of place, and hands you an ordered reshaping plan. **Report only — it never edits code.**
+*The seer looks at how a codebase is shaped and tells you which parts were designed and which just grew.*
+
+> The senior-engineer design-cohesion critique — not bug-hunting, not lint. Seer finds the real design problem from the detail that is out of place, and hands you an ordered reshaping plan. **Report only — it never edits code.**
 
 ---
 
-## The case
+## The problem
 
 Every codebase accretes. Packages get added faster than they get merged, helper functions multiply, one module quietly becomes three. Nobody decided this — it just happened, one reasonable-looking commit at a time. Ask a naive "review the architecture" pass about it and you get plausible-sounding opinions with nothing to act on.
 
-Seer works it like a case file. It builds a structural map of the target, then sends eight independent investigators over it at once, each seeing only their own angle and none seeing the others' leads. It cross-examines every lead they bring back — most smells have an innocent explanation, and Seer goes looking for it before believing anything. What survives is written up: a per-subsystem verdict, `file:line` evidence, and a concrete plan for reshaping it.
+Seer builds a structural map of the target, then sends eight independent investigators over it at once, each seeing only their own angle and none seeing the others' leads. It cross-examines every lead they bring back — most smells have an innocent explanation, and Seer goes looking for it before believing anything. What survives is written up: a per-subsystem verdict, `file:line` evidence, and a concrete plan for reshaping it.
 
 > [!NOTE]
-> **Seer is standalone.** It's one of nine independent tools in a small collection, but you'll never need the other eight to use it. It does need Claude Code's [Workflow tool](https://docs.claude.com/en/docs/claude-code) — the engine is a Workflow script — so if `/seer:review` reports that Workflow is unavailable, that is the one prerequisite, and it depends on your Claude Code version and plan rather than anything you install here.
+> **Seer is standalone.** It's one of fifteen independent regulars in The Tavern, but you'll never need the other fourteen to use it. It does need Claude Code's [Workflow tool](https://docs.claude.com/en/docs/claude-code) — the engine is a Workflow script — so if `/seer:review` reports that Workflow is unavailable, that is the one prerequisite, and it depends on your Claude Code version and plan rather than anything you install here.
 
-Its working principle: **the code is the only witness that doesn't lie.** A comment can go stale the moment it's written; the code that actually runs cannot. Seer never takes a docstring's word for it — it reads the call sites and follows the flow. And silence is a legitimate verdict: a well-shaped target should come back with few or no findings. Seer isn't paid by the smell.
+Its working principle: **the code is the evidence; comments go stale.** A comment can go stale the moment it's written; the code that actually runs cannot. Seer never takes a docstring's word for it — it reads the call sites and follows the flow. And silence is a legitimate verdict: a well-shaped target should come back with few or no findings. Seer isn't paid by the smell.
 
 ---
 
@@ -246,7 +248,7 @@ The format is documented in [the .questboard contract](../../docs/questboard-con
 
 ## Pairs well with
 
-Seer closes a case with a reshaping plan, not a diff. Two siblings in the same collection are natural next steps if you want one, though neither is required:
+Seer ends with a reshaping plan, not a diff. Two other regulars are natural next steps if you want one, though neither is required:
 
 - [cleric](../cleric/README.md) — for the small, mechanical items on the plan (dead code, dedup, circular deps)
 - [sellsword](../sellsword/README.md) — for the larger structural moves, handed off as a problem for Sellsword to own end to end

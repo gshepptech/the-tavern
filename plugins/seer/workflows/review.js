@@ -205,7 +205,7 @@ const LENSES = [
 const GROUNDING = `
 GROUNDING DISCIPLINE (non-negotiable):
 - Every finding MUST carry at least one concrete file:line anchor you actually read. No anchor → no finding.
-- Read the code and trace call sites. Never treat a comment as the source of truth — the code is the only witness that doesn't lie; comments go stale.
+- Read the code and trace call sites. Never treat a comment as the source of truth — the code is the evidence; comments go stale.
 - Forbidden phrases: "appears to", "looks like", "seems to", "probably". Either you verified it in the code or it is not a finding.
 - This is MACRO-DESIGN critique, not bug-hunting and not lint. Do not report missing error handling, style nits, or correctness bugs. Report SHAPE: why it is structured this way, what would make it cohere.
 - Every finding needs a concrete proposed solution — what to move/merge/split/rename and roughly how. "Consider refactoring" is not a solution.

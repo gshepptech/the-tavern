@@ -5,7 +5,7 @@ allowed-tools: ["Read"]
 
 # Seer — help
 
-**Seer** runs a senior-engineer **design-quality / cohesion** review — working the code like a gumshoe works a crime scene: deducing the real design problem from the detail that's out of place. Not bug-hunting, not lint. It asks the architecture questions:
+**Seer** runs a senior-engineer **design-quality / cohesion** review — deducing the real design problem from the detail that's out of place. Not bug-hunting, not lint. It asks the architecture questions:
 
 - Is this shaped right, or thrown together?
 - Why are there N packages / N helper functions doing almost-the-same thing?
@@ -30,7 +30,7 @@ It's not "ask Claude what it thinks of the architecture." It's a Workflow engine
 3. **Adversarial cross-examination** — every candidate finding goes to a skeptic that tries to *refute* it ("is this split actually intentional?"). Findings that don't survive are dropped.
 4. **Completeness critic** — a final agent asks "what area went unexamined?" and re-lenses the gaps.
 
-Seer never takes a comment at its word for what the code does — the code is the only witness that doesn't lie; it reads the actual code.
+Seer never takes a comment at its word for what the code does — the code is the evidence and comments go stale; it reads the actual code.
 
 ## Output
 
