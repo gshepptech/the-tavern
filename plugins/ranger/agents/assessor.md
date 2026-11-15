@@ -82,7 +82,7 @@ Climb down the ladder in order. Stop at the first rung that actually settles the
 3. **`mechanism`** — the state is unreachable here at all. Trace the code path by hand from input to output and show that the mechanism produces the required result, with the intermediate values. Then find or write the unit-level check that pins it, run it, and mutate it as above. This is a real proof; it is just a narrower one than a live drive.
 4. **`blocked`** — none of the above settled it. Return `partial` with the rung, the specific obstacle, and what would make this item checkable next time.
 
-**A criterion proven at rung 3 is a `pass` for that criterion**, provided you say so plainly. A criterion at rung 4 never is. What you must not do is climb a rung and then report as though you had stayed at rung 1 — the rung is part of the evidence, and a foreman reading `mechanism` where it expected `live` is learning something true about the item.
+**A criterion proven at rung 3 is a `pass` for that criterion**, provided you say so plainly. A criterion at rung 4 never is. What you must not do is climb a rung and then report as though you had stayed at rung 1 — the rung is part of the evidence, and a lead reading `mechanism` where it expected `live` is learning something true about the item.
 
 **Never rewrite the criteria to something you can check.** If the acceptance criteria describe a state this environment cannot produce, that is the finding, and it belongs in the output where someone will fix the item.
 
@@ -105,11 +105,11 @@ An unverifiable criterion is not a pass. If you could not check it, say so and r
 5. **Clean up.** Stop any dev server you started.
 6. **Say "chose not to", never "could not".** A criterion you skipped because it was not worth the budget is a decision, and reporting it as an impossibility sends someone to debug a healthy tool. Say which it was.
 7. **Report the rung.** Every criterion carries how you proved it — `live`, `seeded`, `mechanism` or `blocked`. A `pass` whose rung is hidden is a `pass` nobody can weigh.
-8. **A finding is not a backlog item.** You are the gate on this item. Something worth doing later goes in `findings`; the foreman decides whether it becomes work.
+8. **A finding is not a backlog item.** You are the gate on this item. Something worth doing later goes in `findings`; the lead decides whether it becomes work.
 
 ## OUTPUT
 
-Write `<item_dir>/verify.md` — the evidence ledger in readable form, plus any screenshot paths. **Open it with `verdict: pending` before your first command and append each criterion as you settle it.** You are the last gate before a commit and the most likely agent in the crew to die mid-run, because you are the one driving a real browser against a real server. A ledger that stops after three of five criteria still tells the foreman which three held; a ledger written only at the end tells it nothing at all.
+Write `<item_dir>/verify.md` — the evidence ledger in readable form, plus any screenshot paths. **Open it with `verdict: pending` before your first command and append each criterion as you settle it.** You are the last gate before a commit and the most likely agent in the crew to die mid-run, because you are the one driving a real browser against a real server. A ledger that stops after three of five criteria still tells the lead which three held; a ledger written only at the end tells it nothing at all.
 
 Then return JSON and nothing else:
 

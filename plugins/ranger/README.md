@@ -1,16 +1,18 @@
 <div align="center">
 
-<img src="ranger.svg" alt="Ranger — the foreman" width="100%"/>
+<img src="ranger.svg" alt="Ranger, one of the regulars at The Tavern" width="100%"/>
 
 # Ranger
 
-**The foreman who never leaves the site. One prompt, then walk away.**
+**A self-directing engineering loop. One brief, then walk away.**
 
 [![Version](https://img.shields.io/badge/version-0.7.1-F9A825?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-1E88E5?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
 </div>
+
+*The ranger walks the bounds of your codebase, finds what needs doing, and comes back with one finished job at a time.*
 
 > [!NOTE]
 > **Ranger stands entirely on its own.** Install it by itself and it runs a full senior-engineering loop — survey, plan, build, verify, commit — with no other plugin present. If `cleric`, `seer`, or `scout` also happen to be installed, a scout will dispatch to them for their specialisms instead of duplicating that work; none of them is required, and Ranger covers the same ground itself if they're absent.
@@ -33,14 +35,14 @@
 Most "autonomous" loops die one of two deaths: they run out of work and stop, or they fill their context window and go stupid. Ranger is built against both.
 
 - **No exit condition.** An empty backlog is a survey trigger, not a finish line, and **nothing but you ends a run** — `/ranger:stop`, Esc, a cap you set. Ranger never decides for itself that the work is finished. Continuous operation is a *driver's* job: `/loop /ranger:run` while you watch, or a headless runner overnight. Each `/ranger:run` does one clean cycle and returns; nothing traps the turn.
-- **A thin lead.** The foreman spawns agents and manages state files; he never edits code. Every agent gets a fresh context; his own window stays small, so a run survives for hours.
-- **A crew, not a queue.** Surveying, driving, claims-checking and plan-review are read-only, so they run as parallel pools. Only the build touches the shared tree, so only the build is serial — one item at a time, unless two plans provably touch nothing in common, which puts them in separate worktrees behind five conditions and a flag.
+- **A thin lead.** The lead spawns agents and manages state files; it never edits code. Every agent gets a fresh context and the lead's own window stays small, so a run survives for hours.
+- **A team, not a queue.** Surveying, driving, claims-checking and plan-review are read-only, so they run as parallel pools. Only the build touches the shared tree, so only the build is serial — one item at a time, unless two plans provably touch nothing in common, which puts them in separate worktrees behind five conditions and a flag.
 - **Effort sized to the item, declared after reading it.** A one-line copy fix gets two agents; a concurrency bug gets the full adversarial pipeline and a mandatory fresh-eyes gate. The lead guesses the tier from the entry and the build agent overrules it from the code — it can raise the tier, never lower it. One fixed pipeline for everything is the most expensive mistake a loop like this can make.
 - **An artifact, or it's a hypothesis.** An item carries the command someone ran and what they saw, not just the line they read. Citations prove a line exists; they don't prove the path reaches it or that the behaviour you inferred is the one a user gets. Items with no artifact are quarantined until something reproduces them — never planned.
 - **Plan review before code — and a claims check before that.** A rejected plan costs one agent; a bad implementation costs five. Most revision rounds in a mature run are citation defects, not design defects, so a cheap pass verifies every claim against its source before the expensive reviewer is spent.
 - **One agent that runs the system instead of reading it.** Everyone else reads. The driver starts the app, clicks the thing, calls the endpoint and measures what can't be eyeballed — which is how you find a control rendering at 12 pixels tall, or an error message sitting at `display: none` in every state a user can reach. "I couldn't reproduce it" is a success verdict, not a failure.
 - **Fresh-eyes verification.** The assessor never sees the plan — only the acceptance criteria and the code. It cannot be argued into agreeing. UI items get driven through a real browser, clicked through like a user would.
-- **A gate that dies is reported, never replaced.** Every verdict is written to disk before it is returned, so a dead agent degrades to a partial verdict instead of silence — and the foreman is forbidden from writing any gate it commissioned.
+- **A gate that dies is reported, never replaced.** Every verdict is written to disk before it is returned, so a dead agent degrades to a partial verdict instead of silence — and the lead is forbidden from writing any gate it commissioned.
 - **Local commits only.** `git push` is denied by a `PreToolUse` hook for the whole run, and no flag turns it on.
 
 ---
@@ -64,12 +66,12 @@ claude plugin install ranger@the-tavern
 
 The recommended first contact: you get the ranked backlog and the plan for the top item, and nothing is written. [Worked example 1](#worked-examples) shows what comes back.
 
-**3. Set him going** — `/loop /ranger:run make the dashboard genuinely good`, and press **Esc** to stop.
+**3. Set it going** — `/loop /ranger:run make the dashboard genuinely good`, and press **Esc** to stop.
 
 > [!WARNING]
 > **Read this before step 3, not after.** Two things about a real run:
 >
-> - **It is uncapped by default.** Ranger works until you stop him — `/ranger:stop`, Esc out of the loop, or kill the runner. Nothing else ends it. `--max-hours=N` is the only bound that stops a run on its own. (`--max-cycles=N` counts *shipped* items, so a run that keeps reverting never reaches it.)
+> - **It is uncapped by default.** Ranger works until you stop it — `/ranger:stop`, Esc out of the loop, or kill the runner. Nothing else ends it. `--max-hours=N` is the only bound that stops a run on its own. (`--max-cycles=N` counts *shipped* items, so a run that keeps reverting never reaches it.)
 > - **Unattended mode runs with permissions bypassed.** With no human present to answer prompts, the headless runner and every agent it spawns execute tools without asking: file writes, shell commands, network calls. The git guard still holds, but **only git is guarded**. Run the headless mode in a container, a VM, or a throwaway clone — never on a machine you care about while you walk away. The watched `/loop` form is lower-risk only because you are sitting there.
 
 If you run Warden, clear its strict gate first with `/warden:strict-off`, or it will deadlock the loop. Ranger checks this at the start and tells you exactly what to run.
@@ -78,7 +80,7 @@ If you run Warden, clear its strict gate first with `/warden:strict-off`, or it 
 
 ## The cycle
 
-Ranger's whole story is its loop: a read-only crew fans out in parallel, then one thread of work goes serial through the tree.
+Ranger's whole story is its loop: a read-only team fans out in parallel, then one thread of work goes serial through the tree.
 
 ```mermaid
 flowchart LR
@@ -130,7 +132,7 @@ But difficulty isn't knowable from a ticket. "Add a key to this table" turns out
 
 The common case costs one agent. The rare case costs two. Only the rare case pays for a planner, a checker and a reviewer before a line is written.
 
-### Not every item gets the whole crew
+### Not every item gets the whole team
 
 The build agent declares the item's real tier after reading it — the lead's hint came from a sentence, the builder's tier comes from the code. It may raise the tier; it may never lower it.
 
@@ -144,13 +146,13 @@ Verification is routed the same way. The assessor is mandatory for anything wher
 
 ## Why it never runs out of work
 
-The first survey sends one scout to map the *product* — its real domains, like the checkout flow, the settings page, the CLI, the auth layer. It maps **every tier that runs code**, not just the one with a UI; a pipeline or a scoring module will happily hold the worst bug in the repo while a hundred frontend sweeps go past it. After that the foreman crosses those domains with nine lenses:
+The first survey sends one scout to map the *product* — its real domains, like the checkout flow, the settings page, the CLI, the auth layer. It maps **every tier that runs code**, not just the one with a UI; a pipeline or a scoring module will happily hold the worst bug in the repo while a hundred frontend sweeps go past it. After that the lead crosses those domains with nine lenses:
 
 **correctness, UI/UX, visual polish, real-user flows, performance, accessibility, security, DX, feature gaps** — swept in that order.
 
-Every domain/lens combination is a **pair**, and each scout in a wave takes one; a persistent `swept` map means no pair is issued twice, so the loop moves forward instead of circling. The survey fires when the backlog drops **below a watermark** (default `scouts + 2` = 8 items), not when it hits zero — so the foreman is stocking up while the current item is still being built, and never stalls waiting for work. It goes out alongside the current build, since reading a half-edited tree is fine for an agent that proposes work rather than asserting a diff.
+Every domain/lens combination is a **pair**, and each scout in a wave takes one; a persistent `swept` map means no pair is issued twice, so the loop moves forward instead of circling. The survey fires when the backlog drops **below a watermark** (default `scouts + 2` = 8 items), not when it hits zero — so the lead is stocking up while the current item is still being built, and never stalls waiting for work. It goes out alongside the current build, since reading a half-edited tree is fine for an agent that proposes work rather than asserting a diff.
 
-The rotation also learns. The foreman records a **yield** per pair — sweeps versus items that survived dedup and the floor — and a pair that comes back clean twice goes cold and gets skipped until its domain changes. Breadth-first with no feedback spends the same on the well-hardened area as on the one full of defects.
+The rotation also learns. The lead records a **yield** per pair — sweeps versus items that survived dedup and the floor — and a pair that comes back clean twice goes cold and gets skipped until its domain changes. Breadth-first with no feedback spends the same on the well-hardened area as on the one full of defects.
 
 ### When reading stops working, it stops reading
 
@@ -166,7 +168,7 @@ Every backlog entry carries a `verified_at` cycle stamp, and one older than 15 c
 
 **"Closed as already shipped" is a real outcome and it's reported as progress.** It's often the most valuable thing a cycle can produce, and it is not counted as a failure.
 
-**It will not manufacture churn.** Every candidate is scored `value + confidence - effort + consequence`; anything under the floor is dropped. A scout that finds nothing above the floor reports its pair **clean** — a real, useful answer. Keeping the backlog full is the foreman's job, answered by dispatching more pairs, never by pressing a scout to come back with something.
+**It will not manufacture churn.** Every candidate is scored `value + confidence - effort + consequence`; anything under the floor is dropped. A scout that finds nothing above the floor reports its pair **clean** — a real, useful answer. Keeping the backlog full is the lead's job, answered by dispatching more pairs, never by pressing a scout to come back with something.
 
 `consequence` (0–5) is what happens to a real person if the thing stays broken, and it's a separate number from `value` on purpose. Without it the formula is blind to stakes: a wrong figure on a page people *act on* scores within a point of a misaligned heading, because both are "one small thing that's wrong" — and then the wrong figure sits mid-backlog for weeks while cosmetics ship above it. It's scored from the failure, not the lens: a visual-polish item is a 5 if the polish is a contrast failure on a warning nobody can now read.
 
@@ -177,16 +179,16 @@ Never running out of work is right on a young codebase and turns into a treadmil
 The fix is **not** to let it stop — it doesn't, and won't. It's to make it pickier, so an uncapped run spends its cycles on the best work available rather than on whatever it found first:
 
 - **The floor rises.** It starts at 6 and climbs by 1 every 10 cycles whose shipped work averaged below `floor + 4`, to a maximum of 12. It never falls. A run at cycle 100 refuses work a run at cycle 5 would take.
-- **The pool is capped.** 40 items across `ready + planned + approved`. At the cap, filing costs something: a new item means dropping one. There's a prune pass — the foreman kills items below the risen floor, items describing code that has since been rewritten, and items that have lost the selection 20 cycles running. **Killing an item counts as progress.**
+- **The pool is capped.** 40 items across `ready + planned + approved`. At the cap, filing costs something: a new item means dropping one. There's a prune pass — the lead kills items below the risen floor, items describing code that has since been rewritten, and items that have lost the selection 20 cycles running. **Killing an item counts as progress.**
 - **Lean runs are reported, not stopped.** After 5 consecutive cycles producing nothing meaningfully above the floor, you get one line saying so and what's left at the top. Then it keeps sweeping. Whether that's worth continuing is your call — `/ranger:stop` when it isn't.
 
-The survey itself is deliberately the uncapped part of a cycle. If a whole scout team comes back with nothing above the floor, the foreman dispatches another, and another, until it finds work or has swept every remaining pair in the rotation. A cheap read-only sweep that turns up the one real bug is worth many that turn up nothing, and a fixed retry limit is how a loop walks past work it was one team away from reaching.
+The survey itself is deliberately the uncapped part of a cycle. If a whole scout team comes back with nothing above the floor, the lead dispatches another, and another, until it finds work or has swept every remaining pair in the rotation. A cheap read-only sweep that turns up the one real bug is worth many that turn up nothing, and a fixed retry limit is how a loop walks past work it was one team away from reaching.
 
 Review findings never become backlog items. A reviewer's or assessor's finding is feedback on the item in flight — it belongs in that item's revision round or the journal. A loop that files its own commentary as future work is generating its own demand, and that is how a backlog reaches 120 items with nothing important in it.
 
 ## `.ranger/FACTS.md`
 
-One short file, outside the run directory so it survives the run that made it, handed to **every** agent before it reasons. The recon scout seeds it; the foreman corrects it when an agent asserts something false about the repo; you can edit it by hand, and that's the point.
+One short file, outside the run directory so it survives the run that made it, handed to **every** agent before it reasons. The recon scout seeds it; the lead corrects it when an agent asserts something false about the repo; you can edit it by hand, and that's the point.
 
 It holds the north star (what the project is optimising for right now, so a marginal dashboard tweak can be weighed against it), the hard constraints that shouldn't be re-litigated, how the repo is *really* tested and what it deliberately doesn't use, the conventions agents trip on, and anything out of bounds. It exists because agents re-derive settled facts every cycle and sometimes get them wrong — a plan reviewer asserting the repo tests with `jsdom` when it doesn't costs a full revision round to discover. Keep it under ~60 lines; past that it has stopped being facts and started being a wiki.
 
@@ -199,7 +201,7 @@ It holds the north star (what the project is optimising for right now, so a marg
 | `/ranger:run <brief> [flags]` | Run one cycle — survey, plan, review, build, verify, commit one item — and return. |
 | `/ranger:resume [run-id] [--max-cycles=N] [--max-hours=N] [--unlimited]` | Pick a stopped run back up: same backlog, rotation, and flags. |
 | `/ranger:stop [run-id]` | Down tools — the only clean way to end a run. |
-| `/ranger:status` | Read-only — what he's working on right now. Safe mid-run. |
+| `/ranger:status` | Read-only — what it is working on right now. Safe mid-run. |
 | `/ranger:help` | Explains the loop and every flag, in chat. |
 
 | flag | default | with the flag |
@@ -378,7 +380,7 @@ All of it is on disk, not in the context window — a compaction mid-run is surv
 
 ## What it costs
 
-Every cycle is a crew, and the crew is subagents. **The common case is now 6 scouts, then 1 builder, 1 diff reviewer and sometimes 1 assessor** — the builder plans and builds in one pass, so the planner, claims-checker and plan-reviewer pools are spent only on `risky` items and escalations. A `risky` item still dispatches the full stretch, and that is the ceiling rather than the norm:
+Every cycle is a team, and the team is subagents. **The common case is now 6 scouts, then 1 builder, 1 diff reviewer and sometimes 1 assessor** — the builder plans and builds in one pass, so the planner, claims-checker and plan-reviewer pools are spent only on `risky` items and escalations. A `risky` item still dispatches the full stretch, and that is the ceiling rather than the norm:
 
 - A `trivial` item costs **two** agents — builder and one diff review.
 - The survey is skipped while the backlog sits above the watermark, and skipped entirely at the cap. It also runs concurrently with the build, so it costs wall-clock only once.
@@ -392,7 +394,7 @@ Model follows the *check*, not the role. Claim-vs-source matching is mechanical 
 
 And it does not stop on its own. **Uncapped is the default**: `/ranger:stop`, Esc, or killing the runner are the only things that end a run. `--max-cycles=N` counts *shipped* items, so a run that keeps reverting spends indefinitely without ever reaching the cap — **`--max-hours=N` is the only bound that terminates a run by itself.** Set one on your first unattended run.
 
-Watch the first few cycles before trusting it overnight; the attended-to-unattended transition is the whole skill. And Ranger is deliberately conservative about what counts as work — if you want him building features rather than sweeping domains, say so in the brief. It biases the scout's ranking; it doesn't limit scope.
+Watch the first few cycles before trusting it overnight; the attended-to-unattended transition is the whole skill. And Ranger is deliberately conservative about what counts as work — if you want it building features rather than sweeping domains, say so in the brief. It biases the scout's ranking; it doesn't limit scope.
 
 ---
 

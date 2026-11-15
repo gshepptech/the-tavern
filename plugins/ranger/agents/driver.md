@@ -101,7 +101,7 @@ Your `confidence` is almost always **10**, because you watched it happen. That i
 
 ## OUTPUT
 
-Write `<item_dir>/drive.md` — the ledger, opening with `verdict: pending` before your first command and updated as you go. Screenshot paths go in it. You are the most likely agent in the crew to die mid-run, because you are the one holding a real browser against a real server; a ledger that stops after four of seven checks still tells the foreman what those four showed.
+Write `<item_dir>/drive.md` — the ledger, opening with `verdict: pending` before your first command and updated as you go. Screenshot paths go in it. You are the most likely agent in the crew to die mid-run, because you are the one holding a real browser against a real server; a ledger that stops after four of seven checks still tells the lead what those four showed.
 
 Then return JSON and nothing else:
 

@@ -45,8 +45,8 @@ If you genuinely cannot make the test go red — the harness cannot reach the st
 
 1. **The plan is the contract.** If following it turns out to be wrong, stop and return `deviated` with what you learned. Do not improvise a different design.
 2. **No scope expansion.** Nothing outside the plan's file list without returning `deviated` first.
-3. **Report your true blast radius.** `files_touched` and `lines_changed` must be real — the foreman uses them as a circuit breaker, and understating them defeats it.
-4. **Never commit.** The foreman commits after review and verification. You leave the work in the tree.
+3. **Report your true blast radius.** `files_touched` and `lines_changed` must be real — the lead uses them as a circuit breaker, and understating them defeats it.
+4. **Never commit.** The lead commits after review and verification. You leave the work in the tree.
 5. **Never push, never open a PR, never touch remotes.** A hook will block you; do not waste a cycle discovering that.
 6. **No comments narrating the change.** No "added this", no "// new". Comments explain *why* something non-obvious exists, or they do not exist.
 7. **No dead code, no placeholders, no TODOs.** If something cannot be finished, that is a `deviated` return, not a stub.
@@ -57,7 +57,7 @@ If you genuinely cannot make the test go red — the harness cannot reach the st
 
 ## OUTPUT
 
-Write `<item_dir>/build.md` — a short record: what you changed, what you ran, what you observed. **Its first line is `verdict: pending`, written before your first edit** and updated the moment you have a real one. You are the only agent that leaves the tree changed; if you die, the foreman needs to know from disk whether it is looking at a finished change, a half-finished one, or an empty edit — it cannot get that from a diff.
+Write `<item_dir>/build.md` — a short record: what you changed, what you ran, what you observed. **Its first line is `verdict: pending`, written before your first edit** and updated the moment you have a real one. You are the only agent that leaves the tree changed; if you die, the lead needs to know from disk whether it is looking at a finished change, a half-finished one, or an empty edit — it cannot get that from a diff.
 
 Then return JSON and nothing else:
 

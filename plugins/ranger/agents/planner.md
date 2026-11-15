@@ -42,11 +42,11 @@ This is the single highest-yield habit in the loop. It is also the one that gets
 ## WHAT MAKES A PLAN GOOD
 
 - It names every file it will touch, and what happens in each.
-- It predicts its own blast radius honestly — the foreman stashes work that blows past its prediction.
+- It predicts its own blast radius honestly — the lead stashes work that blows past its prediction.
 - It says how the change will be proved, in terms the assessor can check without reading the plan.
 - It is specific enough that the implementer makes no design decisions, only mechanical ones.
 - **Its proof is falsifiable.** The test in its Proof section must be one that **fails against the pre-change code**. A criterion the current code already satisfies proves nothing about the change, and a test that cannot fail is worse than no test — it is a green light wired to nothing. State, for each proof, what makes it go red today.
-- It is short. **A plan is capped at 400 lines and the foreman bounces it over that, unread.** A plan longer than the diff it describes is a bad plan, and a long plan is mostly prose — prose is where false claims live, and every claim you make is one a checker will open the source on.
+- It is short. **A plan is capped at 400 lines and the lead bounces it over that, unread.** A plan longer than the diff it describes is a bad plan, and a long plan is mostly prose — prose is where false claims live, and every claim you make is one a checker will open the source on.
 
 ## HARD RULES
 
@@ -64,7 +64,7 @@ This is the single highest-yield habit in the loop. It is also the one that gets
 
 ## OUTPUT
 
-Write `<item_dir>/plan.md`. **Its first line is the verdict**, written before the rest and set to `pending` until you have one — the foreman reads this file when you do not come back, and a plan with no verdict on it is indistinguishable from a plan that was never started:
+Write `<item_dir>/plan.md`. **Its first line is the verdict**, written before the rest and set to `pending` until you have one — the lead reads this file when you do not come back, and a plan with no verdict on it is indistinguishable from a plan that was never started:
 
 ```markdown
 # <item title>
@@ -116,4 +116,4 @@ Then return JSON and nothing else:
 }
 ```
 
-`siblings` with `fixed_here: false` are the foreman's leads, not your scope. Never expand the item to cover them.
+`siblings` with `fixed_here: false` are for the lead to follow up, not your scope. Never expand the item to cover them.

@@ -5,7 +5,7 @@ shared workspace. It reads at survey time so a scout does not re-propose work
 some earlier run already tried and abandoned, and it writes an `attempt` note
 on every committed item and every quarantined one. See docs/questboard-contract.md.
 
-The foreman drives an unattended loop, sometimes overnight, with permissions
+The lead drives an unattended loop, sometimes overnight, with permissions
 bypassed. That raises the bar on this particular integration: a side channel
 that can throw is a side channel that can end somebody's night. So the tests
 below are mostly about the workspace being absent, empty or damaged, and about
@@ -34,7 +34,7 @@ QUESTBOARD = PLUGIN_ROOT / "scripts" / "questboard.py"
 RUN_MD = PLUGIN_ROOT / "commands" / "run.md"
 SCOUT_MD = PLUGIN_ROOT / "agents" / "scout.md"
 
-# The exact command STEP 3a tells the foreman to run.
+# The exact command STEP 3a tells the lead to run.
 SURVEY_READ = ("read", "--limit", "40")
 
 
@@ -195,13 +195,13 @@ def test_a_write_that_cannot_happen_does_not_end_the_cycle(tmp_path: Path) -> No
 
 
 # ---------------------------------------------------------------------------
-# The prose contract: what run.md and scout.md commit the foreman to
+# The prose contract: what run.md and scout.md commit the lead to
 # ---------------------------------------------------------------------------
 
 
 def test_run_md_uses_exactly_the_read_command_this_file_tests() -> None:
     """If the survey step drifts to different arguments, these tests stop
-    covering what the foreman actually runs."""
+    covering what the lead actually runs."""
     text = RUN_MD.read_text(encoding="utf-8")
     assert 'questboard.py" read --limit 40' in text
 
@@ -242,7 +242,7 @@ def test_scout_knows_an_empty_prior_work_is_normal() -> None:
 
 
 # ---------------------------------------------------------------------------
-# The note templates the foreman has to be able to read
+# The note templates the lead has to be able to read
 # ---------------------------------------------------------------------------
 #
 # Sellsword, Cleric and Seer write their notes with the Write tool from a JSON

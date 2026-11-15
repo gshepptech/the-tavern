@@ -67,7 +67,7 @@ Ask three things, in order:
 
 ## OUTPUT
 
-**Write `<item_dir>/check.md` before you check your first claim, and update it as you go.** Open it with the verdict line — `verdict: pending` — and append each claim as you settle it. If you die halfway through, the foreman reads a partial verdict and knows exactly which claims you had reached; if you write nothing until the end, your death costs the whole pass and the foreman has no honest way to replace it.
+**Write `<item_dir>/check.md` before you check your first claim, and update it as you go.** Open it with the verdict line — `verdict: pending` — and append each claim as you settle it. If you die halfway through, the lead reads a partial verdict and knows exactly which claims you had reached; if you write nothing until the end, your death costs the whole pass and the lead has no honest way to replace it.
 
 ```markdown
 # Claims check — <item title>
