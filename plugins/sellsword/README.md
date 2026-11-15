@@ -1,10 +1,12 @@
 <div align="center">
 
-<img src="sellsword.svg" alt="Sellsword — the general contractor" width="100%"/>
+<img src="sellsword.svg" alt="Sellsword, one of the regulars at The Tavern" width="100%"/>
 
 # Sellsword
 
-**Hand him a gnarly problem. He owns the outcome — investigate, plan, execute, verify.**
+*The sellsword takes one hard job, sees it through, and brings back proof it is done.*
+
+**Hire it for one hard problem. It owns the outcome: investigate, plan, execute, verify.**
 
 [![version](https://img.shields.io/badge/sellsword-v0.4.0-FB8C00?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-FB8C00?style=flat-square)](../../LICENSE)
@@ -28,18 +30,18 @@
 
 ---
 
-## The job order
+## The contract
 
 | | |
 |---|---|
 | **Job** | Whatever you describe, free-form — no task-type picker |
-| **Crew on this job** | dispatcher, recon, builder, auditor, fresh-eyes — 5 agents |
+| **Agents on this job** | dispatcher, recon, builder, auditor, fresh-eyes — 5 agents |
 | **Sign-off** | Two independent verifiers, each with a real evidence ledger |
 | **Scope** | Code, infra, and live systems — not confined to the repo |
 
-Sellsword is the **general contractor**. Everyone else on the crew works one trade; Sellsword is the one you call when the problem doesn't respect a single boundary — it's half a bug, half a deploy, half an SSH session. He gathers context, proposes a plan when the work touches real state, then executes and proves the outcome by observation, not by inference.
+Most of the other regulars each do one kind of work; Sellsword is the one you hire when the problem doesn't respect a single boundary — it's half a bug, half a deploy, half an SSH session. It gathers context, proposes a plan when the work touches real state, then executes and proves the outcome by observation, not by inference.
 
-**What makes Sellsword different from a code-editing agent: he operates on real systems.** SSH sessions, `terraform`, `kubectl`, package mirrors, live deploys — anything you'd otherwise do by hand at a terminal is fair game. That's the reason to reach for Sellsword specifically, rather than a plugin that only ever touches files in the repo.
+**What makes Sellsword different from a code-editing agent: it operates on real systems.** SSH sessions, `terraform`, `kubectl`, package mirrors, live deploys — anything you'd otherwise do by hand at a terminal is fair game. That's the reason to reach for Sellsword specifically, rather than a plugin that only ever touches files in the repo.
 
 ---
 
@@ -50,7 +52,7 @@ claude plugin marketplace add gshepptech/the-tavern
 claude plugin install sellsword@the-tavern
 ```
 
-Then hand him something:
+Then hand it something:
 
 ```
 /sellsword:do why is staging login broken since yesterday
@@ -58,7 +60,7 @@ Then hand him something:
 
 ---
 
-## The crew
+## The party
 
 ```mermaid
 flowchart LR
@@ -87,7 +89,7 @@ flowchart LR
 
 ## How a job runs — `/sellsword:do` vs `/sellsword:goal`
 
-Both commands drive the same crew and the same evidence discipline. They differ in **who watches**.
+Both commands drive the same agents and the same evidence discipline. They differ in **who watches**.
 
 | | `/sellsword:do` | `/sellsword:goal` |
 |---|---|---|
@@ -234,10 +236,10 @@ auditor: pass · fresh-eyes: pass
 
 ## What it costs
 
-Every agent in the crew is Opus, so a run is not cheap. Roughly what you're buying:
+Every agent Sellsword hires is Opus, so a run is not cheap. Roughly what you're buying:
 
 - **`/sellsword:do`** — five agent spawns minimum (dispatcher, recon, builder, auditor, fresh-eyes). Recon is capped at **30 tool calls / 6 minutes**, the builder at **120 tool calls / 30 minutes**; `--thorough` doubles both. Failed verification re-spawns the builder, capped at **3 audit-cycles**. A builder that declares `stuck` fires three parallel variants plus an arbiter — that's the single most expensive path, and it only fires on declared stuck.
-- **`/sellsword:goal`** — the same crew, once per cycle, defaulting to **15 cycles or 6 hours**, whichever comes first. Bound it with `--max-cycles=N` and `--max-hours=N`; the defaults are generous.
+- **`/sellsword:goal`** — the same five agents, once per cycle, defaulting to **15 cycles or 6 hours**, whichever comes first. Bound it with `--max-cycles=N` and `--max-hours=N`; the defaults are generous.
 - **Cheapest useful shape** — `/sellsword:do --scope=quick` on a narrow intent, which keeps recon and the builder inside the standard budgets.
 
 ---
@@ -313,9 +315,9 @@ Sellsword reads nothing from the workspace and never fails a run over a failed w
 
 ## Pairs well with
 
-Sellsword stands on its own, but if you've also installed other **The Tavern** crew members:
+Sellsword stands on its own, but if you've also hired other regulars from The Tavern:
 
-- [Ranger](../ranger/README.md) — a foreman who keeps a backlog and ships small commits continuously, if the work is a steady stream of repo-scoped items rather than one gnarly problem.
+- [Ranger](../ranger/README.md) — a self-directing loop that keeps a backlog and ships small commits continuously, if the work is a steady stream of repo-scoped items rather than one gnarly problem.
 - [Seer](../seer/README.md) — a design-cohesion reviewer, if you want a second opinion on whether Sellsword's changes are shaped right, not just whether they work.
 
 ---

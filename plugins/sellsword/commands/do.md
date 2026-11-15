@@ -1,5 +1,5 @@
 ---
-description: "Hand Sellsword a gnarly problem and he owns the outcome — investigate, plan, execute, verify"
+description: "Hand Sellsword a gnarly problem and it owns the outcome — investigate, plan, execute, verify"
 argument-hint: "<intent> [--thorough] [--yolo] [--scope=quick|standard]"
 allowed-tools: ["Bash(mkdir:*)", "Bash(cat:*)", "Bash(ls:*)", "Bash(date:*)", "Bash(test:*)", "Bash(head:*)", "Bash(tail:*)", "Bash(echo:*)", "Bash(printf:*)", "Bash(pwd:*)", "Bash(git:*)", "Read", "Write", "Edit", "Glob", "Grep", "Agent", "AskUserQuestion"]
 ---

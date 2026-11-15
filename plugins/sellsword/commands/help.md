@@ -10,9 +10,9 @@ Render this help text to the user verbatim.
 
 ---
 
-# Sellsword — your general contractor for gnarly problems
+# Sellsword — hire it for one hard problem
 
-Hand Sellsword a gnarly problem and he owns the outcome end to end. Sellsword is a single command that gathers context, optionally proposes a plan, then executes against real systems (SSH, infra, code edits, deploys, features), and verifies the outcome by observation — not by inference.
+Hand Sellsword a gnarly problem and it owns the outcome end to end. Sellsword is a single command that gathers context, optionally proposes a plan, then executes against real systems (SSH, infra, code edits, deploys, features), and verifies the outcome by observation — not by inference.
 
 ## How to use it
 
