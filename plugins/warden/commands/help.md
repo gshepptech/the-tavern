@@ -23,11 +23,11 @@ WHAT IT DOES
     (e) Completion — Fable-mode: blocks a response that ends by PROMISING
                      first-person work ("I'll implement…", "let me run…")
                      with no trailing tool call and no clarifying question.
-                     Do the work now, don't hand back a plan. (NEW in v0.5.0)
+                     Do the work now, don't hand back a plan.
     (c) Grounding  — codebase questions require a Read/Grep/Glob this turn
                      (no general-knowledge fallback)
     (d) Iterative Critic — substantive responses must pass a multi-round
-                           critic dialog (NEW in v0.4.0):
+                           critic dialog:
         - Rounds 1-3: warden:fast-critic (Haiku, cheap, 10-item rule audit)
         - Rounds 4-6: warden:pre-stop-critic (opus escalation, same audit
                       with deeper file-reading verification)

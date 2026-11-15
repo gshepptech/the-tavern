@@ -257,10 +257,9 @@ def _redact_for_log(event: dict) -> dict:
     This log lives at a single path in $HOME and accumulates across every
     project you ever use Warden in, including private ones. It exists to tune the
     gates -- which gate fired, how often, on what shape of input -- and that
-    needs counts and categories, not content. It previously recorded up to 120
-    characters of the assistant's actual prose and the absolute path of every
-    cited file, which is a transcript fragment of someone's private work
-    sitting in a file nobody remembers is there.
+    needs counts and categories, not content. Prose or absolute paths here
+    would be a transcript fragment of someone's private work sitting in a
+    file nobody remembers is there.
     """
     def scrub(node):
         if isinstance(node, dict):
@@ -536,13 +535,13 @@ def load_transcript(path: str) -> list[dict]:
 
     This hook runs at the end of every turn in every project, so a transcript
     it cannot parse must degrade to "no opinion", never to a traceback. Three
-    real cases used to crash it, each of which surfaces in ordinary use:
+    shapes turn up in ordinary use:
 
       - non-UTF-8 bytes anywhere in the file (a grep result, a binary blob, a
-        file path in another encoding) raised UnicodeDecodeError, which is not
-        an OSError and so escaped the handler below;
+        file path in another encoding), which would raise UnicodeDecodeError,
+        not an OSError;
       - a line that is valid JSON but not an object (a bare list or string),
-        which then failed on .get();
+        which would fail on .get();
       - `content: null`, which is a legal shape and is handled downstream.
 
     errors="replace" keeps the rest of the transcript readable rather than
@@ -573,8 +572,8 @@ def slice_current_turn(messages: list[dict]) -> tuple[list[dict], dict | None]:
     A "genuine user prompt" is a user-role message containing real text content
     (the user typed something). User-role messages containing only tool_result
     blocks are INTERNAL to Claude's response process — they belong to the same
-    turn and must be included in the slice. This was a bug in v0.2.0 that made
-    multi-round critic counting fail.
+    turn and must be included in the slice, or multi-round critic counting
+    breaks.
     """
     if not messages:
         return [], None
