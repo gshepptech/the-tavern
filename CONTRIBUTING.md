@@ -10,21 +10,24 @@ plugin, or pitching a whole new tradesperson for the crew, contributions are wel
 - **Every plugin must stand alone.** Each crew member is usable by itself, with no
   other plugin installed. A change that makes one plugin depend on another needs a
   very good reason — optional composition is fine, a hard dependency is not.
-- **Keep the spec intact.** Sage and Smith share one discipline — *plans are prompts*. Changes
-  that touch the handoff format should preserve byte-for-byte fidelity.
+- **Keep the spec format stable.** Sage writes specs that Smith and Tinker read. A change
+  to the requirement IDs, the acceptance-criteria shape or the `sealed_by` line has to
+  keep all three working.
 - **No emoji in documentation.** Headings, tables and prose stay plain text. GitHub
   alert callouts (`> [!NOTE]`), mermaid diagrams and `<details>` blocks are fine;
   decorative Unicode is not — no emoji, no dingbats, and no arrow glyphs (write
   `->` instead). Images are limited to each plugin's own SVG and shields.io badges.
   The exception is a glyph that defines runtime output, such as the state markers
-  in Sellsword's run table or the verdict marks in Smith's TRACE tables — those are part
-  of what an agent prints, not decoration, and they stay.
+  in Sellsword's run table — those are part of what an agent prints, not decoration,
+  and they stay.
 
 ## Repo layout
 
 ```
-.claude-plugin/marketplace.json     # the marketplace manifest (lists all 9 plugins)
-.github/scripts/validate_manifests.py   # local manifest validator
+.claude-plugin/marketplace.json     # the marketplace manifest (lists all ten plugins)
+.github/scripts/                    # the consistency checks CI runs
+docs/                               # install profiles and the .questboard contract
+scripts/install-profile.sh          # installs a named set of plugins
 plugins/<name>/                     # one directory per tradesperson
   .claude-plugin/plugin.json        # that plugin's manifest — name and version
   README.md                         # per-plugin docs, self-contained
@@ -33,11 +36,10 @@ plugins/<name>/                     # one directory per tradesperson
   agents/                           # sub-agent definitions        (most plugins)
   skills/                           # skills, with references/     (some plugins)
   hooks/hooks.json                  # hook wiring                  (warden, sellsword, ranger)
-  scripts/                          # hook scripts and setup       (some plugins)
-  workflows/                        # Workflow scripts             (seer)
+  scripts/                          # hook and helper scripts      (some plugins)
+  workflows/                        # Workflow scripts             (seer, tinker)
   presets/                          # curated briefs               (ranger)
-  tests/                            # test suite                   (warden, sage, ranger)
-plugins/smith/mcp-server/           # Smith's MCP server and its own test suite
+  tests/                            # test suite                   (warden, sage, ranger, smith, tinker)
 ```
 
 ## Local checks (run these before you push)
@@ -63,36 +65,35 @@ python3 .github/scripts/check_flags.py
 #    and any profile carrying an unattended plugin still warns about it
 python3 .github/scripts/check_profiles.py
 
-# 6. Syntax-check JavaScript and shell
-git ls-files '*.js' | xargs -I{} node --check {}
+# 6. Syntax-check JavaScript (Workflow scripts are wrapped first) and shell
+python3 .github/scripts/check_js.py
 git ls-files '*.sh' | xargs -I{} bash -n {}
 ```
 
-Four plugins carry test suites. Run the ones your change touches; run all four if
+Five plugins carry test suites. Run the ones your change touches; run all five if
 you're not sure:
 
 ```bash
 # Warden — citation verifier and hook gates
-cd plugins/warden && uv run --with pytest python -m pytest tests/ -q
+cd plugins/warden && uv run --with pytest python -m pytest -q
 
-# Sage — spec format, typed sections, validation
-cd plugins/sage && uv run --with pytest --with jsonschema python -m pytest tests/ -q
+# Sage — spec validator, seal and the shared-workspace helper
+cd plugins/sage && uv run --with pytest python -m pytest -q
 
-# Ranger — the git guard hook
-cd plugins/ranger && uv run --with pytest python -m pytest tests/ -q
+# Ranger — the git guard hook and the shared-workspace helper
+cd plugins/ranger && uv run --with pytest python -m pytest -q
 
-# Smith — MCP server
-cd plugins/smith/mcp-server && uv run --with pytest --with jsonschema --with "mcp>=1.0.0" python -m pytest -q
+# Smith — spec parsing, plan checks and the ledger's evidence rule
+cd plugins/smith && uv run --with pytest python -m pytest -q
+
+# Tinker — preflight, command detection, gates and the Workflow script
+cd plugins/tinker && uv run --with pytest python -m pytest -q
 ```
 
 > [!NOTE]
 > `uv run --with` keeps the dependencies scoped to the run instead of installing
-> into your environment. If you'd rather use pip, install `pytest`, `jsonschema`
-> and `mcp>=1.0.0` first and call `pytest` directly.
-
-Some tests are deliberately skipped — they are red-until-implemented markers for
-planned work, and each carries a skip reason explaining which plan owns it. Skips
-are expected; failures are not.
+> into your environment. If you'd rather use pip, install `pytest` first and call
+> `pytest` directly. Tinker's Workflow tests also need `node` on `PATH`.
 
 ## Versioning
 
@@ -148,8 +149,7 @@ describe the thing qualitatively instead.
 
 ## Naming note
 
-The crew are people — **Sage, Smith, Warden, Sellsword, Cleric, Scout, Tactician, Seer, Ranger**.
-One internal note: the `mill_mcp` Python package under `plugins/smith/mcp-server/`
-has **frozen** identifiers — they bind MCP tool resolution, so leave them as-is.
+The crew are people — **Sage, Smith, Warden, Sellsword, Cleric, Scout, Tactician, Seer, Ranger** —
+and **Tinker**, named after its tool. A new plugin gets a name in the same spirit.
 
 Happy building.
