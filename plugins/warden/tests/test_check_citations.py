@@ -263,12 +263,10 @@ def _run_hook_with_home(transcript_path: str, home: str) -> dict:
 def test_trust_me_survives_its_own_turn():
     """The raw /warden:trust-me marker must NOT be consumed by the Stop hook.
 
-    Regression test. The Stop hook fires at the end of every turn, including
-    the turn that ran /warden:trust-me and created the marker. Consuming it there
-    spent the bypass before the user's next prompt arrived, so the gates still
-    fired and the escape hatch never worked. Only the ARMED marker - promoted
-    by the UserPromptSubmit hook at the start of the following turn - may be
-    consumed here.
+    The Stop hook also fires at the end of the turn that ran /warden:trust-me,
+    so consuming the raw marker there would spend the bypass before the user's
+    next prompt. The UserPromptSubmit hook promotes it to the armed marker, and
+    only the armed marker is consumed.
     """
     home = tempfile.mkdtemp()
     claude_dir = Path(home) / ".claude"

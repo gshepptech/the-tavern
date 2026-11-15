@@ -16,17 +16,14 @@ TRUST_ME_ARMED_FILE="${HOME}/.claude/.warden-trust-me-armed"
 
 # Arm a pending /warden:trust-me for THIS turn.
 #
-# The strict gates live in the Stop hook, which fires at the END of every turn,
-# including the end of the turn that ran /warden:trust-me and created the
-# marker. Consuming the marker there spent the bypass one turn early, before
-# the user's next prompt ever arrived, so the gates still fired and the escape
-# hatch never worked.
+# The Stop hook also fires at the end of the turn that ran /warden:trust-me,
+# so consuming the raw marker there would spend the bypass before the user's
+# next prompt. This UserPromptSubmit hook promotes it to the armed marker, and
+# only the armed marker is consumed.
 #
-# Promotion happens here instead, at UserPromptSubmit, which is the same
-# mechanism that makes /warden:casual correct: this hook already ran for the
+# This is the same mechanism /warden:casual uses: this hook already ran for the
 # trust-me turn before the marker existed, so the first prompt to see it is the
-# one the user actually meant to protect. The Stop hook consumes the *armed*
-# marker only. Runs before the state check below because /warden:off silences the
+# one the user meant to protect. Runs before the state check below because /warden:off silences the
 # preamble but leaves the Stop gates firing - a bypass must still arm.
 #
 # Only a FRESH marker is promoted. /warden:trust-me means "bypass my NEXT turn";

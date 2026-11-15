@@ -232,12 +232,10 @@ def consume_trust_me() -> bool:
     """Check and delete the ARMED one-shot trust-me flag.
 
     Deliberately reads TRUST_ME_ARMED_FILE, not the marker /warden:trust-me
-    writes. This hook fires at the end of EVERY turn, including the turn that
-    ran /warden:trust-me - so consuming the raw marker here spent the bypass
-    before the user's next prompt arrived, and the gates fired anyway. The
-    UserPromptSubmit hook promotes the raw marker to the armed one at the start
-    of the following turn, which is the turn the user actually meant to
-    protect. Same mechanism that makes /warden:casual correct.
+    writes. The Stop hook also fires at the end of the turn that ran
+    /warden:trust-me, so consuming the raw marker here would spend the bypass
+    before the user's next prompt. The UserPromptSubmit hook promotes it to the
+    armed marker, and only the armed marker is consumed.
     """
     if not TRUST_ME_ARMED_FILE.exists():
         return False
