@@ -11,7 +11,7 @@ Explain the following to the user, compactly and in your own words.
 
 A small spec-to-code build workflow: `/tinker:build <spec>`. It aims for about an hour per feature, with a handful of
 agent calls and a check of every requirement against the code. It is one Workflow script plus small Python helpers,
-with three agents and no MCP server.
+with three agents.
 
 ## The flow
 

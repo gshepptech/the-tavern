@@ -1,7 +1,7 @@
 {
   "name": "tinker",
   "version": "0.1.0",
-  "description": "A lean spec-to-code build workflow. One Workflow script: preflight in code, one builder (slices only when the spec is over budget), then a code check beside one spec-to-code check, and at most two batched fix rounds. Three agents, a counted and capped number of agent calls, no MCP server.",
+  "description": "A lean spec-to-code build workflow. One Workflow script: preflight in code, one builder (slices only when the spec is over budget), then a code check beside one spec-to-code check, and at most two batched fix rounds. Three agents and a counted, capped number of agent calls.",
   "author": {
     "name": "gshepptech"
   },
