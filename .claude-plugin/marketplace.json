@@ -45,7 +45,7 @@
     {
       "name": "warden",
       "source": "./plugins/warden",
-      "description": "Stops Claude racing on everyday work. Injects a measure-twice checklist before each reply, then blocks replies that cite files Claude never opened, hedge without checking, or promise work instead of doing it.",
+      "description": "Stops Claude racing on everyday work. Injects a short checklist before each reply, then blocks replies that cite files Claude never opened, hedge without checking, or promise work instead of doing it.",
       "version": "0.5.1",
       "category": "productivity",
       "author": {
