@@ -1,22 +1,17 @@
 #!/usr/bin/env python3
 """Catch documented-but-unwired behaviour before it ships.
 
-This is the defect class that dominated one whole release: a flag or a name
-appears in documentation, nothing implements it, and nobody notices because
-the docs are the only place it is written down.
+A flag or a name that appears only in documentation is easy to ship
+unimplemented: nothing fails, and nobody notices until someone uses it. This
+catches the common shapes of that defect:
 
-Real examples this would have caught:
-  - Smith's `--nyquist` documented in an argument-hint and a help example;
-    setup-mill.sh had no case for it, so it was appended to the scope string.
-  - Sage's `--brownfield` / `--greenfield` / `--cosmetic` documented in
-    /sage:plan; setup-sage.sh fell through to a catch-all that put them in the
-    feature name, corrupting the derived slug and every output path.
-  - Smith's MCP server naming `mill:teammate` and friends as subagent types
-    when the registered agents are `smith:*`, so a live run would fail to spawn.
-  - Three Smith skills calling `Mill-Mark-Stream-Complete`, `verify_citations`
-    and `mill_add_verdict`, none of which are registered tool names.
+  - a `--flag` in a command's argument-hint that the plugin's setup script
+    never parses, so it falls through into some other argument;
+  - a `subagent_type` naming an agent file that does not exist, so a live run
+    fails to spawn it;
+  - a `plugins/<name>/...` path left behind by a rename.
 
-Two checks:
+Three checks:
 
   1. FLAG PARITY. Every `--flag` in a command's frontmatter `argument-hint`
      must be handled by that plugin's setup script, if it has one. A plugin
@@ -25,6 +20,9 @@ Two checks:
 
   2. AGENT REFERENCES. Every `subagent_type` naming `<plugin>:<agent>` must
      correspond to a real file at plugins/<plugin>/agents/<agent>.md.
+
+  3. PLUGIN PATHS. Every `plugins/<name>/...` path outside tests must name a
+     plugin this repo ships.
 
 Exit 0 if clean, 1 otherwise. Run from the repo root.
 """
@@ -40,10 +38,8 @@ ROOT = Path(__file__).resolve().parent.parent.parent
 ARGUMENT_HINT = re.compile(r"^argument-hint:\s*(.+)$", re.M)
 FLAG = re.compile(r"--[a-z][a-z0-9-]+")
 SUBAGENT_REF = re.compile(r"""subagent_type\s*=?\s*['"]([a-z0-9-]+):([a-z0-9-]+)['"]""")
-# A rename leaves stale paths behind as readily as it leaves stale agent types.
-# Smith's MCP server handed back `plugins/mill/agents/spec-test-deriver.md` long
-# after the plugin became `smith`, and the subagent_type check above did not see
-# it because it is a path, not a type.
+# A rename leaves stale paths behind as readily as it leaves stale agent types,
+# and the subagent_type check above does not see a path.
 PLUGIN_PATH_REF = re.compile(r"plugins/([a-z0-9_-]+)/(?:agents|commands|skills|scripts)/")
 
 # Flags consumed by the model reading the command file, never passed to a
@@ -114,9 +110,8 @@ def check_agent_refs() -> list[str]:
             if agent_file.exists():
                 continue
             # An unknown namespace is the more dangerous case, not a safer one:
-            # `mill:teammate` survived a plugin rename precisely because
-            # plugins/mill/ no longer existed. This repo should never name a
-            # plugin it does not ship.
+            # after a rename the old directory is gone, so nothing else flags
+            # it. This repo should never name a plugin it does not ship.
             if not (ROOT / "plugins" / plugin_name).is_dir():
                 problems.append(
                     f"{path.relative_to(ROOT)}: references subagent_type "
