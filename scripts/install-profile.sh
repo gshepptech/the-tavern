@@ -12,7 +12,7 @@
 #
 # Both commands are idempotent and both are what /plugin install does under the
 # hood, so nothing here is doing anything you could not type yourself. The value
-# is that you type one line instead of choosing from a table of nine tools you
+# is that you type one line instead of choosing from a table of ten tools you
 # have never used, and that the warnings for the dangerous ones are unavoidable.
 #
 # Deliberately not offered: a curl-pipe-to-shell one-liner. Every plugin in this
@@ -49,7 +49,7 @@ profile_plugins() {
     pipeline)   echo "sage smith" ;;
     review)     echo "seer cleric" ;;
     unattended) echo "sellsword ranger" ;;
-    all)        echo "sage smith warden sellsword cleric scout tactician seer ranger" ;;
+    all)        echo "sage smith tinker warden sellsword cleric scout tactician seer ranger" ;;
     *)          return 1 ;;
   esac
 }
@@ -57,7 +57,7 @@ profile_plugins() {
 profile_blurb() {
   case "$1" in
     daily)      echo "Solo, on a codebase you did not write. The everyday set." ;;
-    pipeline)   echo "Spec a feature properly, then have it built out. Needs setup." ;;
+    pipeline)   echo "Spec a feature properly, then have it built out." ;;
     review)     echo "Assess and tidy. Nothing writes code unprompted." ;;
     unattended) echo "Work that runs while you are away. BYPASSES PERMISSIONS." ;;
     all)        echo "The whole crew. Includes both unattended tools." ;;
@@ -82,7 +82,7 @@ Profiles:
   pipeline     sage, smith            Spec a feature, then build it out
   review       seer, cleric         Assess and tidy, minimal writing
   unattended   sellsword, ranger            Runs while you are away. Bypasses permissions
-  all          all nine               The whole crew
+  all          all ten                The whole crew
 
 Options:
   --scope <user|project|local>  Where to record the install. Default: user.
@@ -283,10 +283,13 @@ say ""
 say "Next:"
 
 case " $plugins " in *" smith "*)
-  say "  - Smith needs one-time project setup: run '/smith:setup', then restart"
-  say "    Claude Code. It writes the Playwright MCP server into .mcp.json and"
-  say "    needs python3 and uv on PATH. Smith's own MCP server"
-  say "    ships inside the plugin."
+  say "  - Smith: '/smith:build <spec>' in a git repo with a clean tree. With Sage"
+  say "    installed, '/smith:build' alone builds the spec Sage sealed most recently."
+  ;;
+esac
+case " $plugins " in *" tinker "*)
+  say "  - Tinker: '/tinker:build <spec>' in a git repo with a clean tree. It works"
+  say "    on its own tinker/<run> branch and never pushes."
   ;;
 esac
 case " $plugins " in *" scout "*)
@@ -316,8 +319,8 @@ case " $plugins " in *" sellsword "*)
   ;;
 esac
 case " $plugins " in *" sage "*)
-  say "  - Sage: '/sage:plan \"<feature>\"'. It is interactive and will ask you"
-  say "    questions - brownfield mode aborts if nobody answers."
+  say "  - Sage: '/sage:plan <feature>'. It reads the code first, then asks you"
+  say "    a few questions one at a time, so stay at the keyboard."
   ;;
 esac
 case " $plugins " in *" seer "*)

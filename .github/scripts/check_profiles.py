@@ -22,7 +22,7 @@ Four checks:
      profile containing one of them must repeat that warning where it is
      documented. A profile that quietly bundles an unattended tool is a defect,
      not an omission - the whole point of a curated set is that the person
-     installing it has not read nine READMEs.
+     installing it has not read every README.
 
   4. NAMED PROFILES RESOLVE. Any `install-profile.sh <name>` written in any
      tracked markdown must name a profile that exists. This is what catches a

@@ -1,6 +1,6 @@
 # Install profiles
 
-Nine plugins is nine decisions, and nobody arriving for the first time has the
+Ten plugins is ten decisions, and nobody arriving for the first time has the
 information to make them. A profile is a named set of plugins that gets you a
 sensible setup in one step, so you can start working and add the rest when you
 find out you want them.
@@ -47,7 +47,7 @@ block from the profile you want below and you are done.
 | [`pipeline`](#pipeline) | sage, smith | Specifying a feature and having it built out |
 | [`review`](#review) | seer, cleric | Assessing and tidying, without autonomous writing |
 | [`unattended`](#unattended) | sellsword, ranger | Work that runs while you are away. Bypasses permissions |
-| [`all`](#all) | all nine | You want the crew |
+| [`all`](#all) | all ten | You want the crew |
 
 Still unsure? `daily` is the one to take. It is the only profile whose plugins
 are all useful on an ordinary Tuesday, and adding the others later costs one
@@ -151,8 +151,7 @@ on a dirty git tree, by design.
 **Plugins:** sage, smith
 
 For someone with a feature to build who wants it specified properly first, then
-built out and verified without babysitting each step. This is the pairing the
-marketplace is named around.
+built out and verified without babysitting each step.
 
 ```bash
 claude plugin marketplace add gshepptech/the-tavern
@@ -160,12 +159,18 @@ claude plugin install sage@the-tavern
 claude plugin install smith@the-tavern
 ```
 
-**Why these two.** [Sage](../plugins/sage/README.md) writes a locked, typed,
-citation-backed spec; [Smith](../plugins/smith/README.md) reads it byte for
-byte and builds it. Neither half requires the other, and that is worth knowing
-before you install both: Sage's spec is useful whoever builds from it, and
-Smith builds from any hand-written spec with numbered requirements in it.
-Install this pair when you want the handoff, not because one needs the other.
+**Why these two.** [Sage](../plugins/sage/README.md) writes a sealed spec with
+numbered requirements, testable acceptance criteria and a cited source for each;
+[Smith](../plugins/smith/README.md) splits it into slices, builds them in
+parallel and has independent verifiers check every requirement. Neither half
+requires the other, and that is worth knowing before you install both: Sage's
+spec is useful whoever builds from it, and Smith builds from any hand-written
+spec with requirement IDs in it. With both installed, `/smith:build` with no
+argument picks up the spec Sage sealed most recently.
+
+[Tinker](../plugins/tinker/README.md) builds the same specs with fewer agents:
+one builder, one spec-checker and at most two fix rounds. Swap it in for Smith
+when the feature is small enough for one builder.
 
 **What it leaves out.** Warden, which would otherwise add a critic pass to every
 turn of what is already an expensive workflow. Scout, which is the natural next
@@ -173,16 +178,14 @@ step after a build lands but drags in Node, a browser download and a running
 dev server that a Go or Python project will never use. Add Scout when you have a
 web app in front of you.
 
-**The honest cost.** This is the most expensive profile to run and the only one
-that does not work out of the box. Smith needs `/smith:setup` once per project,
-which writes the Playwright MCP server into `.mcp.json` (Smith's own server
-ships inside the plugin) and needs `python3` and `uv` on PATH, and
-then a restart of Claude Code. A clean three-casting Smith run is roughly
-15 to 20 agents, all on the session's model, and the GRIND loop is not bounded by
-default: each cycle adds up to three teammates and re-runs the whole
-inspect suite until defects hit zero. Set `--max-cycles=N` on your first run
-against an unfamiliar codebase. Smith has no approval gates by design, so if
-you want to review each step before the next one, this is the wrong tool.
+**The honest cost.** This is the most expensive profile to run. Sage's interview
+needs you present. Smith spawns one planner, one builder per slice, verifiers
+and fixers, running up to `--max-parallel` agents at once (default 4) for up to
+`--max-rounds` fix rounds (default 3). Lower both on your first run against an
+unfamiliar codebase. Smith needs `python3`, a git repository and a clean working
+tree; it builds on its own `smith/<run>` branch and never pushes. It has no
+approval gates between slices by design, so if you want to review each step
+before the next one, this is the wrong tool.
 
 ---
 
@@ -260,8 +263,9 @@ deploy config or a box you have to SSH into. [Ranger](../plugins/ranger/README.m
 owns a standing quality sweep with no particular finish line, finding its own
 work and shipping one local commit per item.
 
-**What it leaves out.** Smith, which is autonomous but is a different job: it
-builds a spec you already have, in your session, under your normal permissions.
+**What it leaves out.** Smith and Tinker, which are autonomous but do a different
+job: they build a spec you already have, in your session, under your normal
+permissions.
 If that is what you want, take [`pipeline`](#pipeline). Warden is out because
 neither of these runs its work in your session, so a per-turn gate has little
 to act on.
@@ -279,7 +283,7 @@ before you touch the unattended modes.
 
 ### all
 
-**Plugins:** sage, smith, warden, sellsword, cleric, scout, tactician, seer, ranger
+**Plugins:** sage, smith, tinker, warden, sellsword, cleric, scout, tactician, seer, ranger
 
 The whole crew. Reasonable if you are evaluating the marketplace and want to
 see everything, or if you already know these tools and want them present.
@@ -294,6 +298,7 @@ see everything, or if you already know these tools and want them present.
 claude plugin marketplace add gshepptech/the-tavern
 claude plugin install sage@the-tavern
 claude plugin install smith@the-tavern
+claude plugin install tinker@the-tavern
 claude plugin install warden@the-tavern
 claude plugin install sellsword@the-tavern
 claude plugin install cleric@the-tavern
@@ -303,18 +308,18 @@ claude plugin install seer@the-tavern
 claude plugin install ranger@the-tavern
 ```
 
-**The honest cost.** Every command from all nine appears in your slash-command
-list at once, which is a real cost when you are learning them. Two of them
-still need per-project setup and a restart before they work (`/smith:setup`,
-`/scout:init`). If you are new here, this is the wrong starting point. Take
+**The honest cost.** Every command from all ten appears in your slash-command
+list at once, which is a real cost when you are learning them. Scout still needs
+per-project setup and a restart before she works (`/scout:init`). If you are new here, this is the wrong starting point. Take
 `daily` and add from there.
 
 ---
 
-## The two plugins in no profile
+## The plugins in no profile
 
-[Scout](../plugins/scout/README.md) and [Tactician](../plugins/tactician/README.md)
-appear only in `all`, and that is deliberate rather than an oversight.
+[Scout](../plugins/scout/README.md), [Tactician](../plugins/tactician/README.md) and
+[Tinker](../plugins/tinker/README.md) appear only in `all`, and that is
+deliberate rather than an oversight.
 
 **Scout** is shaped by your project, not your habits. She needs `@playwright/test`
 installed, several hundred megabytes of browsers downloaded, an MCP server
@@ -329,6 +334,10 @@ a web app in front of you: `claude plugin install scout@the-tavern`, then
 and run, which is a thing you want occasionally and deliberately, never as a
 default. It costs nothing to have installed, spawns no subagents while
 authoring, and would still be noise in a starter set.
+
+**Tinker** is an alternative to Smith, not an addition to it. Both build a spec;
+Tinker uses fewer agents and suits a feature one builder can carry. Install
+whichever fits the size of your work, or swap it into `pipeline` by hand.
 
 ## Changing your mind
 
