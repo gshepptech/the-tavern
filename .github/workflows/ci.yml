@@ -93,14 +93,15 @@ jobs:
             deps: ""
           - plugin: sage
             dir: plugins/sage
-            deps: "--with jsonschema"
+            deps: ""
           - plugin: ranger
             dir: plugins/ranger
             deps: ""
           - plugin: smith
-            dir: plugins/smith/mcp-server
-            # No --with overrides: pyproject.toml declares jsonschema and the
-            # mcp<2.0.0 cap, and it must stay the single source of that pin.
+            dir: plugins/smith
+            deps: ""
+          - plugin: tinker
+            dir: plugins/tinker
             deps: ""
     steps:
       - uses: actions/checkout@v4

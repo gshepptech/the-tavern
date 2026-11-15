@@ -9,8 +9,8 @@
     {
       "name": "sage",
       "source": "./plugins/sage",
-      "description": "Turns a vague feature idea into a locked, buildable spec. Researches your codebase first, then interviews you with grounded questions and writes a spec with typed invariants and citations. Plans only, never writes code.",
-      "version": "6.0.0",
+      "description": "Turns a feature idea into a sealed spec. Reads the codebase first, asks only what the code cannot answer, then writes numbered requirements with acceptance criteria that can fail and a cited source for each. A validator checks the spec and seals it with a hash. Plans only, never writes code.",
+      "version": "1.0.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
@@ -27,19 +27,19 @@
     {
       "name": "smith",
       "source": "./plugins/smith",
-      "description": "Builds a spec out autonomously. Decomposes it into parallel work, builds in waves, then verifies through independent streams and grinds defects to zero before it will call the work done.",
-      "version": "5.0.0",
+      "description": "Builds a spec to its requirements. Splits it into slices with explicit file ownership, builds independent slices in parallel, then has verifiers that never saw the builders' notes check every requirement and record the evidence. Fixes and re-verifies until everything passes or a limit is hit.",
+      "version": "1.0.0",
       "category": "development",
       "author": {
         "name": "gshepptech"
       },
       "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/smith/README.md",
       "keywords": [
-        "autonomous",
         "build",
+        "spec-driven",
         "verification",
         "multi-agent",
-        "spec-driven"
+        "parallel"
       ]
     },
     {
@@ -165,24 +165,6 @@
         "loop",
         "maintenance",
         "multi-agent"
-      ]
-    },
-    {
-      "name": "tinker",
-      "source": "./plugins/tinker",
-      "description": "Builds a spec lean. Freezes a done-checklist with an oracle per requirement, builds with one builder or a few slices, then has independent checkers run the real system, check spec against code and measure test strength. A refute-first validator confirms each finding; fixes need tests that fail before and pass after.",
-      "version": "0.1.0",
-      "category": "development",
-      "author": {
-        "name": "gshepptech"
-      },
-      "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/tinker/README.md",
-      "keywords": [
-        "build",
-        "spec-driven",
-        "verification",
-        "workflow",
-        "qa"
       ]
     },
     {

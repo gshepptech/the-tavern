@@ -16,6 +16,6 @@ Closes #
 
 - [ ] `python3 .github/scripts/validate_manifests.py` passes
 - [ ] `git ls-files '*.js' | xargs -I{} node --check {}` passes (if JS changed)
-- [ ] `cd plugins/smith/mcp-server && pytest` passes (if Smith changed)
+- [ ] `cd plugins/<name> && uv run --with pytest python -m pytest -q` passes (if the plugin has tests)
 - [ ] Bumped the plugin `version` and updated its `README.md` (if behavior changed)
 - [ ] Updated the root `README.md` Crew table / `CHANGELOG.md` (if user-facing)
