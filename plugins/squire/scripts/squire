@@ -1,0 +1,3 @@
+#!/bin/bash
+# squire's code steps. Usage: squire [--root DIR] <command> [args]; see squire.py.
+exec python3 "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/squire.py" "$@"
