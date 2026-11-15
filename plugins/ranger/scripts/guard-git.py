@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
-"""Ranger guard-git — PreToolUse guard for /ranger:run (Ranger v0.3.0).
+"""Ranger guard-git - PreToolUse guard for /ranger:run.
 
 An unattended loop must not be able to publish. A prompt instruction is a
 request the model may reinterpret; this hook is enforced outside the model, so
 it holds even under bypassed permissions. While a Ranger run is active it
 denies any Bash command that would push to a remote, mutate remote config, send
-work off the machine, or — unless the matching flag was passed — create a
+work off the machine, or - unless the matching flag was passed - create a
 branch or merge.
 
 Enforced while a run is active:
@@ -19,15 +19,15 @@ Enforced while a run is active:
                        git worktree add
   needs --merge-dev    git merge, git cherry-pick, git rebase <other-branch>
 
-`git reset --hard` and `git revert` are deliberately ALLOWED — they are how the
+`git reset --hard` and `git revert` are deliberately ALLOWED - they are how the
 loop honours revert-don't-pile-on when a change regresses.
 
-THREAT MODEL — read this before trusting it further than it goes.
+THREAT MODEL - read this before trusting it further than it goes.
 The adversary is an agent doing something unintended, not a human trying to
 defeat the guard. Commands are inspected as text, so the guard is strong
 against accidents and weak against deliberate obfuscation. It resolves shell
 quoting, recurses into `sh -c` / `bash -c` / `eval` payloads, and strips
-`sudo` / `env` / `VAR=` prefixes — the wrappers an agent plausibly reaches for.
+`sudo` / `env` / `VAR=` prefixes - the wrappers an agent plausibly reaches for.
 It does NOT sandbox: a command that writes a script and runs it, or that
 reaches the network by some route nobody enumerated, gets through. Treat this
 as a strong guardrail, not a security boundary. The actual containment for
@@ -60,7 +60,7 @@ from pathlib import Path
 # message containing the words "git push" is not mistaken for a push.
 SEGMENT_SPLIT = re.compile(r"(?:&&|\|\||[;|\n])")
 
-# `FOO=bar sudo -E git ...` — strip the noise before the real command word.
+# `FOO=bar sudo -E git ...` - strip the noise before the real command word.
 LEADING_NOISE = re.compile(r"^(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+|sudo\s+|command\s+|env\s+)+")
 
 # Launchers that run another program. Without stripping these, `nohup git push`
@@ -96,7 +96,7 @@ PROTECTED_BRANCHES = {"main", "master", "dev", "develop", "development"}
 # outer command word.
 WRAPPER_SHELLS = {"sh", "bash", "zsh", "dash", "ksh", "fish"}
 
-# `gh api` can write to a remote directly — creating refs, tags and releases —
+# `gh api` can write to a remote directly - creating refs, tags and releases -
 # without ever naming a subcommand the guard would otherwise recognise.
 GH_API_WRITE_METHODS = {"POST", "PATCH", "PUT", "DELETE"}
 
@@ -174,7 +174,7 @@ def _run_is_dead(pointer: dict, state: dict, state_path: Path) -> bool:
     Two liveness signals. Any one saying "dead" disarms the guard.
 
     Deliberately NOT a wall-clock/`max_seconds` signal. The lead enforces the
-    cap at the TOP of each cycle and only then flips `status: capped` — which
+    cap at the TOP of each cycle and only then flips `status: capped` - which
     the caller already honours via the `status != active` check. Between the
     deadline passing and that flip, the run is fully LIVE: the lead is building
     and implementer agents are running Bash. A clock-based disarm would open
@@ -227,7 +227,7 @@ def _active_flags(project_dir: Path, session_id) -> dict | None:
     # Session scoping keeps an interactive run from policing a human working in
     # the same repo from another window. It must NOT apply to a headless run:
     # the runner spawns a fresh `claude -p` per cycle, so every cycle carries a
-    # new session id and the guard would disarm itself from cycle 2 onward —
+    # new session id and the guard would disarm itself from cycle 2 onward -
     # in precisely the unattended mode the guarantee exists for.
     if state.get("mode") != "headless":
         state_session = state.get("session_id")
@@ -249,7 +249,7 @@ def _split_commands(command: str) -> list[list[str]]:
     collapses the adjacent-quote trick (`git pu""sh` -> `git push`) that
     defeats a naive whitespace split.
 
-    Falls back to the older regex split if the line will not lex — usually
+    Falls back to the older regex split if the line will not lex - usually
     unbalanced quotes. A line we cannot parse must still be inspected, never
     silently allowed.
     """
@@ -327,7 +327,7 @@ def _segments(command: str, _depth: int = 0) -> list[list[str]]:
             continue
 
         prog = os.path.basename(tokens[0])
-        # `sh -c '<payload>'` — the payload is its own command line. The flag
+        # `sh -c '<payload>'` - the payload is its own command line. The flag
         # can be bundled with others (`bash -lc`, `sh -cx`, `sh -xc`), so match
         # any short-flag token that contains a `c`, not the exact string `-c`.
         if prog in WRAPPER_SHELLS:
@@ -340,7 +340,7 @@ def _segments(command: str, _depth: int = 0) -> list[list[str]]:
                 if is_c_flag and i + 1 < len(tokens):
                     out.extend(_segments(tokens[i + 1], _depth + 1))
                     break
-        # `eval git push` — the remainder is a command line.
+        # `eval git push` - the remainder is a command line.
         elif prog == "eval" and len(tokens) > 1:
             out.extend(_segments(" ".join(tokens[1:]), _depth + 1))
     return out
@@ -400,7 +400,7 @@ def _verdict(tokens: list[str], flags: dict) -> str | None:
 
     if prog == "gh":
         # Allowlist, not denylist. gh grows verbs faster than any guard tracks
-        # them, and nearly all of them talk to the network — `gh gist create`,
+        # them, and nearly all of them talk to the network - `gh gist create`,
         # `gh release upload`, `gh secret set`, `gh workflow run` and
         # `gh auth token` would all walk past a short denylist.
         verb = rest[0] if rest and not rest[0].startswith("-") else None
@@ -558,7 +558,7 @@ def main() -> int:
     project_dir = Path(event.get("cwd") or os.getcwd())
     flags = _active_flags(project_dir, event.get("session_id"))
     if flags is None:
-        return _allow()  # no active run — never restrict the user's own work
+        return _allow()  # no active run - never restrict the user's own work
 
     for tokens in _segments(command):
         reason = _verdict(tokens, flags)

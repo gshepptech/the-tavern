@@ -6,12 +6,12 @@ runs the hook against each, and asserts the decision (block / pass) and the
 specific unverified citations the hook reports.
 
 Test cases:
-  1. KEYCLOAK — assistant cites file:line that wasn't Read; expect BLOCK
-  2. CLEAN   — every cited file was Read in the turn; expect PASS
-  3. FENCED  — citation appears only inside a ``` block; expect PASS (skipped)
-  4. SUBAGENT — only a Task/Agent call touched the file; expect BLOCK
-  5. DIFF    — citation-shaped text in diff lines (---/+++); expect PASS
-  6. PROSE   — file path mentioned without :line; expect PASS (tier A only)
+  1. UNREAD   - assistant cites file:line that wasn't Read; expect BLOCK
+  2. CLEAN   - every cited file was Read in the turn; expect PASS
+  3. FENCED  - citation appears only inside a ``` block; expect PASS (skipped)
+  4. SUBAGENT - only a Task/Agent call touched the file; expect BLOCK
+  5. DIFF    - citation-shaped text in diff lines (---/+++); expect PASS
+  6. PROSE   - file path mentioned without :line; expect PASS (tier A only)
 """
 
 from __future__ import annotations
@@ -98,10 +98,10 @@ def run_hook(transcript_path: str, *, mode: str | None = "default") -> dict:
 
 # --- test cases -----------------------------------------------------------
 
-def test_keycloak_failure_blocks():
-    """Reproduces the Keycloak failure: assistant cites a file:line it never Read."""
+def test_unread_citation_blocks():
+    """The assistant cites a file:line it never Read."""
     t = write_transcript([
-        msg("user", "How can we wire Keycloak scan results into the deployment report?"),
+        msg("user", "How can we add compliance results to the deployment report?"),
         msg("assistant", [
             tool_use_block("Read", {"file_path": "/repo/internal/api/report/handler.go"}),
             text_block(
@@ -120,11 +120,11 @@ def test_keycloak_failure_blocks():
     assert "handler.go:73" not in reason, f"handler.go was Read, should not be flagged: {reason}"
     # report.proto was NOT Read → must be flagged
     assert "report.proto:11" in reason, f"report.proto was not Read, should be flagged: {reason}"
-    print("  ✓ keycloak_failure_blocks")
+    print("  ✓ unread_citation_blocks")
 
 
 def test_clean_response_passes():
-    """All cited files were Read in this turn — should pass."""
+    """All cited files were Read in this turn - should pass."""
     t = write_transcript([
         msg("user", "What's at handler.go:73?"),
         msg("assistant", [
@@ -163,8 +163,8 @@ def test_fenced_block_skipped():
 def test_subagent_read_does_not_count():
     """Only a Task (subagent) call touched the file; no direct Read.
 
-    This is the exact failure mode from the Keycloak turn — Explore subagent
-    Read the files, returned a summary, Claude cited from the summary.
+    An Explore subagent Read the files and returned a summary, and Claude
+    cited from the summary.
     The hook MUST treat subagent invocations as non-verification.
     """
     t = write_transcript([
@@ -227,7 +227,7 @@ def test_bare_path_without_line_skipped():
 
 
 def test_off_mode_short_circuits():
-    """When mode is 'off', the hook must do nothing — no decision, no block."""
+    """When mode is 'off', the hook must do nothing - no decision, no block."""
     t = write_transcript([
         msg("user", "Where is X?"),
         msg("assistant", [
@@ -266,8 +266,8 @@ def test_trust_me_survives_its_own_turn():
     Regression test. The Stop hook fires at the end of every turn, including
     the turn that ran /warden:trust-me and created the marker. Consuming it there
     spent the bypass before the user's next prompt arrived, so the gates still
-    fired and the escape hatch never worked. Only the ARMED marker — promoted
-    by the UserPromptSubmit hook at the start of the following turn — may be
+    fired and the escape hatch never worked. Only the ARMED marker - promoted
+    by the UserPromptSubmit hook at the start of the following turn - may be
     consumed here.
     """
     home = tempfile.mkdtemp()
@@ -600,7 +600,7 @@ def test_completion_fable_off_passes():
 
 def main() -> int:
     tests = [
-        test_keycloak_failure_blocks,
+        test_unread_citation_blocks,
         test_clean_response_passes,
         test_fenced_block_skipped,
         test_subagent_read_does_not_count,
