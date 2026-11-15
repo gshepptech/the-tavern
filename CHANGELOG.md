@@ -1,131 +1,129 @@
 # Changelog
 
-All notable changes to this marketplace are documented here. The format is based
-on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Individual plugins
-carry their own versions (shown in the [Crew table](README.md#-the-crew)); this
-file tracks the marketplace as a whole.
+All notable changes to this marketplace are documented here. The format is based on
+[Keep a Changelog](https://keepachangelog.com/en/1.1.0/). Each plugin carries its own
+[semantic version](https://semver.org/), shown in the [crew table](README.md#the-crew), and
+entries are grouped by the date they reached `main`.
 
-## [Unreleased]
+## 2026-11-14
 
 ### Added
-- **Ranger `--sweep` — the pre-release sprawl.** The rotation is built for a marathon: a few domain×lens pairs per cycle, one item built per cycle, breadth arriving over days. The moment before you hand a product to the public is the opposite shape — you want every corner looked at *now* and the verdicts on one board, because the corner the rotation would have reached on Thursday is the one holding the launch blocker. `--sweep` runs one survey-only pass over the entire domain grid in waves and ends with a stocked, ranked backlog and no build; the next tick finds the pipeline full and starts building. Two things make it more than "more scouts": modality follows the lens — scouts read for `correctness`/`security`/`performance`/`dx`, **drivers run the real app** for `ui-ux`/`visual-polish`/`flows`/`a11y`/`feature-gap`, because a 12px control and a `display:none` error are invisible in source — and nothing about what counts as a find changes: the floor, the artifact rule, dedup and quarantine apply unchanged, since a sprawl that lowers the evidence bar just fills the board with plausible fiction faster. `--sweep` covers the five shakeout lenses; `--sweep=all` covers all nine. Armable mid-run, where it deliberately keeps the mature run's risen floor.
-
-### Fixed
-- **`questboard.py` accepted a trailing newline in `plugin` and `created`, and `validate` called it healthy.** Both patterns were anchored with `$`, which in Python matches the end of the string *or* the position just before a final newline — so `"plugin": "ranger\n"` satisfied the slug check. That is worse than a plain parsing bug, because `validate` exists to be loud about a malformed workspace and instead reported `nothing malformed` and exited 0, while `read` passed the malformed field on to its caller as `prior_work`. Both patterns are now anchored `\A…\Z`, which matches exactly. The three vendored copies stay byte-identical, so the fix lands in Sage, Ranger and Smith together. Found by the new Ranger scout contract on its first run, which is the first evidence that requiring an executed artifact surfaces things a citation would not have.
+- **Sage 1.0.0.** Turns a feature idea into a sealed spec. A researcher agent reports
+  numbered code facts with `path:line` evidence, the interview asks only what the code
+  cannot answer, and every requirement cites its sources and carries acceptance criteria
+  that can fail. A stdlib validator checks the structure and seals the file with a sha256
+  hash; a spec-reviewer agent flags ambiguity before sealing. `/sage:plan`, `/sage:resume`.
+- **Smith 1.0.0.** Builds a spec to its requirements. A planner splits the spec into
+  slices with explicit file ownership, builders work independent slices in parallel waves,
+  and verifiers that never see the builders' notes check every requirement. A stdlib
+  ledger refuses to mark a requirement done without a passing command and its output from
+  the current round, and a fix reopens every requirement whose files it touched.
+  `/smith:build`, `/smith:status`.
+- CI checks Workflow scripts by wrapping them the way the runtime runs them, so a
+  top-level `return` or `await` no longer fails the syntax step.
 
 ### Changed
-- **Sage and Smith are rebuilt on the current upstream engine.** Both were re-ported from their upstream source under the Sage and Smith names, with the internal Mill engine, the woodworking run names and the fork's own fixes carried over: the `.questboard` spec handoff, the `/smith:start --spec` next steps, the corrected help text, the real `Mill-Stream` / `Mill-Verdict` / `Verify-Citations` tool names in the skills, and the 10-dimension validator wording. What arrives with them: Smith's `mill` MCP server is now declared by the plugin itself, so `/smith:setup` only wires Playwright and Serena (and removes a stale project-scope `mill` entry); Serena runs as a shared HTTP daemon kept healthy by a SessionStart hook; `/smith:update` upgrades the server; and both plugins take a `model` option that steers a named set of agents. Majors because the MCP registration moved: Sage 6.0.0, Smith 5.0.0.
-- **Ranger stops believing findings and starts reproducing them.** A field review of eight full cycles found that the loop's dominant failure was not fixing the wrong thing — it was fixing the right thing for a reason that dissolved the moment anyone executed it, because every stage in the pipeline read and none of them ran. The response is four changes that move the loop from arguing about code to observing it:
-  - **An item carries an artifact, or it is a hypothesis.** A scout now files the command it ran and what it saw, not only the line it read. `confidence` is scored off that artifact rather than off how well the item argues, and an item with no artifact enters as `hypothesis` and is quarantined on arrival — never planned, because a plan written against an unreproduced claim looks exactly like a good one. Quarantine is a state, not a bin: hard to reproduce is not false, and a driver can settle it later.
-  - **An eighth agent, the driver — the only one that runs the system instead of reading it.** Every other agent in the roster reads; the capability gap was never more opinions, it was no observations. It drives the real app, calls real endpoints and measures what cannot be eyeballed, in two modes: `survey` explores a surface, `verify` tries to reproduce one claim. "I could not reproduce this" is an explicit success verdict, because a verifier rewarded for findings confirms whatever it is handed.
-  - **Verdicts are written to disk before they are returned.** In one observed run eight agents returned nothing usable and a gate was quietly written by the foreman that commissioned it. Every verdict-producing agent now opens its file with `verdict: pending` as its first act, so death degrades to a partial verdict rather than to silence, a missing gate is reported on the cycle line, and `FOREMAN RULE 10` forbids the foreman from authoring any gate it asked for.
-  - **Red-before-green now needs the failure text, and the text has to match.** "Verified red before the fix" was claimed routinely and was sometimes true for the wrong reason — a missing fixture, an import error, an assertion about a different value. The build agent pastes the verbatim pre-fix output; the reviewer checks the failure is *this* defect. A test that cannot be shown red is `undemonstrated`, which is allowed and visible.
-- **Ranger's default path is one agent, not three.** Planning and building were separate roles paying a plan -> claims-check -> plan-review toll on every item, including the ones whose plan was a paragraph saying "change line 47". The new `builder` reads, decides, edits, proves, and returns the diff *together with the plan it followed*, so the diff review still has something to review against. Because difficulty is not knowable from a backlog entry, it may **bail**: `needs-plan` returns its reading and no diff, and the item escalates to the full pipeline. The common case costs one agent and the rare case costs two, where every case used to cost three before a line was written. `--planners` drops to a default of 1, since planners now feed only escalations and `risky` items.
-- **The item's risk tier is declared after reading it, not before.** The foreman sets a `tier_hint` from the entry; the builder overrules it ninety seconds into the code. Tier is a ratchet — a build agent may raise it, never lower it — and `score` stays what it always was, a measure of value rather than risk.
-- **A lean Ranger run changes modality instead of only raising the floor.** Raising the floor is the right answer to diminishing value and the wrong one to an exhausted method: a reader eventually stops finding what a reader can find, and reading harder does not fix that. The survey rotation gains a third axis alongside domain and lens, and at three lean cycles it switches to driving the running system. It is also cheaper than sweeping nine lenses to conclude nothing is wrong.
-- **Ranger backlog entries carry `verified_at` and rot on a schedule.** One sweep of one board found six entries marked pending, approved or blocked when the work had already shipped, each with a confidently-written justification. Entries older than 15 cycles must be re-checked before they can be built, and **"closed as already shipped" is now a real cycle outcome reported as progress** — it is frequently the most valuable thing a cycle produces and it used to look like failure.
-- **Two Ranger builds can run at once, in separate worktrees, behind five conditions and a flag.** Serial builds are the loop's throughput ceiling. Batching is capped at two, requires `--branch` (the git guard already gates `git worktree add`), refuses any path overlap including lockfiles, migrations, generated files and CI config, refuses `risky` items and unplanned ones, and stops for the rest of the run on the first conflict. Each item still commits separately, so `git revert` stays a complete undo.
-- **Ranger runs its independent stages concurrently only where the sequencing was not paying for itself.** The claims checker still runs *ahead* of the plan reviewer on standard items, because it is the cheapest agent in the loop and the reviewer is the most expensive; parallelising them would spend an `opus` reviewer on every plan the checker was about to bounce. They fan out together on `risky` items, where the reviewer runs regardless. The assessor is spawned alongside the diff reviewer only when the item already makes it mandatory, never when the review's own findings are what decide whether it runs. The next cycle's survey now goes out with the current cycle's build, which is the one place the fan-out is free.
+- Sage and Smith replace the earlier spec and build plugins of the same names with a
+  smaller design built around a validator and a ledger. Their versions restart at 1.0.0.
+- **Ranger 0.7.1.** The looped-run preflight checks only Warden's strict gate.
+- The executable-bit check in CI applies to scripts with a shebang; imported modules are
+  exempt.
+- The root README, contributing guide, install profiles and `.questboard` contract cover all
+  ten plugins.
+
+## 2026-10-16
 
 ### Added
-- **An optional shared workspace, `.questboard/`.** Six of the nine can now leave each other notes: Sage records each sealed spec, Smith resolves `--spec` from the newest one when you do not pass a path, Ranger reads what the project has already tried before its scouts sweep and records every commit and quarantine, and Sellsword, Cleric and Seer write findings the repo does not otherwise keep. Notes are immutable single-file JSON with no index and no shared mutable state, so there is nothing to lock and nothing to contend over. Nothing requires it: absent, empty, and every-note-corrupt all resolve to an empty list and behaviour identical to before, a reader never creates the directory, and a failed write never fails a run. Warden, Scout and Tactician deliberately do not participate. The full contract, including what a tenth plugin would have to implement, is in [docs/questboard-contract.md](docs/questboard-contract.md).
-- **Install profiles.** `daily`, `pipeline`, `review`, `unattended` and `all`, driven by `scripts/install-profile.sh` with `--list`, `--dry-run`, `--scope` and `--yes`. Getting started was nine decisions before anyone had the information to make them. Profiles are this repo's own convention rather than a platform feature: Claude Code has no bundle, group or collection field in the marketplace manifest, and declaring one warns but still validates, so it would ship inert. The plugin manifest does support a `dependencies` array and this deliberately does not use it, because a hard dependency between two plugins would break the promise that each works alone. Documented in full in [docs/profiles.md](docs/profiles.md).
-- **`check_profiles.py`**, a fifth validator. Every plugin a profile names must exist, the script and the docs must agree, and any profile carrying Sellsword or Ranger must still warn that they run with permissions bypassed. Each of its checks was verified by breaking it on purpose, including planting a profile that bundles Ranger with no warning.
+- **Tinker 0.1.0.** A lean spec-to-code build as one Workflow script. Preflight, planning
+  checks, commits, verification and the report run in Python; agents only build, check the
+  spec against the code and fix. One builder unless the spec is over budget, a code check
+  beside one spec-to-code check, at most two batched fix rounds, and a hard cap on agent
+  calls. The integration check must run to completion, and each behavioural fix carries a
+  test that fails before it and passes after. `/tinker:build`.
 
-### Plugin versions
-
-The plugin cache is version-keyed, so an installed plugin only picks up changes when its
-version moves. Every plugin whose runtime files changed is bumped in both its
-`plugin.json` and `marketplace.json`:
-
-| Plugin | Version | Why |
-|---|---|---|
-| Ranger | 0.2.0 to 0.6.1 | new `--scouts` / `--planners` flags, uncapped runs by default, a model-tiered crew, per-item effort tiering, a rising quality floor and a capped backlog — and now a required evidence artifact per item, two new agents (`builder`, `driver`), verdicts written to disk, a default path of one build agent instead of three, and `--planners` defaulting to 1. Behaviour changes nobody should receive silently |
-| Sellsword | 0.2.0 to 0.3.0 | `/sellsword:goal` runs can be resumed, which they could not before |
-| Smith | 4.4.0 to 5.0.0 | rebuilt on the current upstream engine (bundled MCP server, `model` option, Serena daemon, `/smith:update`), agent-type namespace, `--nyquist` parsing, MCP tool names, stream allow-list, the `.questboard` workspace, and the `questboard.py` anchor fix |
-| Warden | 0.5.0 to 0.5.1 | `/warden:trust-me` now works |
-| Sage | 5.0.0 to 6.0.0 | rebuilt on the current upstream spec engine (`model` option), mode flags no longer corrupt the feature slug, plus the `.questboard` workspace and the `questboard.py` anchor fix |
-| Scout | 0.2.0 to 0.2.1 | `/scout:matrix` writes the config its generated specs import |
-| Tactician | 0.2.0 to 0.2.1 | `/tactician:make` was missing `AskUserQuestion` from its allowed-tools |
-| Cleric | 0.1.0 to 0.1.1 | corrected static-analysis tool names change which commands the agents run |
-| Seer | 0.1.0 (unchanged) | documentation only; no runtime change to deliver |
+## 2026-09-01
 
 ### Added
-- **Ranger** `v0.2.0` — the ninth crew member: a self-directing, unattended senior-engineering loop. A thin lead works a crew of Opus agents (scout, planner, implementer, reviewer, assessor) through survey, plan, plan-review, select, build, review, verify and commit, one local commit per item. `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status`, `/ranger:help`.
-  - **Parallel pools for the read-only half of the crew.** Six scouts sweep six domain/lens pairs at once, three planners plan and three reviewers review concurrently; only the implementer touches the shared working tree, so only the build is serial. The foreman owns the domain rotation and the dedup, which is what lets the scouts run without treading on each other. Sized with `--scouts=N` (1-8) and `--planners=N` (1-4).
-  - **The backlog refills above a watermark, not at zero**, so the lead stocks up while the current item is still building and never stalls waiting for work to be found. A scout reporting its pair *clean* is a legitimate result — keeping the backlog full is the foreman's job, answered by dispatching more pairs rather than pressing a scout to manufacture churn.
-  - Each `/ranger:run` runs one idempotent cycle and returns; continuous operation is driven by `/loop /ranger:run` (watched) or the bundled headless runner (overnight) — no Stop-hook trapping or transcript spam.
-  - `--preset` curated, applicability-gated briefs (ui, ux, a11y, harden, perf) that skip anything the app lacks; `--dry-run` preview; `/ranger:resume`; `--branch` / `--merge-dev` / `--ask` default off.
-  - **Runs are uncapped by default** — nothing ends a run but `/ranger:stop`, Esc, or killing the runner. `--max-cycles=N` bounds shipped items and `--max-hours=N` bounds wall-clock; caps are checked between items so bounding a run never strands a half-finished change.
-  - A `PreToolUse` hook hard-denies `git push`, remote mutation, and PR creation regardless of the model's decision. Subprocess tests cover the guard.
-- Community health files: contributing guide, code of conduct, security policy, issue forms, and PR template.
-- Expanded README: status badges, table of contents, per-crew deep-dives, and a "which crew member do I need?" picker.
+- **Ranger 0.7.0.** `--sweep` runs one survey-only pass over the whole domain grid before
+  any build, ending with a ranked backlog. Scouts read for correctness, security,
+  performance and developer experience; drivers run the real app for UI, flow and
+  accessibility lenses. `--sweep=all` covers all nine lenses.
 
-### Added
-- **CI, and three checks that encode what kept going wrong.** `.github/workflows/ci.yml` runs manifest validation, syntax checks and all four test suites on every push and pull request. Alongside it: `check_versions.py` (a version lives in four places and only two were previously compared), `check_docs.py` (no decorative Unicode, every relative link resolves), and `check_flags.py`, which asserts that every `--flag` in a command's argument-hint is actually handled by that plugin's script and that every `subagent_type` names an agent file that exists. That last one is aimed squarely at the defect class that dominated this release; reverting either the Sage or the Smith fix makes it fail.
-
-### Security
-- **An independent review caught a hole the earlier liveness fix had opened.** A wall-clock signal disarmed the Ranger guard the moment a run passed its time cap — but the lead only flips `status: capped` at the *top* of the next cycle, so during the over-cap cycle the run is fully live and that signal allowed `git push` in exactly the past-its-budget-but-running state the guard exists for. Reproduced, then removed the signal (a dead run is caught by the PID and staleness signals; a capped one by the existing `status` check). Regression-tested: an over-cap run with a live PID still denies.
-- **`git clean -fd` on Ranger's reject path could delete the guard's own marker.** `.ranger/` was untracked, so the reject-path `git clean -fd` removed it and silently disarmed the guard for the rest of the session. Ranger now git-ignores `.ranger/` on init; a bare `git clean -fd` skips it and only `git clean -x/-X` (already denied) could reach it.
-- **`/warden:trust-me` could leak its bypass to an unintended turn.** An unspent marker bypassed the first turn of a later unrelated session, and an armed marker created while strict was off stranded until strict was re-enabled and fired on that turn. Now only a marker fresher than five minutes is promoted, and the armed marker is consumed unconditionally. Both paths regression-tested.
-- **Two more guard evasions the review surfaced:** combined short-flag wrappers (`bash -lc "git push"`, `sh -cx …`) slipped past the `sh -c` recursion, and `gh --repo o/r pr view` misparsed the repo value as the subcommand and wrongly denied a legitimate read. Both fixed and tested.
-- **Warden's Stop hook crashed on ordinary transcripts.** Non-UTF-8 bytes anywhere in the file, a `content: null` message, or a line that is valid JSON but not an object each produced a traceback — on every turn, in every project, for anyone with Warden installed. `UnicodeDecodeError` is not an `OSError`, so it escaped the handler. The reader now tolerates all three and there is a last-resort fail-open at the entry point: a gate that cannot decide must let the response through, never break the session.
-- **Warden's tuning log recorded more than it needed to.** It kept up to 120 characters of the assistant's actual prose and the absolute path of every cited file, in one file in `$HOME`, accumulating across every project including private ones, never rotated. It now records lengths instead of content and basenames instead of paths, and rotates at 2 MB. It remains useful for the thing it exists for: seeing which gate fires and how often.
-- **Ranger's headless runner retried forever.** A cycle that failed for a reason retrying could not fix — expired auth, no network — respawned `claude -p` every five seconds indefinitely. It now backs off quadratically and stops after five consecutive failures, resetting on any success.
-- **A crashed `/sellsword:goal` run could trap every later turn in the repo.** `goal-gate.py` self-disarms on a cap, but a goal loop runs inside a Claude session with no external runner to record a PID or trap on exit, so an uncapped run that was Ctrl-C'd or killed left `status: active` on disk — and this Stop hook then blocked every later session in that repo from *ending its turn*. Same class as the Ranger lockout below, worse symptom. Fixed with a staleness check: `state.json` is rewritten every cycle, so a heartbeat untouched for six hours means the loop is dead and the hook stands down. Verified a live loop still blocks and a stale one no longer traps.
-- **Ranger's git guard could be bypassed by writing a git hook.** The guard only inspects Bash commands, but an agent can `Write` a `.git/hooks/post-commit` (or `pre-commit`) containing `git push` that no Bash call names, and the mandatory per-cycle commit would run it. The commit step now runs with `core.hooksPath=/dev/null`, which neutralises any repo hook while the commit still succeeds — verified, including that the guard still permits the commit form. A user's legitimate pre-commit hooks do not run during Ranger's own commits, which is the correct trade for an unattended loop.
-- **A crashed Ranger run locked the user out of their own repo.** `status` only leaves `active` on a clean stop, the runner had no exit trap, and headless mode deliberately skips session scoping — so a Ctrl-C'd or killed overnight run left the guard armed forever, denying the user's own `git push`, `git checkout -b` and `gh pr create` in that repo in every later session, with nothing explaining why. Reproduced days-out. The guard now treats a run as dead on any of three signals (its own wall-clock cap, a recorded runner PID that is gone, or a `state.json` untouched for six hours); the runner records its PID and disarms on exit; and every denial now tells the user how to clear a stale marker.
-- **Ranger's methodical-mode preflight was inverted.** It read a missing `.<plugin>-strict-mode` marker as "not enforcing", but all three methodical plugins read an absent marker as `default`, which enforces — so a freshly installed Warden (which writes no marker) was waved through, then deadlocked the loop. Verified live: plumb was enabled on the test machine with no marker and the old check reported all-clear. `run.md` and `resume.md` now check `enabledPlugins` for real enablement and treat anything but an explicit `off` as enforcing.
-- **Ranger's git guard could be walked past by a wrapper shell.** The hook inspected only the outer command word and split on separators without regard for quoting, so `sh -c "git push"`, `eval git\ push`, `git pu""sh` and `FOO=1 sudo sh -c "git push"` all reached the network. `gh api -X POST` could write refs directly without naming a subcommand the guard recognised, and `git config remote.origin.pushurl` and `git send-email` were unguarded entirely. The guard now lexes commands with shell quoting rules, recurses into `sh`/`bash`/`zsh`/`dash`/`ksh`/`fish` `-c` payloads and into `eval` (depth-bounded), strips `sudo`/`env`/`VAR=` prefixes, and denies `gh api` writes, `git config remote.*` and `git send-email`. Twelve evasion cases and seven false-positive cases are now covered by tests; thirteen fail against the previous implementation.
-- **Quote-aware parsing also fixed a pre-existing false positive:** a commit message containing `; git push` was read as a real push and denied. Ranger writes its own commit messages, so that could have stalled a run on its own subject line.
-- **The guard's claim is downgraded to match reality.** It was described as making publishing impossible ("instructions are a request, a hook is a guarantee"). It is enforced outside the model and does hold under bypassed permissions, but it inspects commands as text: the threat model is an agent publishing by accident, not someone deliberately working around it. A command that writes a script and then runs it still gets through. The docs now say guardrail, not sandbox, and name running unattended work somewhere disposable as the actual containment.
+## 2026-08-26
 
 ### Fixed
-- **A second and third round of rename rot.** Beyond the `mill:` agent types, the Smith MCP server and its command/agent files still pointed at `plugins/mill/agents/...` and `plugins/blueprint/agents/...` (`blueprint` being Sage's old name) — 27 stale paths across nine runtime files, including F0.5's enumeration of `plugins/blueprint/agents/*.md`, a directory that does not exist, so the Sage-side PROBE-01 stream could never be found. Every referenced path was verified to resolve under `plugins/sage/` or `plugins/smith/` before rewriting. `check_flags.py` was extended to catch stale `plugins/<name>/...` paths, not just `subagent_type` references (runtime files only; test fixtures are data and left alone).
-- **README output samples that did not match what the code emits.** Sage showed a `spec-review.json` with invented `SR-N` flag IDs in a console format that exists nowhere; corrected to the real closed schema with `FLAG-NNN` IDs and the `typed_row` field. Sellsword showed a run-id with a four-digit time where the generator produces six. Tactician omitted the generated-script block its own command requires (the whole point being that you read the harness before trusting it); added, and all three sample scripts verified to parse against the Workflow contract. None was a wholesale fabrication — every sample traced to a real format definition — but these four had drifted.
-- **Undefined jargon in the two places it hurt most.** `casting`, Smith's central noun, was used throughout and defined nowhere; it now has a one-line definition and a plain-words translation of the whole smith vocabulary at first use. Warden's `Read Floor` and `Blast Radius` appeared in the diagram that sells the plugin but were defined only inside `inject.sh`; the checklist is now spelled out in a table. Warden's "Thirteen cases" test-count claim (actually 17) was replaced with wording that cannot drift.
-- **Two model demotions, and an honest halt on the rest.** `sellsword/recon` (read-only brief-building) and `scout/spec-writer` (writes test files under strict rules, self-verifies) dropped to sonnet. The wider tiering plan was abandoned after reading the agents: all eight Cleric agents mutate code and Cleric auto-applies to the repo, so cheap models are most dangerous exactly there; `sellsword/dispatcher` sets the production side-effect surface. The opus agents are largely earning their tier, so tiering is not the cost lever it first appeared.
-- **Smith's MCP server told the orchestrator to spawn agent types that do not exist.** The runtime instruction strings returned by `Mill-Next` and the action imperatives named `mill:teammate`, `mill:tracer`, `mill:assayer`, `mill:research-auditor` and `mill:coverage-diff` — stale from before the plugin was renamed — where the registered types are `smith:*`. Also referenced `/mill:resume`, which is not a command. The frozen `mill_mcp` package name and `Mill-*` MCP tool names are unchanged, as they bind tool resolution.
-- **Sage's mode-override flags were never parsed.** `--brownfield`, `--greenfield` and `--cosmetic` are documented in `/sage:plan`, but `setup-sage.sh`'s argument loop had no case for them, so they fell through the catch-all and were appended to the feature name — corrupting the derived slug and every output path built from it. The flags are now consumed, and any unrecognised `--flag` is a clear error rather than silent corruption.
-- **`/warden:trust-me` never worked.** Its one-shot marker was consumed unconditionally at the top of the Stop hook — which also fires at the end of the turn that *creates* the marker — so the bypass was spent before the user's next prompt arrived and the strict gates fired anyway. The marker is now promoted to an armed flag by the `UserPromptSubmit` hook at the start of the following turn, and only the armed flag is consumed at Stop. That is the same ordering that already made `/warden:casual` correct. Covered by three new regression tests, one of which fails against the previous implementation.
-- **Smith's `Mill-Stream` rejected four of its own documented streams.** The tool's JSON schema and `mill_mark_stream`'s internal allow-list had drifted apart: the schema accepted `research_audit` and `coverage_diff`, which the function then rejected as invalid, and neither accepted `flow_trace` or the TEST-01 `test_observations` channel despite both being documented INSPECT streams with their own agents. Both now derive from a single `VALID_STREAMS` constant so they cannot drift again. Which streams are *required* to call INSPECT clean is unchanged.
-- **`/sellsword:goal` runs could not be resumed.** `/sellsword:resume` branched entirely on `/sellsword:do`'s phase vocabulary and had no path for goal runs, which are driven by the `Stop` hook rather than the conversation. It now re-arms `.sellsword/active-goal.json`, refuses to double-arm against another live goal run, extends rather than silently drops a cap the user set, and asks before re-arming a run that stopped `stuck` or `blocked` instead of burning cycles on the same obstacle.
-- **Smith's `--nyquist` flag was never parsed.** Documented in `/smith:start`'s argument hint and in a `/smith:help` example, but `setup-mill.sh`'s argument loop had no case for it, so it was appended to the scope string as literal text. Same defect class as Sage's mode flags.
-- **Three Smith skills called MCP tools that do not exist** — `Mill-Mark-Stream-Complete` (the registered tool is `Mill-Stream`, and the call was also missing its required `cycle` argument), `verify_citations` (registered as `Verify-Citations`), and `mill_add_verdict` (the internal function name; the tool is `Mill-Verdict`). Any agent following those instructions would have failed the call.
-- **Scout's `/scout:matrix` never wrote the config file its own generated tests import.** The command collected roles and credentials and showed a scaffold, but no step wrote `scout.config.json` — while the `tests/auth/<role>.setup.ts` it generates imports that file directly. Also, `/scout:crawl` named its Playwright MCP dependency without the restart-and-stop instruction every other MCP-dependent command carries.
-- **Sellsword's `--thorough` was described as doing two things it does not** — spawning three builder variants from the start, and running the auditor twice. Three variants spawn only on a `stuck` declaration, and the auditor runs once per verify cycle. Its real effect is doubled recon and builder budgets, doubled depth floors, and auto-escalation to multi-angle retry on stuck. The claim appeared in the dispatcher agent's own operating instructions, not just user-facing text.
-- **Sellsword's `/sellsword:list --active` filtered on status values that are never written** (`plan_approval`, `dual_verification`) while omitting the real `recon_complete`, so a run stopped at recon never showed as active. `/sellsword:resume`'s phase table branched on the same two non-existent names.
-- `Mill-Validate-Castings` described itself as validating across 9 dimensions; it validates 10. Smith's `plugin.json` also called the phases M0.9/M0.7, a typo for F0.9/F0.7.
-- Sage's `/sage:help` documented a `docs/recon/{slug}/` output tree and a `VC-NNN` ID scheme, neither of which exists in `setup-sage.sh`. Its phase list also omitted R1.75 IMPLICIT and R3.5 SPEC REVIEW, and `reality.md` was shown one directory deeper than it is written.
-- Warden's toggles were described as session-scoped. Every one is a marker file under `~/.claude/` with no session-boundary cleanup, so they persist until explicitly reversed; the docs now say so.
-- Ranger's `guard-git.py` docstring claimed v0.1.0 and listed fewer denials than `_verdict()` actually enforces — it omitted `gh release`/`gh repo` mutation, `git remote rm`, `-d/--delete` branch deletion, and the `-B`/`-C` checkout forms.
-- Cleric documented `decisions.md` and `log.md` as run artifacts; nothing writes them.
+- **Cleric 0.2.1.** The deduplication track looks for the project's own TypeScript and
+  JavaScript parsers before falling back to line-window matching.
 
-### Changed
-- **Ranger sizes the effort to the item instead of running one pipeline for everything.** Every item took the same five-to-seven agents, so a label reword got the same treatment as a data-loss race — the largest single waste in the loop. The lead now triages up front: `trivial` (copy, a CSS value, a pure one-liner) takes an implementer and one diff review and nothing else; `risky` (concurrency, migrations, auth, a component with 3+ call sites) gets two plan reviewers and a fresh-eyes gate that cannot be downgraded; everything else is `standard` and unchanged. Tiering down must be defensible in the journal; tiering up is free, and anything ambiguous is `standard`.
-- **Verification is routed rather than mandatory.** The fresh-eyes assessor is the most expensive step in the loop and it was spent on every item, including pure-logic fixes where it re-derived what a test already proved. It is now mandatory for UI-judgement lenses, for `risky` items, and for any build the diff reviewer flagged — and skipped for a pure-logic fix pinned by a test the foreman has *watched fail against the pre-change code*. Where it cannot reach a state at all it now climbs a time-boxed ladder (`live`, `seeded`, `mechanism`, `blocked`) and reports which rung it reached, instead of burning an hour losing to a toggle; the rung travels with the verdict.
-- **A claims check runs before the reviewer, on the cheap model.** Most revision rounds in a mature run were citation defects rather than design defects — a quote missing its qualifying clause, a cited section that does not exist, a claimed repo gap that was not one. The designs were usually right first time. A new `checker` agent (`haiku`) extracts every factual claim in a plan with its cited source and verifies each at first hand, before an `opus` reviewer is spent; a failure there costs a re-plan, not a review round. Plans are also capped at 400 lines and bounced unread over it, because prose is where false claims live.
-- **Scoring weights consequence separately from value.** `value + confidence - effort` was blind to stakes, so a false green on a safety-critical surface ranked within a point of a cosmetic nit and could sit mid-backlog for weeks. Adds `consequence` (0-5) — what happens to a real person if the thing stays broken — scored from the failure rather than the lens, so a visual-polish item is a 5 when the polish is a contrast failure on a warning nobody can read.
-- **Ranger gets pickier on a maturing codebase instead of grinding.** "Never runs out of work" is right at cycle 12 and turns into a treadmill by cycle 130. The score floor now starts at 6 and rises to a maximum of 12 as shipped work thins, never falling; the ready pool is capped at 40, where filing a new item costs dropping one; and a prune pass kills items below the risen floor, items describing code that has since moved, and items that have lost the selection twenty cycles running. Review findings no longer become backlog items — a loop that files its own commentary as future work generates its own demand, which is how a backlog reaches 120 items with nothing important in it. **None of this ends a run:** the lean-cycle counter is a gauge that prints one line and carries on, and standing down remains `/ranger:stop`, Esc, or a cap the user set.
-- **The survey is explicitly the uncapped part of a cycle.** An empty scout team used to end the sweep after at most two retries. There is now no fixed limit — the foreman dispatches team after team until it finds work above the floor or has swept every remaining pair in the rotation, which is finite and so terminates on its own. A cheap read-only sweep that turns up the one real bug is worth many that turn up nothing.
-- **The rotation learns, and covers the whole codebase.** The foreman records a per-pair yield (sweeps versus items that survived dedup and the floor); a pair returning clean twice goes cold and is skipped until its domain changes. Recon is now told that every tier which runs code gets a domain, not just the one with a UI — a pipeline or a scoring module will hold the worst bug in the repo while frontend sweeps go past it forever.
-- **The crew's standing rules moved into the agent definitions.** Roughly fifteen hard-won rules were being relayed by the foreman in every spawn prompt: expensive on every agent, and gone the moment a foreman forgot one. Verify at source, ask what else has the same shape, count the clauses not the surfaces, "chose not to" never "could not", write incrementally, a test that cannot fail is not a test, mutate before trusting green. They now live in `planner.md`, `reviewer.md`, `implementer.md`, `assessor.md` and `scout.md`. Reviewers are additionally barred from prescribing literal replacement text they have not executed, and the implementer is told to treat any such prescription as a suggestion rather than a contract.
-- **`.ranger/FACTS.md` gives every agent durable ground truth.** Agents re-derived settled facts each cycle and occasionally got them wrong — a plan reviewer asserting the repo tests with `jsdom` when it does not costs a full revision round to discover. One short file, outside the run directory so it survives the run that made it, seeded by the recon scout, corrected by the foreman, and editable by hand: north star, hard constraints, how the repo is really tested, the conventions agents trip on, what is out of bounds.
-- **The foreman's ban on reading code narrows to editing code.** "Never read or edit code" made the lead spend an agent on questions a single `Grep` would settle. Reading is now encouraged where it decides something; editing remains forbidden, and the Bash grant stays read-only with no interpreter, because an unattended loop with `node -e` has no safety model left.
-- **Ranger's crew is model-tiered instead of uniformly Opus.** A default cycle fans out six scouts, three planners and three plan reviewers before anything is built, and every one of them ran `opus` — most at `effort: xhigh`. The model now goes where the judgement is: scout and planner drop to `sonnet` (the planner escalates to `opus` when an item's effort is 3+), while reviewer, implementer and assessor stay on `opus` as the quality gates. Nothing runs at `xhigh`. Recorded as a `MODEL BUDGET` section in `commands/run.md`, which also names pool size (`--scouts`, `--planners`) as the cheapest spend dial, so the tiering does not quietly drift back.
-- **The assessor no longer re-reads the whole page after every click.** It took a bare `browser_snapshot` per action, dumping the entire accessibility tree into an Opus context dozens of times per UI item. It now locates with `browser_find`, bounds snapshots with `target`/`depth`, spills full-page trees to disk via `filename`, and budgets roughly 15 browser calls per item. It deliberately keeps `opus` on UI lenses — motion and interaction feel cannot be judged from a screenshot, so moving the visual gate to a cheaper model would blind it rather than save it.
-- **Honest labelling of what enforces each safety claim.** Two guarantees read like mechanisms but are the model following prose, and now say so. Cleric's confidence gate presented HIGH/MEDIUM/LOW as a threshold; the README now states the rank is a judgement the model makes and honours, and that the real protection is the atomic-commit-plus-`git reset` undo, not the label. Sellsword's `--allow-production` and plan checkpoint were framed as hard gates; `goal-gate.py` only blocks a run from *stopping*, so the README now separates the one hook-enforced promise from the several prose-enforced ones and names the environment as the actual containment.
-- **Every plugin README rebuilt to stand on its own.** Each crew member is usable with no other plugin installed, so each README now leads with that, carries its own complete setup and commands, and links siblings only from a "Pairs well with" footer. The root README leads with nine independent tools rather than a Sage-to-Smith spine with the rest as edges.
-- **No emoji or decorative Unicode in documentation.** Removed throughout the READMEs and prose; functional markers that define runtime output (status glyphs in Sellsword's run table, verdict marks in Smith's TRACE tables, good/bad example marks in Scout's authoring skill) are deliberately kept.
-- `CONTRIBUTING.md` claimed 8 plugins, omitted Ranger from the crew, and documented only one of the four test suites. It now lists all four with runnable commands, the full plugin anatomy, and the standalone-plugin and no-emoji rules.
-- `SECURITY.md` now names the two largest capabilities explicitly — unattended runs execute with permissions bypassed and only git is guarded, and Sellsword reaches real infrastructure over SSH — and distinguishes that designed behaviour from a reportable vulnerability.
-- Security and Code-of-Conduct contacts now use GitHub-native reporting (Security Advisories + maintainer handle) instead of a personal email address.
-
-## [0.1.0] — 2026-06-26
+## 2026-08-14
 
 ### Added
-- Initial public release of the **The Tavern** marketplace with all eight crew members:
-  Sage, Smith, Warden, Sellsword, Cleric, Scout, Tactician, and Seer.
+- **The `.questboard/` shared workspace.** An optional directory where plugins leave each other
+  immutable JSON notes. Sage records each sealed spec, Smith resolves its spec from the
+  newest one, Ranger reads what has already been tried and records each attempt, and Sellsword,
+  Cleric and Seer record findings they did not act on. Every plugin behaves the same when
+  the directory is absent. See [docs/questboard-contract.md](docs/questboard-contract.md).
+- **Install profiles.** `daily`, `pipeline`, `review`, `unattended` and `all`, installed
+  with `scripts/install-profile.sh` (`--list`, `--dry-run`, `--scope`, `--yes`) and checked
+  against [docs/profiles.md](docs/profiles.md) in CI.
+- **Ranger 0.6.0.** Every backlog item carries an artifact: the command a scout ran and
+  what it saw. A new `driver` agent runs the real system to survey or to reproduce a claim,
+  and a new `builder` agent handles most items in one pass, escalating to the full
+  plan-and-review path only when the work is wider than the item implied. Verdicts are
+  written to disk before they are returned, and a red-before-green claim must include the
+  failure text.
+- **Sellsword 0.4.0, Cleric 0.2.0, Seer 0.2.0.** Each writes its findings to `.questboard/` when
+  the directory exists.
 
-[Unreleased]: https://github.com/gshepptech/the-tavern/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/gshepptech/the-tavern/releases/tag/v0.1.0
+### Fixed
+- **Ranger 0.6.1.** The shared-workspace helper rejects a trailing newline in the `plugin`
+  and `created` fields, which `validate` previously accepted.
+
+## 2026-08-05
+
+### Changed
+- **Ranger 0.5.0.** Effort is sized to each item: a small fix costs two agents and a risky
+  change gets the full pipeline. The quality floor rises as a run matures and the backlog
+  is capped, so a long run gets more selective instead of producing churn.
+
+## 2026-08-01
+
+### Changed
+- **Ranger 0.4.0.** Agents run on model tiers matched to their role, and the assessor's
+  browser work is bounded.
+
+## 2026-07-23
+
+### Added
+- CI: manifest validation, version agreement, documentation, flag-wiring checks, syntax
+  checks and the plugin test suites on every push and pull request.
+- **Ranger 0.3.0.** Scouts run in parallel pools sized by `--scouts` and `--planners`.
+- **Sellsword 0.3.0.** `/sellsword:goal` runs can be resumed.
+
+### Fixed
+- **Ranger 0.3.0.** The git guard covers more ways to publish, including `gh api` writes
+  and commands hidden behind a launcher.
+- **Warden 0.5.1.** `/warden:trust-me` works, the Stop hook tolerates malformed transcripts, and
+  the local gate log records counts rather than response text.
+- **Cleric 0.1.1.** Corrected static-analysis tool names.
+- **Scout 0.2.1.** `/scout:matrix` writes the config its generated specs import.
+- **Tactician 0.2.1.** `/tactician:make` declares the `AskUserQuestion` tool it uses.
+
+## 2026-07-21
+
+### Added
+- **Ranger 0.2.0.** A self-directing, unattended engineering loop: survey, plan, review,
+  build, verify and commit, one local commit per item, until you stop it. A `PreToolUse`
+  hook denies `git push`, remote changes and PR creation even with permissions bypassed.
+  `/ranger:run`, `/ranger:stop`, `/ranger:resume`, `/ranger:status`.
+
+## 2026-06-26
+
+### Added
+- First public release of the marketplace, with:
+  - **Warden 0.5.0**: methodical-mode hooks, a citation verifier and a two-tier critic.
+  - **Sellsword 0.2.0**: a five-agent crew that investigates, plans, executes and verifies.
+  - **Cleric 0.1.0**: low-risk cleanup across seven tracks.
+  - **Scout 0.2.0**: Playwright end-to-end tests written by driving the real app.
+  - **Tactician 0.2.0**: generated multi-agent Workflow scripts.
+  - **Seer 0.1.0**: architecture and design-cohesion review.
