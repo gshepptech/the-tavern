@@ -36,9 +36,9 @@ jobs:
       - name: Check documentation
         run: python3 .github/scripts/check_docs.py
 
-      # Documented-but-unwired behaviour is the defect class that dominated an
-      # entire release: flags in an argument-hint that no script parses, and
-      # subagent types left behind by a rename. Both are invisible in review.
+      # Documented-but-unwired behaviour: flags in an argument-hint that no
+      # script parses, and agent types or paths left behind by a rename. Both
+      # are invisible in review.
       - name: Check flags and agent references
         run: python3 .github/scripts/check_flags.py
 
@@ -65,19 +65,25 @@ jobs:
       - name: Shell scripts parse
         run: git ls-files '*.sh' | xargs -r -I{} bash -n {}
 
+      # Workflow scripts run inside an async function, so the check wraps them
+      # the same way before handing them to node --check.
       - name: JavaScript parses
-        run: git ls-files '*.js' | xargs -r -I{} node --check {}
+        run: python3 .github/scripts/check_js.py
 
       - name: Python compiles
         run: git ls-files '*.py' | xargs -r python3 -m py_compile
 
       # Hooks are executed by Claude Code directly, so a non-executable hook
-      # script is a silent runtime failure rather than a syntax error.
-      - name: Hook scripts are executable
+      # script is a silent runtime failure rather than a syntax error. Files
+      # without a shebang are modules imported by another script and are not
+      # run on their own.
+      - name: Scripts are executable
         run: |
           fail=0
-          for f in $(git ls-files 'plugins/*/scripts/*.py' 'plugins/*/scripts/*.sh'); do
-            if [ ! -x "$f" ]; then echo "not executable: $f"; fail=1; fi
+          for f in $(git ls-files 'plugins/*/scripts/*'); do
+            if head -c 2 "$f" | grep -q '^#!' && [ ! -x "$f" ]; then
+              echo "not executable: $f"; fail=1
+            fi
           done
           exit $fail
 
@@ -114,7 +120,4 @@ jobs:
         # pattern that goes wrong the moment someone adds an event-driven input.
         env:
           DEPS: ${{ matrix.deps }}
-        # Some tests are deliberately skipped: they are red-until-implemented
-        # markers for planned work and each carries a skip reason. Skips are
-        # expected; failures are not.
         run: uv run --with pytest $DEPS python -m pytest -q
