@@ -138,7 +138,7 @@ def test_evasion_attempts_denied(guard, cmd):
         "gh auth token",
         "gh pr comment 1 --body pwn",
         # -X deletes ONLY ignored files, which is exactly the .env case the
-        # block exists for, and the old check was lowercase-only.
+        # block exists for.
         "git clean -fdX",
         # Long-form spellings of the flag-gated operations.
         "git switch --create feat",

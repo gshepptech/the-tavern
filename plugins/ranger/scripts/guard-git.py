@@ -476,9 +476,9 @@ def _verdict(tokens: list[str], flags: dict) -> str | None:
 
     if sub == "clean":
         # -x and -X both delete git-ignored files; -X deletes ONLY those, which
-        # is precisely the .env case the block exists for. The old check was
-        # lowercase-only, so -X was allowed, and it substring-matched any flag,
-        # so `--exclude=*.pyx` was denied for containing an "x".
+        # is precisely the .env case the block exists for. Match -x/-X
+        # case-sensitively per short-flag cluster, and skip long options, so
+        # `--exclude=*.pyx` is not mistaken for -x.
         for tok in rest:
             if not tok.startswith("-"):
                 continue
