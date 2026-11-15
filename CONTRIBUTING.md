@@ -1,18 +1,18 @@
 # Contributing to The Tavern
 
-Thanks for swinging by the job site. Whether you're fixing a typo, sharpening a
-plugin, or pitching a whole new tradesperson for the crew, contributions are welcome.
+Pull up a chair. Whether you're fixing a typo, sharpening a plugin, or proposing a
+new regular for the tavern, contributions are welcome.
 
 ## Ground rules
 
 - **Be kind.** This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 - **Open an issue first** for anything non-trivial, so we can agree on the shape before you build.
-- **Every plugin must stand alone.** Each crew member is usable by itself, with no
+- **Every plugin must stand alone.** Each regular is usable by itself, with no
   other plugin installed. A change that makes one plugin depend on another needs a
   very good reason — optional composition is fine, a hard dependency is not.
-- **Keep the spec format stable.** Sage writes specs that Smith and Tinker read. A change
-  to the requirement IDs, the acceptance-criteria shape or the `sealed_by` line has to
-  keep all three working.
+- **Keep the spec format stable.** Sage writes specs that Smith, Tinker and Squire read.
+  A change to the requirement IDs, the acceptance-criteria shape or the `sealed_by` line
+  has to keep all four working.
 - **No emoji in documentation.** Headings, tables and prose stay plain text. GitHub
   alert callouts (`> [!NOTE]`), mermaid diagrams and `<details>` blocks are fine;
   decorative Unicode is not — no emoji, no dingbats, and no arrow glyphs (write
@@ -24,22 +24,22 @@ plugin, or pitching a whole new tradesperson for the crew, contributions are wel
 ## Repo layout
 
 ```
-.claude-plugin/marketplace.json     # the marketplace manifest (lists all ten plugins)
+.claude-plugin/marketplace.json     # the marketplace manifest (lists all fifteen plugins)
 .github/scripts/                    # the consistency checks CI runs
-docs/                               # install profiles and the .questboard contract
+docs/                               # install profiles and the quest board contract
 scripts/install-profile.sh          # installs a named set of plugins
-plugins/<name>/                     # one directory per tradesperson
+plugins/<name>/                     # one directory per regular
   .claude-plugin/plugin.json        # that plugin's manifest — name and version
   README.md                         # per-plugin docs, self-contained
-  <name>.svg                        # that plugin's artwork
+  <name>.svg                        # that plugin's artwork      (some plugins)
   commands/                         # slash commands
   agents/                           # sub-agent definitions        (most plugins)
   skills/                           # skills, with references/     (some plugins)
-  hooks/hooks.json                  # hook wiring                  (warden, sellsword, ranger)
+  hooks/hooks.json                  # hook wiring                  (warden, sellsword, ranger, monk, raven)
   scripts/                          # hook and helper scripts      (some plugins)
-  workflows/                        # Workflow scripts             (seer, tinker)
+  workflows/                        # Workflow scripts             (seer, tinker, squire)
   presets/                          # curated briefs               (ranger)
-  tests/                            # test suite                   (warden, sage, ranger, smith, tinker)
+  tests/                            # test suite                   (ten plugins, see below)
 ```
 
 ## Local checks (run these before you push)
@@ -70,7 +70,7 @@ python3 .github/scripts/check_js.py
 git ls-files '*.sh' | xargs -I{} bash -n {}
 ```
 
-Five plugins carry test suites. Run the ones your change touches; run all five if
+Ten plugins carry test suites. Run the ones your change touches; run all ten if
 you're not sure:
 
 ```bash
@@ -88,12 +88,27 @@ cd plugins/smith && uv run --with pytest python -m pytest -q
 
 # Tinker — preflight, command detection, gates and the Workflow script
 cd plugins/tinker && uv run --with pytest python -m pytest -q
+
+# Squire — spec indexing, check detection, verdict validation and the Workflow script
+cd plugins/squire && uv run --with pytest python -m pytest -q
+
+# Scribe — each documentation gate against temporary repositories
+cd plugins/scribe && uv run --with pytest python -m pytest -q
+
+# Bard — persona and slice planning, the finding validator and the report renderer
+cd plugins/bard && uv run --with pytest python -m pytest -q
+
+# Monk — the hook script, commands and the length gate
+cd plugins/monk && uv run --with pytest python -m pytest -q
+
+# Raven — message contents, redaction and failure handling against a local server
+cd plugins/raven && uv run --with pytest python -m pytest -q
 ```
 
 > [!NOTE]
 > `uv run --with` keeps the dependencies scoped to the run instead of installing
 > into your environment. If you'd rather use pip, install `pytest` first and call
-> `pytest` directly. Tinker's Workflow tests also need `node` on `PATH`.
+> `pytest` directly. Tinker's and Squire's Workflow tests also need `node` on `PATH`.
 
 ## Versioning
 
@@ -106,7 +121,7 @@ A version is written in four places and `check_versions.py` enforces that all fo
 1. `plugins/<name>/.claude-plugin/plugin.json` — the one that controls delivery
 2. `.claude-plugin/marketplace.json` — the marketplace entry
 3. `plugins/<name>/README.md` — the shields.io badge
-4. `README.md` — the Crew table row
+4. `README.md` — the roster table row
 
 Which level to bump:
 
@@ -127,7 +142,8 @@ Which level to bump:
    assuming the root README has been read. Sibling plugins belong in a
    "Pairs well with" section at the bottom, not as framing at the top.
 4. If you add a new plugin, add an entry to `marketplace.json`, a row to the
-   **Crew** table in the root `README.md`, and a line to the Per-plugin docs list.
+   roster table in the root `README.md`, a test matrix entry in
+   `.github/workflows/ci.yml` if it has tests, and its name in the issue templates.
 5. Note anything user-visible in the [Changelog](CHANGELOG.md).
 
 ## Documentation accuracy
@@ -149,7 +165,7 @@ describe the thing qualitatively instead.
 
 ## Naming note
 
-The crew are people — **Sage, Smith, Warden, Sellsword, Cleric, Scout, Tactician, Seer, Ranger** —
-and **Tinker**, named after its tool. A new plugin gets a name in the same spirit.
-
-Happy building.
+Every plugin is named for a regular you would find in a fantasy tavern, and the name
+hints at the job: the sage writes the plan down, the smith builds from it, the warden
+keeps watch, the scribe writes the docs. A new plugin gets a name in the same spirit:
+one lowercase word, a role rather than a person.
