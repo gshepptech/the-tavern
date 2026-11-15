@@ -6,7 +6,7 @@
 
 **The foreman who never leaves the site. One prompt, then walk away.**
 
-[![Version](https://img.shields.io/badge/version-0.7.0-F9A825?style=flat-square)](.claude-plugin/plugin.json)
+[![Version](https://img.shields.io/badge/version-0.7.1-F9A825?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-1E88E5?style=flat-square)](../../LICENSE)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-8E44AD?style=flat-square)](https://docs.claude.com/en/docs/claude-code)
 
@@ -72,7 +72,7 @@ The recommended first contact: you get the ranked backlog and the plan for the t
 > - **It is uncapped by default.** Ranger works until you stop him — `/ranger:stop`, Esc out of the loop, or kill the runner. Nothing else ends it. `--max-hours=N` is the only bound that stops a run on its own. (`--max-cycles=N` counts *shipped* items, so a run that keeps reverting never reaches it.)
 > - **Unattended mode runs with permissions bypassed.** With no human present to answer prompts, the headless runner and every agent it spawns execute tools without asking: file writes, shell commands, network calls. The git guard still holds, but **only git is guarded**. Run the headless mode in a container, a VM, or a throwaway clone — never on a machine you care about while you walk away. The watched `/loop` form is lower-risk only because you are sitting there.
 
-If you run a methodical-mode plugin (`warden`, `adhoc`, `plumb`), clear its strict gate first — `/warden:strict-off` etc. — or it will deadlock the loop. Ranger checks this at the start and tells you exactly what to run.
+If you run Warden, clear its strict gate first with `/warden:strict-off`, or it will deadlock the loop. Ranger checks this at the start and tells you exactly what to run.
 
 ---
 
@@ -128,7 +128,7 @@ Most items go to one agent. A separate planner writing a paragraph, a checker op
 
 But difficulty isn't knowable from a ticket. "Add a key to this table" turns out to be two tables with opposite defaults. "Replace a repeated literal with a constant" turns out to be two different meanings that coincidentally match. None of that shows up in a backlog entry; all of it shows up ninety seconds into the code. So the builder can **bail** — `needs-plan` returns its reading and no diff, and the item escalates to the full planner -> claims-check -> plan-review path with that reading attached.
 
-The common case costs one agent. The rare case costs two. Every case used to cost three before a line was written.
+The common case costs one agent. The rare case costs two. Only the rare case pays for a planner, a checker and a reviewer before a line is written.
 
 ### Not every item gets the whole crew
 
@@ -162,9 +162,9 @@ The same agent settles the quarantine. Once three or more unreproduced items pil
 
 ### Entries rot, and closing one counts
 
-Every backlog entry carries a `verified_at` cycle stamp, and one older than 15 cycles has to be re-checked against the tree before it can be built. A loop that files continuously and never re-verifies drifts toward a board describing a codebase that no longer exists — one sweep of one board turned up six entries marked pending or blocked when the work had already shipped, each with a confident-sounding justification.
+Every backlog entry carries a `verified_at` cycle stamp, and one older than 15 cycles has to be re-checked against the tree before it can be built. A loop that files continuously and never re-verifies drifts toward a board describing a codebase that no longer exists, with entries still marked pending or blocked after the work has shipped, each carrying a confident-sounding justification.
 
-**"Closed as already shipped" is a real outcome and it's reported as progress.** It's often the most valuable thing a cycle can produce, and it used to look like failure.
+**"Closed as already shipped" is a real outcome and it's reported as progress.** It's often the most valuable thing a cycle can produce, and it is not counted as a failure.
 
 **It will not manufacture churn.** Every candidate is scored `value + confidence - effort + consequence`; anything under the floor is dropped. A scout that finds nothing above the floor reports its pair **clean** — a real, useful answer. Keeping the backlog full is the foreman's job, answered by dispatching more pairs, never by pressing a scout to come back with something.
 
@@ -355,7 +355,7 @@ RANGER=$(ls -d ~/.claude/plugins/cache/the-tavern/ranger/*/scripts/ranger-run.sh
 | grinding on the impossible | 3 cycles with no commit, and the item is quarantined; rotation advances |
 | a bad change compounding | revert, don't pile on — one commit per item, one `git revert` away |
 | conflicts | a conflicting merge is aborted and left on its branch, never resolved unattended |
-| interactive deadlock | preflight refuses to start unless the methodical-mode strict gates (`warden`, `adhoc`, `plumb`) are off |
+| interactive deadlock | preflight refuses to start unless Warden's strict gate is off |
 
 ---
 

@@ -20,7 +20,7 @@ Parse `$ARGUMENTS`: an optional `run-id`, plus the cap flags (`--unlimited`, `--
 
 ## Preflight
 
-Same as `/ranger:run` STEP 2a: check the methodical-mode strict gates and confirm the git tree is in a state you can commit against. **Run the exact check from STEP 2a** — a missing marker means strict is ON, not off, because all three plugins read an absent marker as `default` and `default` enforces.
+Same as `/ranger:run` STEP 2a: check Warden's strict gate and confirm the git tree is in a state you can commit against. **Run the exact check from STEP 2a** — a missing marker means strict is ON, not off, because Warden reads an absent marker as `default` and `default` enforces.
 
 ```bash
 python3 - <<'PY'
@@ -31,7 +31,7 @@ try:
 except Exception:
     enabled = {}
 blocking = []
-for p in ("warden", "adhoc", "plumb"):
+for p in ("warden",):
     if not any(k.split("@")[0] == p and v for k, v in enabled.items()):
         continue
     marker = home / ".claude" / f".{p}-strict-mode"
@@ -42,7 +42,7 @@ print("BLOCKING: " + ", ".join(blocking) if blocking else "CLEAR")
 PY
 ```
 
-Anything other than `CLEAR` — name which and stop. The user clears it with `/warden:strict-off`, `/adhoc:strict-off`, or `/plumb:strict-off`.
+Anything other than `CLEAR` — name which and stop. The user clears it with `/warden:strict-off`.
 
 ## Re-arm and continue
 

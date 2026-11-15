@@ -77,11 +77,11 @@ Run without --dry-run to execute. A real run is uncapped — it works until you 
 
 ## STEP 2 — initialise (first invocation only)
 
-### 2a. Preflight — methodical-mode strict gates
+### 2a. Preflight — Warden's strict gate
 
-An unattended/looped run cannot survive an interactive block. The methodical-mode plugins (`warden`, `adhoc`, `plumb`) install strict `Stop`-hook gates that HARD-block and need an interactive `/…:trust-me` to clear — that would **deadlock** a `/loop` run.
+An unattended/looped run cannot survive an interactive block. Warden installs strict `Stop`-hook gates that HARD-block and need an interactive `/warden:trust-me` to clear — that would **deadlock** a `/loop` run.
 
-**A missing marker means strict is ON, not off.** All three plugins read an absent marker as `default`, and `default` enforces (see `warden/scripts/check-citations.py` — `read_mode` returns `"default"` when the file is absent, and only a literal `"off"` clears the gate). A freshly installed plugin writes no marker at all, so "no file" is the *most* likely enforcing state, not a safe one. Only an explicit `off` is safe, and only for a plugin that is actually enabled:
+**A missing marker means strict is ON, not off.** Warden reads an absent marker as `default`, and `default` enforces (see `warden/scripts/check-citations.py` — `read_mode` returns `"default"` when the file is absent, and only a literal `"off"` clears the gate). A freshly installed plugin writes no marker at all, so "no file" is the *most* likely enforcing state, not a safe one. Only an explicit `off` is safe, and the check only applies when Warden is actually enabled:
 
 ```bash
 python3 - <<'PY'
@@ -92,7 +92,7 @@ try:
 except Exception:
     enabled = {}
 blocking = []
-for p in ("warden", "adhoc", "plumb"):
+for p in ("warden",):
     if not any(k.split("@")[0] == p and v for k, v in enabled.items()):
         continue                      # not enabled: it cannot gate anything
     marker = home / ".claude" / f".{p}-strict-mode"
@@ -106,7 +106,7 @@ PY
 `CLEAR` → continue. Anything else → name them and **stop**:
 
 > **Cannot start a looped run — a methodical-mode strict gate is on: `<names>`.**
-> Run the matching command(s) — `/warden:strict-off`, `/adhoc:strict-off`, `/plumb:strict-off` — then re-run. (Each just writes an `off` marker; safe even if that plugin isn't installed.)
+> Run `/warden:strict-off`, then re-run. (It just writes an `off` marker.)
 
 ### 2b. Git
 
@@ -376,7 +376,7 @@ Then, if depth is still >= `backlog_cap`: **filing costs something.** Drop the l
 
 ### BACKLOG ENTRIES ROT
 
-A loop that files continuously and never re-verifies drifts toward a board describing a codebase that no longer exists. One sweep of one board found **six** entries marked pending, approved-for-build or blocked when the work had already shipped — one of them blocked on a dependency it never actually needed. Every one of them carried a plausible, confidently-written justification, which is exactly why none of them had been questioned.
+A loop that files continuously and never re-verifies drifts toward a board describing a codebase that no longer exists: entries marked pending, approved-for-build or blocked when the work has already shipped, or blocked on a dependency they never needed. Each carries a plausible, confidently-written justification, which is exactly why nobody questions it.
 
 **Every item carries `verified_at`** — the cycle number at which its artifact was last known to reproduce. The scout sets it when it files. The builder refreshes it every time it re-runs an artifact at step 1.
 
@@ -388,15 +388,15 @@ A loop that files continuously and never re-verifies drifts toward a board descr
 ✓ <cycle>. <title> — already shipped  ·  closed, no diff  ·  <N>/<cap> queued, floor <floor>
 ```
 
-It is frequently the most valuable thing a cycle can produce and it currently looks like failure. It is not a stall (`stall_count` is untouched), it is not a lean cycle (`lean_cycles` is untouched — the cycle did its job), and it does not advance `cycle`. When an entry is disproved this way, **correct the entry in the same pass** — mark it `done` with `outcome: already-shipped`, note what you observed in the journal, and check whether anything else on the board was blocked on it. An item silently worked around is an item that comes back.
+It is frequently the most valuable thing a cycle can produce. It is not a stall (`stall_count` is untouched), it is not a lean cycle (`lean_cycles` is untouched — the cycle did its job), and it does not advance `cycle`. When an entry is disproved this way, **correct the entry in the same pass** — mark it `done` with `outcome: already-shipped`, note what you observed in the journal, and check whether anything else on the board was blocked on it. An item silently worked around is an item that comes back.
 
 ### BACKLOG ECONOMICS
 
-Ranger's original guarantee was that it never runs out of work. On a young codebase that is exactly right. On a maturing one it becomes a treadmill: the real defects clear, and the loop grinds progressively more marginal items at full five-agent cost, because it was told a thin backlog is a survey trigger and never told what "good enough" looks like.
+Ranger never runs out of work. On a young codebase that is exactly right. On a maturing one it becomes a treadmill: the real defects clear, and the loop grinds progressively more marginal items at full five-agent cost, unless it knows what "good enough" looks like.
 
 Three mechanisms, all of which you own:
 
-1. **The floor rises.** `state.floor` starts at 6. Every 10th cycle, if the last 10 committed items averaged below `floor + 4`, raise `floor` by 1, to a maximum of 12. It never falls. A run 100 cycles in should be refusing work a run at cycle 5 would take. (The test is relative to the floor on purpose — scores include `consequence` now, so a fixed number would drift as the scale did.)
+1. **The floor rises.** `state.floor` starts at 6. Every 10th cycle, if the last 10 committed items averaged below `floor + 4`, raise `floor` by 1, to a maximum of 12. It never falls. A run 100 cycles in should be refusing work a run at cycle 5 would take. (The test is relative to the floor on purpose — scores include `consequence`, so a fixed number would not track the scale.)
 2. **The pool is capped.** `backlog_cap` (40) is a hard ceiling on `ready + planned + approved`. At the cap, filing an item requires dropping one.
 3. **Lean runs change modality, and are reported, never stopped.** `lean_cycles` counts consecutive cycles that produced nothing above the floor, *or* whose committed item scored below `floor + 2`. Reset it on any item at or above `floor + 2`. At 3, switch the survey to `drive` (see MODALITY) — a reader that has stopped finding things is a fact about the reader, not only about the codebase. At 5, add the notice below. The floor still rises on its own schedule; these are separate mechanisms answering separate questions.
 
@@ -627,7 +627,7 @@ Best-effort: `osascript -e 'display notification "stood down: <RUN_ID>" with tit
 
 Agents die. They hit an API error, they exhaust a context window, they return prose where JSON was asked for, they come back empty. In a pool of six scouts this is routine rather than exceptional, and the loop has to have an answer that is not improvisation — because the improvisation available to you is the worst one there is: writing the missing verdict yourself.
 
-**Every agent whose product is a verdict now writes it to a file** — `plan.md`, `check.md`, `review-plan.md`, `review-diff.md`, `build.md`, `verify.md`, each opening with a `verdict:` line set to `pending` before the agent does anything else. So a dead agent leaves one of three states, and they are not the same state:
+**Every agent whose product is a verdict writes it to a file** — `plan.md`, `check.md`, `review-plan.md`, `review-diff.md`, `build.md`, `verify.md`, each opening with a `verdict:` line set to `pending` before the agent does anything else. So a dead agent leaves one of three states, and they are not the same state:
 
 | what is on disk | what it means | what you do |
 |---|---|---|

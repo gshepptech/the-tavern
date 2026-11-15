@@ -70,8 +70,8 @@ LAUNCHERS = {
     "stdbuf", "setsid", "doas", "xargs", "watch",
 }
 
-# git subcommands that move work off this machine. `push` was the only one on
-# the original list; every other name here is an equally good way to publish.
+# git subcommands that move work off this machine. `push` is the obvious one;
+# every other name here is an equally good way to publish.
 GIT_PUBLISH_VERBS = {
     "push", "send-email", "request-pull", "bundle", "daemon", "svn", "p4",
     "format-patch",
@@ -402,7 +402,7 @@ def _verdict(tokens: list[str], flags: dict) -> str | None:
         # Allowlist, not denylist. gh grows verbs faster than any guard tracks
         # them, and nearly all of them talk to the network — `gh gist create`,
         # `gh release upload`, `gh secret set`, `gh workflow run` and
-        # `gh auth token` all previously walked past a three-verb denylist.
+        # `gh auth token` would all walk past a short denylist.
         verb = rest[0] if rest and not rest[0].startswith("-") else None
         # `gh api` is judged by its HTTP method just below, not by the
         # allowlist: a plain GET is a legitimate read, a write is not.
