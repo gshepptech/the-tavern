@@ -12,7 +12,7 @@ Render this help text to the user verbatim.
 
 # Cleric — careful low-risk codebase cleanup
 
-Cleric is the The Tavern crew member who sweeps the site clean. Seven focused tracks. Each inspects, ranks proposals by confidence, applies ONLY HIGH-confidence LOW-risk changes, and runs all checks after each batch. Atomic commits per batch — any failing check is one `git revert` away.
+Cleric is the careful cleanup pass from The Tavern. Seven focused tracks. Each inspects, ranks proposals by confidence, applies ONLY HIGH-confidence LOW-risk changes, and runs all checks after each batch. Atomic commits per batch — any failing check is one `git revert` away.
 
 ## Commands
 

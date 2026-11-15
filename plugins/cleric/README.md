@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="cleric.svg" alt="Cleric — the sweep" width="100%"/>
+<img src="cleric.svg" alt="Cleric, one of the regulars at The Tavern" width="100%"/>
 
 # Cleric
+
+*The cleric tends to the codebase carefully: it clears what is dead and leaves alone anything it cannot prove is safe to touch.*
 
 **A careful, low-risk codebase cleanup pass across 7 focused tracks — dedup, type consolidation, dead code, circular deps, type strengthening, error handling, and deprecated/AI-slop removal.**
 
@@ -13,7 +15,7 @@
 </div>
 
 > [!NOTE]
-> **Cleric is standalone.** Install it on its own, point it at any repo, and it works completely by itself — no other The Tavern plugin required. What it composes with is a footnote at the bottom of this page, not a prerequisite.
+> **Cleric is standalone.** Install it on its own, point it at any repo, and it works completely by itself — no other plugin from The Tavern required. What it composes with is a footnote at the bottom of this page, not a prerequisite.
 
 ---
 
@@ -318,11 +320,11 @@ The format is documented in [the .questboard contract](../../docs/questboard-con
 
 ## Pairs well with
 
-Cleric runs perfectly on its own. If you're already using other The Tavern crew members, a couple of pairings save time:
+Cleric runs perfectly on its own. If you have hired other regulars from The Tavern, a couple of pairings save time:
 
 - **[Seer](../seer/README.md)** — run a design-cohesion review first to find what's mis-shaped, then let Cleric sweep the low-risk cleanup that clears the way.
-- **[Ranger](../ranger/README.md)** — his continuous build loop can drive `/cleric:run --auto` as a periodic maintenance pass between feature work.
-- **[Scout](../scout/README.md)** — her Playwright suite is a good extra check that Cleric's changes didn't quietly break a real user flow.
+- **[Ranger](../ranger/README.md)** — its continuous build loop can drive `/cleric:run --auto` as a periodic maintenance pass between feature work.
+- **[Scout](../scout/README.md)** — its Playwright suite is a good extra check that Cleric's changes didn't quietly break a real user flow.
 
 ---
 
