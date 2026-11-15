@@ -1,10 +1,12 @@
 <div align="center">
 
-<img src="warden.svg" alt="Warden — keeps every job plumb, level, and true" width="100%"/>
+<img src="warden.svg" alt="Warden, one of the regulars at The Tavern" width="100%"/>
 
 # Warden
 
-**Measure twice, cut once. Methodical-mode guardrails for ad-hoc Claude Code work.**
+*The warden keeps watch over every reply and turns back any claim that was not checked.*
+
+**Methodical-mode guardrails for ad-hoc Claude Code work.**
 
 [![Version](https://img.shields.io/badge/version-0.5.1-E53935?style=flat-square)](.claude-plugin/plugin.json)
 [![License](https://img.shields.io/badge/License-Apache--2.0-E53935?style=flat-square)](../../LICENSE)
@@ -261,7 +263,7 @@ rm -f ~/.claude/.warden-state ~/.claude/.warden-citations-mode ~/.claude/.warden
 
 ## Pairs well with
 
-Warden doesn't need any of these — it's built to stand alone. But if you're running the fuller The Tavern crew, Warden's gates apply just as well to their output:
+Warden doesn't need any of these — it's built to stand alone. But if you've hired other regulars from The Tavern, Warden's gates apply just as well to their output:
 
 - [Sage](../sage/README.md) — spec the feature first; Warden keeps the implementation honest against it.
 - [Smith](../smith/README.md) — Warden's citation and grounding gates fit naturally around an autonomous build loop.

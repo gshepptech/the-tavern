@@ -62,7 +62,7 @@ esac
 
 # Default: inject the methodical preamble.
 cat <<'EOF'
-[warden:methodical-mode active — measure twice, cut once — /warden:casual to skip this turn, /warden:off to disable for the session]
+[warden:methodical-mode active — check before you claim — /warden:casual to skip this turn, /warden:off to disable for the session]
 
 Before responding, walk this checklist out loud (briefly — one line per step is fine):
 
