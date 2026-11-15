@@ -2,10 +2,10 @@
 description: Show the Scout plugin commands, skills, and agent
 ---
 
-The user wants help with the Scout plugin. Reply with exactly this message — verbatim, no additions:
+The user wants help with the Scout plugin. Reply with exactly this message, word for word, with no additions:
 
 ```
-Scout — Playwright E2E test authoring + maintenance, driven by Claude
+Scout: Playwright E2E test authoring + maintenance, driven by Claude
 
 WHAT IT DOES
   Wraps Playwright + Playwright MCP into a slash-command workflow. Claude drives
@@ -37,7 +37,7 @@ CONFIG
   .mcp.json              Playwright MCP entry (headed by default).
   scout.config.json        Roles + login flow for /scout:matrix. Created on first
                          matrix run.
-  .auth/                 storageState per role. Gitignored — contains session
+  .auth/                 storageState per role. Gitignored, contains session
                          tokens. Never commit.
 
 TYPICAL FLOW

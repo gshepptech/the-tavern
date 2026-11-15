@@ -10,9 +10,9 @@ Render this help text to the user verbatim.
 
 ---
 
-# Sellsword — hire it for one hard problem
+# Sellsword: hire it for one hard problem
 
-Hand Sellsword a gnarly problem and it owns the outcome end to end. Sellsword is a single command that gathers context, optionally proposes a plan, then executes against real systems (SSH, infra, code edits, deploys, features), and verifies the outcome by observation — not by inference.
+Hand Sellsword a gnarly problem and it owns the outcome end to end. Sellsword is a single command that gathers context, optionally proposes a plan, then executes against real systems (SSH, infra, code edits, deploys, features), and verifies the outcome by observation, not by inference.
 
 ## How to use it
 
@@ -27,7 +27,7 @@ Examples:
 ```
 /sellsword:do figure out why staging login is broken since yesterday
 
-/sellsword:do make sure Keycloak can run properly on Azure on RHEL — I want to deploy
+/sellsword:do make sure Keycloak can run properly on Azure on RHEL, I want to deploy
 
 /sellsword:do get the airgap bundle pulling all packages until it works
 
@@ -38,25 +38,25 @@ Examples:
 
 ## Flags
 
-- `--thorough` — doubles the depth contract (recon budget, builder budgets, and per-mode evidence floors) and skips the "ask first" step on stuck — multi-angle retry fires automatically instead of waiting for you to opt in.
-- `--yolo` — skips the plan-approval checkpoint. **Forbidden against production** (Sellsword enforces this regardless of flag).
-- `--scope=quick|standard` — override scope (default: dispatcher decides).
+- `--thorough`: doubles the depth contract (recon budget, builder budgets, and per-mode evidence floors) and skips the "ask first" step on stuck. Multi-angle retry fires automatically instead of waiting for you to opt in.
+- `--yolo`: skips the plan-approval checkpoint. **Forbidden against production** (Sellsword enforces this regardless of flag).
+- `--scope=quick|standard`: override scope (default: dispatcher decides).
 
 ## What happens
 
-1. **Dispatcher** classifies the intent — initial mode, scope, side-effect surface, whether a plan checkpoint is needed.
-2. **Recon** gathers context — codebase, memory, recent git history, targeted web research, the verification surface ("what would prove this is real?"), and an honest assumption ledger. Bounded budget (30 tool calls / 6 min, doubled in thorough mode).
+1. **Dispatcher** classifies the intent: initial mode, scope, side-effect surface, whether a plan checkpoint is needed.
+2. **Recon** gathers context: codebase, memory, recent git history, targeted web research, the verification surface ("what would prove this is real?"), and an honest assumption ledger. Bounded budget (30 tool calls / 6 min, doubled in thorough mode).
 3. **Builder** does the work, switching between modes as the task evolves:
-   - `investigating` — forming hypotheses, reading systems
-   - `planning` — proposing a path forward
-   - `executing` — applying changes to real systems
-   - `verifying` — proving the outcome with concrete commands
-   - `stuck` — declaring it explicitly rather than thrashing
-4. **One checkpoint** (only for side-effecting tasks) — the builder proposes a plan in chat, you approve / revise / cancel.
-5. **Auditor** runs after execution — adversarial check, must produce an evidence ledger of commands it actually ran.
-6. **Fresh-eyes** runs in parallel with the auditor — blind to everything except the original intent and current state. Catches drift the auditor and builder can't see.
-7. If either verdict is less than a clean pass, Sellsword re-spawns the builder with their findings and re-verifies — up to 3 audit-cycles — before handing back to you. `/sellsword:do` still ends the turn on its own; it doesn't run unattended the way `/sellsword:goal` does.
-8. **Debrief** in chat — what was done, what changed along the way, what was verified, open follow-ups.
+   - `investigating`: forming hypotheses, reading systems
+   - `planning`: proposing a path forward
+   - `executing`: applying changes to real systems
+   - `verifying`: proving the outcome with concrete commands
+   - `stuck`: declaring it explicitly rather than thrashing
+4. **One checkpoint** (only for side-effecting tasks). The builder proposes a plan in chat, you approve / revise / cancel.
+5. **Auditor** runs after execution. It is an adversarial check and must produce an evidence ledger of commands it actually ran.
+6. **Fresh-eyes** runs in parallel with the auditor, blind to everything except the original intent and current state. Catches drift the auditor and builder can't see.
+7. If either verdict is less than a clean pass, Sellsword re-spawns the builder with their findings and re-verifies, up to 3 audit-cycles, before handing back to you. `/sellsword:do` still ends the turn on its own; it doesn't run unattended the way `/sellsword:goal` does.
+8. **Debrief** in chat: what was done, what changed along the way, what was verified, open follow-ups.
 
 ## On stuck
 
@@ -66,18 +66,18 @@ When the builder declares stuck (4 reflections without progress on a step), Sell
 
 Everything is in `.sellsword/runs/<run-id>/`:
 
-- `state.json` — phase, status, configuration
-- `dispatcher-config.json` — the dispatcher's classification
-- `brief.md` — recon's output
-- `plan.md` — the builder's plan (if checkpoint phase ran)
-- `journal.md` — append-only log of every significant action
-- `reflections.md` — what failures taught the builder
-- `verification.md` — the builder's own verification pass
-- `auditor-verdict.md` — adversarial verdict with evidence ledger
-- `fresh-eyes-verdict.md` — blind drift check with evidence ledger
-- `followups.md` — out-of-scope things noticed during the run
-- `escalation.md` — only present if the builder got stuck
-- `retry/variant-{A,B,C}/` and `retry/synthesis.md` — only present if multi-angle retry fired
+- `state.json`: phase, status, configuration
+- `dispatcher-config.json`: the dispatcher's classification
+- `brief.md`: recon's output
+- `plan.md`: the builder's plan (if checkpoint phase ran)
+- `journal.md`: append-only log of every significant action
+- `reflections.md`: what failures taught the builder
+- `verification.md`: the builder's own verification pass
+- `auditor-verdict.md`: adversarial verdict with evidence ledger
+- `fresh-eyes-verdict.md`: blind drift check with evidence ledger
+- `followups.md`: out-of-scope things noticed during the run
+- `escalation.md`: only present if the builder got stuck
+- `retry/variant-{A,B,C}/` and `retry/synthesis.md`: only present if multi-angle retry fired
 
 You don't have to read any of these. Plan and debrief render in chat. The files exist for resume and audit.
 
@@ -87,7 +87,7 @@ You don't have to read any of these. Plan and debrief render in chat. The files 
 /sellsword:goal <completion condition>
 ```
 
-`/sellsword:do` does one task and hands back. `/sellsword:goal` takes a *completion condition* and runs Sellsword's builder -> auditor -> fresh-eyes loop **unattended**, cycle after cycle, until the condition is met — auditor AND fresh-eyes both return `pass` — or a safety cap stops it. No plan checkpoint, no budget questions. You set the finish line and walk away.
+`/sellsword:do` does one task and hands back. `/sellsword:goal` takes a *completion condition* and runs Sellsword's builder -> auditor -> fresh-eyes loop **unattended**, cycle after cycle, until the condition is met (auditor AND fresh-eyes both return `pass`) or a safety cap stops it. No plan checkpoint, no budget questions. You set the finish line and walk away.
 
 ```
 /sellsword:goal every test in test/auth passes and `npm run lint` exits 0
@@ -95,18 +95,18 @@ You don't have to read any of these. Plan and debrief render in chat. The files 
 /sellsword:goal the /workloads page renders live pod data, verified in a browser
 ```
 
-A `Stop` hook (`goal-gate.py`) enforces it — the run cannot end while the goal is unmet. It exits only on **goal met** (auditor + fresh-eyes both pass), **capped** (`--max-cycles`, default 15, or `--max-hours`, default 6), **stuck** (multi-angle retry exhausted), or **blocked** (production side-effects without `--allow-production`).
+A `Stop` hook (`goal-gate.py`) enforces it. The run cannot end while the goal is unmet. It exits only on **goal met** (auditor + fresh-eyes both pass), **capped** (`--max-cycles`, default 15, or `--max-hours`, default 6), **stuck** (multi-angle retry exhausted), or **blocked** (production side-effects without `--allow-production`).
 
-**Before the first run:** an unattended run can't survive an interactive block, so `/sellsword:goal` refuses to start unless warden's strict gates are off — run `/warden:strict-off` first if you use the warden plugin.
+**Before the first run:** an unattended run can't survive an interactive block, so `/sellsword:goal` refuses to start unless warden's strict gates are off. Run `/warden:strict-off` first if you use the warden plugin.
 
 ## Other commands
 
-- `/sellsword:do <intent>` — one task, end to end, with a plan checkpoint
-- `/sellsword:goal <condition>` — unattended: run until auditor + fresh-eyes both pass
-- `/sellsword:resume <run-id>` — pick up an interrupted run
-- `/sellsword:list` — show recent runs
-- `/sellsword:cancel [<run-id>]` — cancel an active run
-- `/sellsword:help` — this text
+- `/sellsword:do <intent>`: one task, end to end, with a plan checkpoint
+- `/sellsword:goal <condition>`: unattended: run until auditor + fresh-eyes both pass
+- `/sellsword:resume <run-id>`: pick up an interrupted run
+- `/sellsword:list`: show recent runs
+- `/sellsword:cancel [<run-id>]`: cancel an active run
+- `/sellsword:help`: this text
 
 ## Host registry (optional)
 
@@ -124,7 +124,7 @@ hosts:
 
 The builder references host tags rather than re-learning hosts every run. Production-tagged hosts force plan approval.
 
-Recon also reads `.sellsword/access.yml` if present, for the same purpose — both files are optional and read-only for Sellsword; nothing writes to them.
+Recon also reads `.sellsword/access.yml` if present, for the same purpose. Both files are optional and read-only for Sellsword; nothing writes to them.
 
 ## What Sellsword is NOT
 
