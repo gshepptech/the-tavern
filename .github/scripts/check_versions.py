@@ -6,7 +6,7 @@ A plugin's version is written in four places, and they drift silently:
   1. plugins/<name>/.claude-plugin/plugin.json   the plugin's own manifest
   2. .claude-plugin/marketplace.json             the marketplace entry
   3. plugins/<name>/README.md                    the shields.io badge
-  4. README.md                                   the Crew table row
+  4. README.md                                   the roster table row
 
 The plugin cache is version-keyed, so (1) is what decides whether an installed
 plugin picks up a change at all. The other three are documentation, and a stale
@@ -62,16 +62,16 @@ def main() -> int:
                     f"{name}: README badge says {badge.group(1)}, plugin.json says {version}"
                 )
 
-        # Crew table rows look like: **[Name](plugins/name/README.md)** `v1.2.3`
-        crew = re.search(
-            rf"\*\*\[{re.escape(name.capitalize())}\]\([^)]*\)\*\*\s+`v(\d+\.\d+\.\d+)`",
+        # Roster table rows look like: | **[Name](plugins/name/README.md)** | ... | `v1.2.3` |
+        row = re.search(
+            rf"\*\*\[{re.escape(name.capitalize())}\]\([^)]*\)\*\*[^\n]*?`v(\d+\.\d+\.\d+)`",
             root_readme,
         )
-        if not crew:
-            problems.append(f"{name}: missing from the Crew table in the root README")
-        elif crew.group(1) != version:
+        if not row:
+            problems.append(f"{name}: missing from the roster table in the root README")
+        elif row.group(1) != version:
             problems.append(
-                f"{name}: root README Crew table says {crew.group(1)}, "
+                f"{name}: root README roster table says {row.group(1)}, "
                 f"plugin.json says {version}"
             )
 
