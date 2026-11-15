@@ -1,10 +1,10 @@
 <div align="center">
 
-<img src="scout.svg" alt="Scout — the inspector" width="100%"/>
+<img src="scout.svg" alt="Scout, one of the regulars at The Tavern" width="100%"/>
 
 # Scout
 
-**Describe the flow. Scout walks every room. The spec writes itself.**
+**Describe the flow. Scout drives it in a real browser and writes the Playwright spec.**
 
 [![version](https://img.shields.io/badge/scout-v0.2.1-00897B?style=flat-square)](.claude-plugin/plugin.json)
 [![license](https://img.shields.io/badge/license-Apache--2.0-4C9A2A?style=flat-square)](../../LICENSE)
@@ -12,10 +12,12 @@
 
 </div>
 
+*The scout walks every path through your app in a real browser and writes down how to walk it again.*
+
 > End-to-end test authoring and maintenance for web apps. Claude opens a real browser via Playwright MCP, reads the accessibility tree, performs the clicks itself, and emits a passing `*.spec.ts` — then keeps it passing.
 
 > [!TIP]
-> **Scout is standalone.** Install her on her own, point her at any web app with a `playwright.config.ts` and a running dev server, and she'll scaffold, author, and maintain a real E2E suite. She doesn't need any other The Tavern plugin.
+> **Scout is standalone.** Install it on its own, point it at any web app with a `playwright.config.ts` and a running dev server, and it will scaffold, author, and maintain a real E2E suite. It doesn't need any other plugin from The Tavern.
 
 ---
 
@@ -30,9 +32,9 @@
 
 ---
 
-## Why an inspector
+## Why drive the real app
 
-Writing E2E tests is tedious in a specific way: you click around the app yourself, hand-write selectors, watch them break the day someone renames a button, then do it all again. Scout does the clicking. Tell her a flow in plain English, get back a spec that passes now and has a fighting chance of still passing next month.
+Writing E2E tests is tedious in a specific way: you click around the app yourself, hand-write selectors, watch them break the day someone renames a button, then do it all again. Scout does the clicking. Tell it a flow in plain English, get back a spec that passes now and has a fighting chance of still passing next month.
 
 The trick is the **accessibility tree**. Every `browser_snapshot` Scout takes returns the same role + accessible-name structure Playwright itself uses at runtime — what Claude sees while authoring is what the test will see while running, so selectors don't drift between the two.
 
@@ -45,7 +47,7 @@ claude plugin marketplace add gshepptech/the-tavern
 claude plugin install scout@the-tavern
 ```
 
-Then, from inside the project you actually want to test — not this marketplace repo, Scout refuses to set herself up against it:
+Then, from inside the project you actually want to test — not this marketplace repo, Scout refuses to set itself up against it:
 
 ```bash
 /scout:init
@@ -71,7 +73,7 @@ Once all four are done:
 
 ---
 
-## What she checks
+## What it checks
 
 | Command | When to run | What it does |
 |---|---|---|
@@ -87,7 +89,7 @@ Once all four are done:
 
 ---
 
-## How she finds it
+## How it finds it
 
 ```mermaid
 flowchart LR
@@ -146,7 +148,7 @@ test.describe('signup', () => {
 
     await test.step('submit email', async () => {
       await page.goto('/signup');
-      await page.getByLabel('Email').fill('inspector@example.com');
+      await page.getByLabel('Email').fill('user@example.com');
       await page.getByRole('button', { name: 'Send magic link' }).click();
     });
 
@@ -216,7 +218,7 @@ These rules live in the `scout:author` skill and load automatically with `/scout
 
 ---
 
-## How she keeps it green
+## How it keeps it green
 
 `/scout:audit` doesn't stop at pass/fail counts — it reads `test-results/<test>/trace.zip` for every failure and classifies the root cause using the `scout:diagnose` skill:
 
@@ -260,7 +262,7 @@ This is for the "did the user-facing flow work" question specifically. It is not
 
 ## What it costs
 
-Scout is the cheapest of the crew — most of the work happens in your own conversation rather than in a fan-out of subagents — but there are two things that scale:
+Scout is the cheapest of the regulars — most of the work happens in your own conversation rather than in a fan-out of subagents — but there are two things that scale:
 
 - **Snapshots.** Every `browser_snapshot` returns a full accessibility tree, and authoring takes one per action. Cost scales with the number of steps in the flow, not with the size of the app.
 - **Route and role counts.** `/scout:crawl` emits one spec per discovered route and is bounded by **depth 4 / 60 pages**. `/scout:matrix` covers routes multiplied by roles, logging in once per role and reusing `storageState` — the pair count is what to watch.
@@ -271,7 +273,7 @@ Scout is the cheapest of the crew — most of the work happens in your own conve
 
 ## Pairs well with
 
-Scout stands alone, but if you're already running the rest of the crew:
+Scout stands alone, but if you have hired other regulars from The Tavern:
 
 - **[Smith](../smith/README.md)** or **[Tinker](../tinker/README.md)** — build a feature from a spec, then lock its behaviour in with browser tests.
 - **[Ranger](../ranger/README.md)** — hand it the "run `/scout:audit`, keep it green" loop as part of an unattended sweep.
