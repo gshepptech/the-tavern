@@ -1,0 +1,17 @@
+{
+  "name": "monk",
+  "version": "1.0.0",
+  "description": "Keeps replies short and useful. Loads a seven-rule ruleset at session start (answer first, numbered steps, one next action, no preamble or sign-off, real time units, flat tone on failure, lists of five or fewer) and a one-line reminder on every prompt. An optional length gate sends an over-budget reply back once with instructions to shorten it. State is per session.",
+  "author": {
+    "name": "gshepptech"
+  },
+  "license": "Apache-2.0",
+  "homepage": "https://github.com/gshepptech/the-tavern/blob/main/plugins/monk/README.md",
+  "repository": "https://github.com/gshepptech/the-tavern",
+  "keywords": [
+    "response-style",
+    "hooks",
+    "brevity",
+    "output"
+  ]
+}
