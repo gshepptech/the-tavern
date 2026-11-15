@@ -152,7 +152,7 @@
     {
       "name": "ranger",
       "source": "./plugins/ranger",
-      "description": "Give it one brief and walk away. A self-directing loop that finds work, sizes the effort to the job, plans and reviews in parallel, builds one item at a time, verifies with fresh eyes, and commits — until you stop it. Local commits only.",
+      "description": "Give it one brief and walk away. A self-directing loop that finds work, sizes the effort to the job, plans and reviews in parallel, builds one item at a time, verifies with fresh eyes, and commits - until you stop it. Local commits only.",
       "version": "0.7.1",
       "category": "automation",
       "author": {

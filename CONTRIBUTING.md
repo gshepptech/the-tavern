@@ -9,16 +9,16 @@ new regular for the tavern, contributions are welcome.
 - **Open an issue first** for anything non-trivial, so we can agree on the shape before you build.
 - **Every plugin must stand alone.** Each regular is usable by itself, with no
   other plugin installed. A change that makes one plugin depend on another needs a
-  very good reason — optional composition is fine, a hard dependency is not.
+  very good reason - optional composition is fine, a hard dependency is not.
 - **Keep the spec format stable.** Sage writes specs that Smith, Tinker and Squire read.
   A change to the requirement IDs, the acceptance-criteria shape or the `sealed_by` line
   has to keep all four working.
 - **No emoji in documentation.** Headings, tables and prose stay plain text. GitHub
   alert callouts (`> [!NOTE]`), mermaid diagrams and `<details>` blocks are fine;
-  decorative Unicode is not — no emoji, no dingbats, and no arrow glyphs (write
+  decorative Unicode is not - no emoji, no dingbats, and no arrow glyphs (write
   `->` instead). Images are limited to each plugin's own SVG and shields.io badges.
   The exception is a glyph that defines runtime output, such as the state markers
-  in Sellsword's run table — those are part of what an agent prints, not decoration,
+  in Sellsword's run table - those are part of what an agent prints, not decoration,
   and they stay.
 
 ## Repo layout
@@ -29,7 +29,7 @@ new regular for the tavern, contributions are welcome.
 docs/                               # install profiles and the quest board contract
 scripts/install-profile.sh          # installs a named set of plugins
 plugins/<name>/                     # one directory per regular
-  .claude-plugin/plugin.json        # that plugin's manifest — name and version
+  .claude-plugin/plugin.json        # that plugin's manifest - name and version
   README.md                         # per-plugin docs, self-contained
   <name>.svg                        # that plugin's artwork      (some plugins)
   commands/                         # slash commands
@@ -74,34 +74,34 @@ Ten plugins carry test suites. Run the ones your change touches; run all ten if
 you're not sure:
 
 ```bash
-# Warden — citation verifier and hook gates
+# Warden - citation verifier and hook gates
 cd plugins/warden && uv run --with pytest python -m pytest -q
 
-# Sage — spec validator, seal and the shared-workspace helper
+# Sage - spec validator, seal and the shared-workspace helper
 cd plugins/sage && uv run --with pytest python -m pytest -q
 
-# Ranger — the git guard hook and the shared-workspace helper
+# Ranger - the git guard hook and the shared-workspace helper
 cd plugins/ranger && uv run --with pytest python -m pytest -q
 
-# Smith — spec parsing, plan checks and the ledger's evidence rule
+# Smith - spec parsing, plan checks and the ledger's evidence rule
 cd plugins/smith && uv run --with pytest python -m pytest -q
 
-# Tinker — preflight, command detection, gates and the Workflow script
+# Tinker - preflight, command detection, gates and the Workflow script
 cd plugins/tinker && uv run --with pytest python -m pytest -q
 
-# Squire — spec indexing, check detection, verdict validation and the Workflow script
+# Squire - spec indexing, check detection, verdict validation and the Workflow script
 cd plugins/squire && uv run --with pytest python -m pytest -q
 
-# Scribe — each documentation gate against temporary repositories
+# Scribe - each documentation gate against temporary repositories
 cd plugins/scribe && uv run --with pytest python -m pytest -q
 
-# Bard — persona and slice planning, the finding validator and the report renderer
+# Bard - persona and slice planning, the finding validator and the report renderer
 cd plugins/bard && uv run --with pytest python -m pytest -q
 
-# Monk — the hook script, commands and the length gate
+# Monk - the hook script, commands and the length gate
 cd plugins/monk && uv run --with pytest python -m pytest -q
 
-# Raven — message contents, redaction and failure handling against a local server
+# Raven - message contents, redaction and failure handling against a local server
 cd plugins/raven && uv run --with pytest python -m pytest -q
 ```
 
@@ -118,19 +118,19 @@ already installed the plugin, so treat the bump as part of the fix, not paperwor
 
 A version is written in four places and `check_versions.py` enforces that all four agree:
 
-1. `plugins/<name>/.claude-plugin/plugin.json` — the one that controls delivery
-2. `.claude-plugin/marketplace.json` — the marketplace entry
-3. `plugins/<name>/README.md` — the shields.io badge
-4. `README.md` — the roster table row
+1. `plugins/<name>/.claude-plugin/plugin.json`: the one that controls delivery
+2. `.claude-plugin/marketplace.json`: the marketplace entry
+3. `plugins/<name>/README.md`: the shields.io badge
+4. `README.md`: the roster table row
 
 Which level to bump:
 
 | Change | Bump |
 |---|---|
-| Anything under `commands/`, `agents/`, `skills/`, `hooks/`, `scripts/` | at least patch — this is runtime |
+| Anything under `commands/`, `agents/`, `skills/`, `hooks/`, `scripts/` | at least patch - this is runtime |
 | A new command, flag, or capability | minor |
 | A behaviour change a user could be surprised by | minor, and say so in the changelog |
-| README wording only | none — nothing to deliver |
+| README wording only | none - nothing to deliver |
 
 ## Adding or changing a plugin
 
@@ -149,7 +149,7 @@ Which level to bump:
 ## Documentation accuracy
 
 Docs drift faster than code. When you change behaviour, grep for every place that
-describes it — the plugin's `commands/*.md` (especially `help.md`), its
+describes it - the plugin's `commands/*.md` (especially `help.md`), its
 `agents/*.md` frontmatter descriptions, its skills, its script header comments, and
 its README. A stale `help.md` is the most common defect in this repo.
 

@@ -2,9 +2,9 @@
 
 ## Reporting a vulnerability
 
-If you discover a security issue in The Tavern — a plugin that executes
+If you discover a security issue in The Tavern - a plugin that executes
 unintended commands, a hook that leaks data, an injection in a workflow script,
-or anything else with a security impact — please report it privately.
+or anything else with a security impact - please report it privately.
 
 Please open a [GitHub Security Advisory](https://github.com/gshepptech/the-tavern/security/advisories/new)
 (Security, then Advisories, then *Report a vulnerability*). This keeps your report
@@ -40,7 +40,7 @@ here and they are working as designed rather than as defects:
   and Sellsword's `/sellsword:goal` are built to work with no human present to answer a
   permission prompt, so they do not ask. A `PreToolUse` hook hard-blocks `git push`,
   remote mutation and PR creation for the whole of a Ranger run, and that block
-  holds even in bypass mode — but **only git is guarded**. File writes, shell
+  holds even in bypass mode - but **only git is guarded**. File writes, shell
   commands and network calls run unprompted. Run unattended mode in a container, a
   VM, or a throwaway clone, never on a machine you care about.
 - **Sellsword operates on real infrastructure**, including SSH to remote hosts. Its host

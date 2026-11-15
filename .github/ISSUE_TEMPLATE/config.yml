@@ -2,7 +2,7 @@ blank_issues_enabled: false
 contact_links:
   - name: Discussions
     url: https://github.com/gshepptech/the-tavern/discussions
-    about: Questions, ideas, and show-and-tell — start here if it isn't a bug or a concrete feature request.
+    about: Questions, ideas, and show-and-tell - start here if it isn't a bug or a concrete feature request.
   - name: Claude Code plugin docs
     url: https://docs.claude.com/en/docs/claude-code
     about: How plugins, marketplaces, hooks, and MCP servers work in Claude Code.
