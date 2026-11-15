@@ -368,14 +368,14 @@ def render_briefs(root: Path, rdir: Path, index: dict, plan: dict, result: dict)
     for sid, s in slices.items():
         reqs = s.get("requirement_ids") or []
         parts = [f"# Slice {sid}: {s.get('title', '')}\n"]
-        parts.append("## Your requirements, quoted exactly from the spec\n")
+        parts.append("## Your requirements, exactly as the spec states them\n")
         for r in reqs:
             others = [o for o in owners.get(r, []) if o != sid]
             reason = (s.get("split_reason") or {}).get(r, "")
             share = f"\n\n_Co-owned with {', '.join(others)}: build and test your part.{(' ' + reason) if reason else ''}_" if others else ""
             parts.append(f"### {r}\n\n{index['clauses'].get(r, '')}{share}\n")
         if index.get("global_sections"):
-            parts.append("## Rules that bind every slice, quoted exactly from the spec\n\n" + index["global_sections"] + "\n")
+            parts.append("## Rules that bind every slice, exactly as the spec states them\n\n" + index["global_sections"] + "\n")
         if plan.get("contract_block") and result["mode"] == "split":
             parts.append("## Cross-slice contract (identical in every slice's brief)\n\n" + plan["contract_block"] + "\n")
         opens = s.get("flexible") or []
