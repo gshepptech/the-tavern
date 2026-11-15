@@ -108,7 +108,7 @@ Input:
 ```
 intent: "why is the staging login broken since yesterday"
 flags: { thorough: false, yolo: false, scope_override: null }
-cwd: "/Users/x/project"
+cwd: "~/project"
 ```
 
 You peek at repo, find `.sellsword/hosts.yml` with `staging` entry. Emit:
@@ -132,7 +132,7 @@ Input:
 ```
 intent: "rotate the prod database credentials and update all the services"
 flags: { thorough: false, yolo: true, scope_override: null }
-cwd: "/Users/x/project"
+cwd: "~/project"
 ```
 
 Emit:
@@ -156,7 +156,7 @@ Input:
 ```
 intent: "figure out why our deploys take 40 minutes and fix it"
 flags: { thorough: true, yolo: false, scope_override: null }
-cwd: "/Users/x/project"
+cwd: "~/project"
 ```
 
 Emit:
