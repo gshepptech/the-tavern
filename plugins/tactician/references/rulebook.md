@@ -1,4 +1,4 @@
-# Tactician Rulebook — how to rig up a really good dynamic Workflow script
+# Tactician Rulebook — how to write a really good dynamic Workflow script
 
 This is the generation procedure `/tactician:make` follows. It is distilled from the Workflow
 tool contract. When you author a script, every rule here is load-bearing — a script that

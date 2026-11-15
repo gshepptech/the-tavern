@@ -10,13 +10,13 @@ Render this help text to the user verbatim.
 
 ---
 
-# tactician — rig up really good dynamic Workflow scripts
+# tactician — write really good dynamic Workflow scripts
 
 Claude's **Workflow tool** fans out subagents deterministically — `agent()`, `pipeline()`,
 `parallel()`, budget-driven loops. Writing a *good* one is mostly knowing the rules: pipeline
 by default, barrier only when a stage truly needs all prior results, schema'd returns instead
 of parsing JSON-as-text, adversarial verification for findings, loop-until-dry for unknown-size
-work. Tactician rigs those rules into a generator so you don't freehand the orchestration.
+work. Tactician builds those rules into a generator so you don't freehand the orchestration.
 
 ## How to use it
 
@@ -25,7 +25,7 @@ work. Tactician rigs those rules into a generator so you don't freehand the orch
 ```
 
 The task is free-form. Tactician classifies it into an orchestration archetype, picks the fan-out
-topology, rigs up a self-contained script, **validates it** (`node --check` + a 14-point
+topology, writes a self-contained script, **validates it** (`node --check` + a 14-point
 self-audit), and saves it to `.claude/workflows/<name>.js`.
 
 Examples:
@@ -69,4 +69,4 @@ skeletons, schema authoring, and the 14-point pre-flight audit.
 ## Note
 
 Running a workflow can spawn many agents and use a lot of tokens — that's why `/tactician:make`
-rigs and saves by default and only *runs* when you pass `--run` or say so.
+writes and saves by default and only *runs* when you pass `--run` or say so.

@@ -4,11 +4,11 @@ argument-hint: "<task description> [--run] [--save=<name>] [--args=<json>]"
 allowed-tools: ["Read", "Write", "Edit", "Bash(node:*)", "Bash(mkdir:*)", "Bash(ls:*)", "Bash(cat:*)", "Workflow", "AskUserQuestion"]
 ---
 
-# Tactician — rig up a dynamic Workflow script
+# Tactician — write a dynamic Workflow script
 
-You are the **Tactician rigger**. The user invoked `/tactician:make <task>` — they want a *really
+You are the **Tactician**. The user invoked `/tactician:make <task>` — they want a *really
 good* Workflow script for that task: one that uses Claude's dynamic Workflow tool correctly
-and would actually hold up if run. Your job is to **classify -> shape -> rig -> validate ->
+and would actually hold up if run. Your job is to **classify -> shape -> write -> validate ->
 present**, never to freehand a script and hope.
 
 The Workflow tool fans out subagents deterministically (`agent`, `pipeline`, `parallel`,
@@ -72,7 +72,7 @@ Keep this to a short spec, not prose. This spec is what you are about to encode.
 
 ---
 
-## STEP 2 — rig up the script
+## STEP 2 — write the script
 
 Write the script to `${CLAUDE_PLUGIN_ROOT}/../../.claude/workflows/<save-name>.js` (create
 `.claude/workflows/` if missing). Follow the rulebook exactly:
@@ -138,7 +138,7 @@ the topology, or leave it saved for later.
 
 ---
 
-## RIGGER RULES
+## TACTICIAN RULES
 
 1. **The rulebook is authoritative.** Read it first; author from it, not from memory.
 2. **Pipeline by default.** Every barrier must have a named cross-item dependency. When in

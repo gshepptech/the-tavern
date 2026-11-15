@@ -1,8 +1,10 @@
 <div align="center">
 
-<img src="tactician.svg" alt="Tactician — the rigger" width="100%"/>
+<img src="tactician.svg" alt="Tactician, one of the regulars at The Tavern" width="100%"/>
 
 # Tactician
+
+*The tactician plans the formation: it writes the multi-agent Workflow script for a job so you do not freehand one.*
 
 **Say what you want done. Tactician writes the multi-agent script that does it — and hands you the file.**
 
@@ -47,7 +49,7 @@ claude plugin marketplace add gshepptech/the-tavern
 claude plugin install tactician@the-tavern
 ```
 
-Then rig up a script:
+Then write a script:
 
 ```
 /tactician:make research how teams do blue-green deploys on k8s and write a cited report
@@ -274,7 +276,7 @@ Tactician then runs `node --check` on the file and walks a 14-point self-audit a
 Tactician writes standalone scripts — nothing here depends on another plugin. Its output is a plain Workflow script, so it composes with whatever else you're running in the same Claude Code session, without any wiring on Tactician's part:
 
 - [Sellsword](../sellsword/README.md) — for a gnarlier problem Sellsword owns end to end, a Tactician-authored script is one more tool available if the work genuinely calls for multi-agent fan-out.
-- [Ranger](../ranger/README.md) — if a backlog item needs real fan-out (a multi-angle review, a wide migration), rig a script for that one cycle rather than hand-rolling the orchestration.
+- [Ranger](../ranger/README.md) — if a backlog item needs real fan-out (a multi-angle review, a wide migration), write a script for that one cycle rather than hand-rolling the orchestration.
 
 ## License
 
