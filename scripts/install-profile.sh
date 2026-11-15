@@ -12,8 +12,8 @@
 #
 # Both commands are idempotent and both are what /plugin install does under the
 # hood, so nothing here is doing anything you could not type yourself. The value
-# is that you type one line instead of choosing from a table of ten tools you
-# have never used, and that the warnings for the dangerous ones are unavoidable.
+# is that you type one line instead of choosing from a table of fifteen tools
+# you have never used, and that the warnings for the dangerous ones are unavoidable.
 #
 # Deliberately not offered: a curl-pipe-to-shell one-liner. Every plugin in this
 # marketplace runs code on your machine, and a project that ships hooks has no
@@ -27,7 +27,7 @@ set -euo pipefail
 MARKETPLACE="the-tavern"
 MARKETPLACE_SOURCE="gshepptech/the-tavern"
 
-PROFILES="daily pipeline review unattended all"
+PROFILES="builder lean solo review unattended full"
 
 # Plugins that run with permissions bypassed in their unattended modes. Any
 # profile containing one of these earns the hard warning and a confirmation.
@@ -45,22 +45,24 @@ profile=""
 
 profile_plugins() {
   case "$1" in
-    daily)      echo "warden sage cleric" ;;
-    pipeline)   echo "sage smith" ;;
-    review)     echo "seer cleric" ;;
-    unattended) echo "sellsword ranger" ;;
-    all)        echo "sage smith tinker warden sellsword cleric scout tactician seer ranger" ;;
+    builder)    echo "sage smith warden" ;;
+    lean)       echo "sage tinker squire" ;;
+    solo)       echo "sellsword warden monk" ;;
+    review)     echo "seer cleric bard" ;;
+    unattended) echo "sellsword ranger raven" ;;
+    full)       echo "sage smith tinker squire sellsword ranger warden seer cleric scout bard tactician scribe raven monk" ;;
     *)          return 1 ;;
   esac
 }
 
 profile_blurb() {
   case "$1" in
-    daily)      echo "Solo, on a codebase you did not write. The everyday set." ;;
-    pipeline)   echo "Spec a feature properly, then have it built out." ;;
-    review)     echo "Assess and tidy. Nothing writes code unprompted." ;;
+    builder)    echo "Spec a feature properly, then have it built out and verified." ;;
+    lean)       echo "Spec and build with fewer agents, for small and medium work." ;;
+    solo)       echo "One hard problem, owned end to end. /sellsword:goal BYPASSES PERMISSIONS." ;;
+    review)     echo "Assess structure, tidy code and test the UX. Nothing builds features." ;;
     unattended) echo "Work that runs while you are away. BYPASSES PERMISSIONS." ;;
-    all)        echo "The whole crew. Includes both unattended tools." ;;
+    full)       echo "All fifteen regulars. Includes both unattended tools." ;;
     *)          return 1 ;;
   esac
 }
@@ -78,11 +80,12 @@ Install a named set of The Tavern plugins.
   ./scripts/install-profile.sh <profile> [options]
 
 Profiles:
-  daily        warden, sage, cleric       Solo, on a codebase you did not write
-  pipeline     sage, smith            Spec a feature, then build it out
-  review       seer, cleric         Assess and tidy, minimal writing
-  unattended   sellsword, ranger            Runs while you are away. Bypasses permissions
-  all          all ten                The whole crew
+  builder      sage, smith, warden          Spec a feature, then build it out
+  lean         sage, tinker, squire         Spec and build with fewer agents
+  solo         sellsword, warden, monk      One hard problem, owned end to end
+  review       seer, cleric, bard           Assess, tidy and test the UX
+  unattended   sellsword, ranger, raven     Runs while you are away. Bypasses permissions
+  full         all fifteen                  Every regular in the tavern
 
 Options:
   --scope <user|project|local>  Where to record the install. Default: user.
@@ -194,24 +197,40 @@ case " $plugins " in
     say ""
     ;;
 esac
+case " $plugins " in
+  *" monk "*)
+    say "Note: Monk installs SessionStart, UserPromptSubmit and Stop hooks and its"
+    say "brevity rules are on in every new session. '/monk:off' turns it off for a"
+    say "session; MONK_DEFAULT=off makes new sessions start with it off."
+    say ""
+    ;;
+esac
 
 if [ "$contains_unattended" -eq 1 ]; then
   warn "WARNING - this profile includes tools that run with permissions bypassed."
   warn ""
-  warn "  Ranger's headless runner and '/sellsword:goal' execute tools without asking:"
-  warn "  file writes, shell commands, network calls. There is no human present to"
-  warn "  answer a prompt, so nothing prompts. Sellsword reaches real infrastructure over"
-  warn "  SSH. Ranger's git guard still hard-denies push, but only git is guarded."
-  warn ""
-  warn "  Ranger is also uncapped by default. '--max-hours=N' is the only flag that"
-  warn "  ends a run on its own; '--max-cycles=N' counts shipped items, so a run that"
-  warn "  keeps reverting never reaches it."
-  warn ""
+  case " $plugins " in *" sellsword "*)
+    warn "  '/sellsword:goal' executes tools without asking: file writes, shell commands,"
+    warn "  network calls. There is no human present to answer a prompt, so nothing"
+    warn "  prompts. Sellsword reaches real infrastructure over SSH."
+    warn ""
+    ;;
+  esac
+  case " $plugins " in *" ranger "*)
+    warn "  Ranger's headless runner executes tools without asking, the same way. Its"
+    warn "  git guard still hard-denies push, but only git is guarded."
+    warn ""
+    warn "  Ranger is also uncapped by default. '--max-hours=N' is the only flag that"
+    warn "  ends a run on its own; '--max-cycles=N' counts shipped items, so a run that"
+    warn "  keeps reverting never reaches it."
+    warn ""
+    ;;
+  esac
   warn "  Run unattended modes in a container, a VM, or a throwaway clone. Not on a"
   warn "  machine you care about while you walk away."
   warn ""
   warn "  Installing them is safe. Nothing runs until you invoke it. This warning is"
-  warn "  about the first time you type '/ranger:run' or '/sellsword:goal'."
+  warn "  about the first time you start an unattended run."
   warn ""
 fi
 
@@ -292,6 +311,11 @@ case " $plugins " in *" tinker "*)
   say "    on its own tinker/<run> branch and never pushes."
   ;;
 esac
+case " $plugins " in *" squire "*)
+  say "  - Squire: '/squire:build <spec>' for a small spec with requirement IDs. It works"
+  say "    on its own squire/<run> branch and never pushes."
+  ;;
+esac
 case " $plugins " in *" scout "*)
   say "  - Scout needs one-time project setup: run '/scout:init' inside the project"
   say "    you want to test, then restart Claude Code. It downloads browsers"
@@ -325,6 +349,27 @@ case " $plugins " in *" sage "*)
 esac
 case " $plugins " in *" seer "*)
   say "  - Seer: '/seer:review <path>'. Start narrow. It never edits anything."
+  ;;
+esac
+case " $plugins " in *" bard "*)
+  say "  - Bard needs the Playwright MCP server:"
+  say "    'claude mcp add playwright -- npx @playwright/mcp@latest', then restart"
+  say "    Claude Code, start your app and run '/bard:run <url>'."
+  ;;
+esac
+case " $plugins " in *" scribe "*)
+  say "  - Scribe: '/scribe:plan' in the repository you want documented, or"
+  say "    '/scribe:audit docs' to check the docs you already have."
+  ;;
+esac
+case " $plugins " in *" raven "*)
+  say "  - Raven needs a Slack incoming webhook. Export RAVEN_SLACK_WEBHOOK_URL in the"
+  say "    shell that starts Claude Code, restart it, then run '/raven:test'."
+  ;;
+esac
+case " $plugins " in *" monk "*)
+  say "  - Monk is already working from your next session. '/monk:gate-on 200' adds"
+  say "    the optional length gate."
   ;;
 esac
 case " $plugins " in *" tactician "*)

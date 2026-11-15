@@ -1,14 +1,14 @@
 # Install profiles
 
-Ten plugins is ten decisions, and nobody arriving for the first time has the
-information to make them. A profile is a named set of plugins that gets you a
-sensible setup in one step, so you can start working and add the rest when you
-find out you want them.
+Fifteen regulars is fifteen decisions, and nobody walking into the tavern for the
+first time has the information to make them. A profile is a named party of
+plugins that gets you a sensible setup in one step, so you can start working and
+hire the rest when you find out you want them.
 
 Nothing here replaces installing one plugin on its own. That is still the
 supported path, still the first-class path, and every plugin still works with
 none of the others present. A profile is a shortcut for people who do not yet
-have an opinion, not a package you are expected to buy into.
+have an opinion, not a bundle you are expected to buy into.
 
 ## What a profile actually is
 
@@ -24,9 +24,9 @@ supported commands, run one at a time:
 
 ```bash
 claude plugin marketplace add gshepptech/the-tavern
-claude plugin install warden@the-tavern
 claude plugin install sage@the-tavern
-claude plugin install cleric@the-tavern
+claude plugin install smith@the-tavern
+claude plugin install warden@the-tavern
 ```
 
 That is the whole mechanism. Both commands are idempotent, so re-running a
@@ -43,15 +43,15 @@ block from the profile you want below and you are done.
 
 | Profile | Plugins | For |
 |---|---|---|
-| [`daily`](#daily) | warden, sage, cleric | Working solo on a codebase you did not write |
-| [`pipeline`](#pipeline) | sage, smith | Specifying a feature and having it built out |
-| [`review`](#review) | seer, cleric | Assessing and tidying, without autonomous writing |
-| [`unattended`](#unattended) | sellsword, ranger | Work that runs while you are away. Bypasses permissions |
-| [`all`](#all) | all ten | You want the crew |
+| [`builder`](#builder) | sage, smith, warden | Specifying a feature and having it built out and verified |
+| [`lean`](#lean) | sage, tinker, squire | The same pipeline with fewer agents, for small and medium work |
+| [`solo`](#solo) | sellsword, warden, monk | Handing one hard problem to a single owner. Bypasses permissions in `/sellsword:goal` |
+| [`review`](#review) | seer, cleric, bard | Assessing structure, tidying code and testing the UX |
+| [`unattended`](#unattended) | sellsword, ranger, raven | Work that runs while you are away. Bypasses permissions |
+| [`full`](#full) | all fifteen | You want every regular in the tavern |
 
-Still unsure? `daily` is the one to take. It is the only profile whose plugins
-are all useful on an ordinary Tuesday, and adding the others later costs one
-line each.
+Still unsure? Take `lean` if you build features, `review` if you inherited a
+codebase. Adding a regular later costs one line.
 
 ## Three ways to install one
 
@@ -61,7 +61,7 @@ needs no clone, no script and no trust in anything you have not read.
 **The script**, if you have the repo cloned:
 
 ```bash
-./scripts/install-profile.sh daily
+./scripts/install-profile.sh builder
 ./scripts/install-profile.sh --list
 ./scripts/install-profile.sh unattended --dry-run
 ```
@@ -71,8 +71,9 @@ before it installs them, and tells you the one-time setup each plugin still
 needs afterwards. `--dry-run` prints the commands and runs nothing.
 
 There is no `curl ... | bash` one-liner, on purpose. These plugins run code on
-your machine, one of them installs hooks that fire on every turn, and a project
-shipping that has no business teaching anyone to execute a remote script unread.
+your machine, several of them install hooks that fire on every turn, and a
+project shipping that has no business teaching anyone to execute a remote
+script unread.
 
 **Declaratively**, if you want a project to arrive pre-configured for whoever
 clones it. This is the platform-supported route and it is what the script
@@ -86,9 +87,9 @@ writes for you. In `.claude/settings.json`:
     }
   },
   "enabledPlugins": {
-    "warden@the-tavern": true,
     "sage@the-tavern": true,
-    "cleric@the-tavern": true
+    "smith@the-tavern": true,
+    "warden@the-tavern": true
   }
 }
 ```
@@ -99,56 +100,15 @@ applies only to you. `~/.claude/settings.json` applies to you in every project,
 and is what you get by default. The script takes `--scope user|project|local`
 and defaults to `user`, matching the CLI.
 
-Think twice before committing an `enabledPlugins` block containing Warden. It
-installs hooks that run on every turn for every one of your colleagues, and
+Think twice before committing an `enabledPlugins` block containing Warden, Monk
+or Raven. Each installs hooks that run for every one of your colleagues, and
 they did not choose that.
 
 ---
 
-### daily
+### builder
 
-**Plugins:** warden, sage, cleric
-
-For someone working alone, most days, on a codebase they did not write and
-cannot hold in their head. The recurring problems are Claude confidently
-inventing things about code it has not read, changes that need to attach to the
-right place, and accumulated cruft getting in the way.
-
-```bash
-claude plugin marketplace add gshepptech/the-tavern
-claude plugin install warden@the-tavern
-claude plugin install sage@the-tavern
-claude plugin install cleric@the-tavern
-```
-
-**Why these three.** [Warden](../plugins/warden/README.md) is the only plugin that
-improves an ordinary turn, and on an unfamiliar codebase the citation verifier
-alone earns its place: a `file:line` Claude never opened gets blocked rather
-than believed. [Sage](../plugins/sage/README.md) is for the changes big enough
-that guessing the attachment point is expensive, which on inherited code is
-most of them. [Cleric](../plugins/cleric/README.md) is the periodic sweep, and
-`/cleric:run` on its own is a dry run that changes nothing.
-
-**What it leaves out.** Nothing autonomous. No Smith, so nothing builds a spec
-out for you unattended. No Sellsword or Ranger, so nothing runs while you are away.
-No Scout, so no browser dependency. Seer is left out because it is a
-stand-back-and-look tool you reach for a few times a year, not weekly, and
-adding it is one line.
-
-**The honest cost.** Warden is not dormant. It installs `UserPromptSubmit` and
-`Stop` hooks that run on every prompt and every response, in every project,
-from the moment it is installed. With `strict-on` (the default) every response
-over 240 characters spawns at least one critic subagent, usually a cheap Haiku
-one. `/warden:strict-off` drops the model-calling gates and keeps the
-pattern-matching ones. `/warden:off` silences it entirely and persists across
-restarts. Sage and Cleric cost nothing until invoked. Cleric will refuse to start
-on a dirty git tree, by design.
-
----
-
-### pipeline
-
-**Plugins:** sage, smith
+**Plugins:** sage, smith, warden
 
 For someone with a feature to build who wants it specified properly first, then
 built out and verified without babysitting each step.
@@ -157,88 +117,178 @@ built out and verified without babysitting each step.
 claude plugin marketplace add gshepptech/the-tavern
 claude plugin install sage@the-tavern
 claude plugin install smith@the-tavern
+claude plugin install warden@the-tavern
 ```
 
-**Why these two.** [Sage](../plugins/sage/README.md) writes a sealed spec with
-numbered requirements, testable acceptance criteria and a cited source for each;
+**Why these three.** [Sage](../plugins/sage/README.md) writes a sealed spec with
+numbered requirements, testable acceptance criteria and a cited source for each.
 [Smith](../plugins/smith/README.md) splits it into slices, builds them in
-parallel and has independent verifiers check every requirement. Neither half
-requires the other, and that is worth knowing before you install both: Sage's
-spec is useful whoever builds from it, and Smith builds from any hand-written
-spec with requirement IDs in it. With both installed, `/smith:build` with no
-argument picks up the spec Sage sealed most recently.
+parallel and has independent verifiers check every requirement. With both
+installed, `/smith:build` with no argument picks up the spec Sage sealed most
+recently. [Warden](../plugins/warden/README.md) covers the turns between the
+two: the conversation where you read the spec, ask about the code and decide
+what to change. Its citation verifier blocks a `file:line` Claude never opened
+rather than letting you believe it.
 
-[Tinker](../plugins/tinker/README.md) builds the same specs with fewer agents:
-one builder, one spec-checker and at most two fix rounds. Swap it in for Smith
-when the feature is small enough for one builder.
+Neither half of the pipeline requires the other. Sage's spec is useful whoever
+builds from it, and Smith builds from any hand-written spec with requirement
+IDs in it.
 
-**What it leaves out.** Warden, which would otherwise add a critic pass to every
-turn of what is already an expensive workflow. Scout, which is the natural next
-step after a build lands but drags in Node, a browser download and a running
-dev server that a Go or Python project will never use. Add Scout when you have a
-web app in front of you.
+**What it leaves out.** Scout and Bard, which are the natural next step after a
+build lands but drag in Node, a browser download and a running dev server that a
+Go or Python project will never use. Add them when you have a web app in front
+of you.
 
-**The honest cost.** This is the most expensive profile to run. Sage's interview
-needs you present. Smith spawns one planner, one builder per slice, verifiers
-and fixers, running up to `--max-parallel` agents at once (default 4) for up to
+**The honest cost.** This is an expensive profile to run. Sage's interview needs
+you present. Smith spawns one planner, one builder per slice, verifiers and
+fixers, running up to `--max-parallel` agents at once (default 4) for up to
 `--max-rounds` fix rounds (default 3). Lower both on your first run against an
 unfamiliar codebase. Smith needs `python3`, a git repository and a clean working
-tree; it builds on its own `smith/<run>` branch and never pushes. It has no
-approval gates between slices by design, so if you want to review each step
-before the next one, this is the wrong tool.
+tree; it builds on its own `smith/<run>` branch and never pushes. Warden is not
+dormant: it installs `UserPromptSubmit` and `Stop` hooks that run on every
+prompt and every response, in every project, and with `strict-on` (the default)
+every response over 240 characters spawns at least one critic subagent, usually
+a cheap Haiku one. `/warden:strict-off` drops the model-calling gates and keeps
+the pattern-matching ones. `/warden:off` silences it entirely.
+
+---
+
+### lean
+
+**Plugins:** sage, tinker, squire
+
+The same spec-then-build shape as `builder`, sized down. For features one
+builder can carry, and for teams that want a capped, predictable number of
+agent calls per build.
+
+```bash
+claude plugin marketplace add gshepptech/the-tavern
+claude plugin install sage@the-tavern
+claude plugin install tinker@the-tavern
+claude plugin install squire@the-tavern
+```
+
+**Why these three.** [Sage](../plugins/sage/README.md) writes the spec.
+[Tinker](../plugins/tinker/README.md) builds it with one builder, a code check
+beside one spec-to-code checker, and at most two batched fix rounds.
+[Squire](../plugins/squire/README.md) is smaller again: one test-first builder,
+a verifier that sees only the spec and the code, and a fixer limited to the
+listed gaps, for a spec of up to about fifteen requirements. Between them they
+cover the afternoon-sized change and the hour-sized feature.
+
+**What it leaves out.** Smith, whose parallel slices and evidence ledger are
+worth their cost on a large spec and overkill on a small one. Warden, which adds
+a critic pass to every turn of a session whose main work is already being
+verified by the build tools. Both are one line to add.
+
+**The honest cost.** Tinker and Squire both run as scripts for Claude Code's
+Workflow tool, so your Claude Code version needs Workflow available. Both want a
+git repository with a clean working tree, work on their own `tinker/<run>`
+or `squire/<run>` branch and never push. A clean first Squire round is five
+agent calls; each fix round adds three.
+
+---
+
+### solo
+
+**Plugins:** sellsword, warden, monk
+
+For someone with one hard problem who wants a single owner to see it through:
+investigate, plan, execute and prove the outcome, often across the repo
+boundary into deploy config or a box you have to SSH into.
+
+> [!WARNING]
+> **`/sellsword:goal` runs with permissions bypassed.** It executes tools
+> without asking: file writes, shell commands, network calls, SSH into real
+> infrastructure. There is no human present to answer a prompt, so nothing
+> prompts. The attended `/sellsword:do` asks before side effects; start there.
+>
+> Installing it is safe. Nothing runs until you invoke it.
+
+```bash
+claude plugin marketplace add gshepptech/the-tavern
+claude plugin install sellsword@the-tavern
+claude plugin install warden@the-tavern
+claude plugin install monk@the-tavern
+```
+
+**Why these three.** [Sellsword](../plugins/sellsword/README.md) owns the
+problem: five agents investigate, plan, execute and verify, with two independent
+verifiers that must both pass. [Warden](../plugins/warden/README.md) keeps the
+conversation around it honest, so the questions you ask before and after a run
+get answers grounded in files Claude actually opened.
+[Monk](../plugins/monk/README.md) keeps every reply short, which matters most
+when you are reading a debrief at the end of a long run and want the outcome in
+the first line.
+
+**What it leaves out.** Ranger, which is unattended in a different shape: a
+standing sweep that finds its own work, not one problem with a finish line. Take
+[`unattended`](#unattended) for that.
+
+**The honest cost.** Every agent Sellsword hires is Opus. `/sellsword:do` is
+five spawns minimum, with recon capped at 30 tool calls and the builder at 120.
+`/sellsword:goal` defaults to 15 cycles or 6 hours. Its preflight refuses to
+start while Warden's strict gates are on, because an unattended run cannot
+answer an interactive block, so run `/warden:strict-off` first. Monk installs
+`SessionStart`, `UserPromptSubmit` and `Stop` hooks and is on in every new
+session; `/monk:off` turns it off for one session.
 
 ---
 
 ### review
 
-**Plugins:** seer, cleric
+**Plugins:** seer, cleric, bard
 
-For someone who wants to understand and tidy an existing codebase, and does not
-want anything writing code on its own initiative.
+For someone who wants to understand and tidy an existing codebase, and see how
+the running app treats its users, without anything building features on its
+own initiative.
 
 ```bash
 claude plugin marketplace add gshepptech/the-tavern
 claude plugin install seer@the-tavern
 claude plugin install cleric@the-tavern
+claude plugin install bard@the-tavern
 ```
 
-**Why these two.** [Seer](../plugins/seer/README.md) answers whether a
+**Why these three.** [Seer](../plugins/seer/README.md) answers whether a
 subsystem was shaped deliberately or just accreted, with `file:line` evidence
-and a reshaping plan, and it never edits anything. [Cleric](../plugins/cleric/README.md)
-is the other half: Seer names what is accreted, Cleric clears what is simply
-dead. The two are listed as a pairing in the root README for good reason.
+and a reshaping plan, and it never edits anything.
+[Cleric](../plugins/cleric/README.md) is the other half: Seer names what is
+accreted, Cleric clears what is simply dead. [Bard](../plugins/bard/README.md)
+looks at the same product from the outside, using it in a real browser as named
+personas and writing a ranked report where every finding has steps to
+reproduce and a screenshot.
 
-**What it leaves out.** Warden, deliberately. Warden would improve these sessions, but
-someone who asked for a narrow review set should not silently acquire hooks
-that fire on every turn in every project. It is one line to add if you want it.
+**What it leaves out.** Warden, deliberately. Someone who asked for a review set
+should not silently acquire hooks that fire on every turn in every project.
 Everything autonomous is out by definition.
 
-**The honest cost.** Be clear-eyed about one thing: **Cleric does write code.**
-`/cleric:run` is a dry run and changes nothing, but `/cleric:apply` auto-applies
-HIGH-confidence low-risk changes and commits them, one atomic commit per batch,
-running your type checks, tests and lints after each. MEDIUM and LOW findings
-wait for you. If "no autonomous writing" means literally nothing may edit the
-tree, install Seer alone and use Cleric in dry-run only. Seer fans out a
-couple of dozen subagents per review and scales with how messy the target is,
-so start narrow: `pkg/auth` or `the diff`, not `the whole repository`. Cleric
-refuses to run on a dirty tree or outside a git repo.
+**The honest cost.** **Cleric does write code.** `/cleric:run` is a dry run and
+changes nothing, but `/cleric:apply` auto-applies high-confidence low-risk
+changes and commits them, one atomic commit per batch, running your type
+checks, tests and lints after each. If "review" means literally nothing may edit
+the tree, use Cleric in dry-run only. Seer fans out a couple of dozen subagents
+per review and scales with how messy the target is, so start narrow. Bard needs
+the Playwright MCP server, Node.js and a running instance of the app; point it
+at development or staging, because its personas submit forms with fake data
+unless you pass `--read-only`.
 
 ---
 
 ### unattended
 
-**Plugins:** sellsword, ranger
+**Plugins:** sellsword, ranger, raven
 
 For someone who wants to set work going and walk away. Read the warning before
 you decide.
 
 > [!WARNING]
-> **Both of these run with permissions bypassed in their unattended modes.**
-> Ranger's headless runner and `/sellsword:goal` execute tools without asking: file
-> writes, shell commands, network calls. There is no human present to answer a
-> prompt, so nothing prompts. Sellsword reaches real infrastructure over SSH.
-> Ranger's git guard still hard-denies push, remote mutation and PR creation,
-> but only git is guarded.
+> **Sellsword and Ranger run with permissions bypassed in their unattended
+> modes.** Ranger's headless runner and `/sellsword:goal` execute tools without
+> asking: file writes, shell commands, network calls. There is no human present
+> to answer a prompt, so nothing prompts. Sellsword reaches real infrastructure
+> over SSH. Ranger's git guard still hard-denies push, remote mutation and PR
+> creation, but only git is guarded.
 >
 > Run these in a container, a VM, or a throwaway clone. Not on a machine you
 > care about while you are not watching.
@@ -254,44 +304,46 @@ you decide.
 claude plugin marketplace add gshepptech/the-tavern
 claude plugin install sellsword@the-tavern
 claude plugin install ranger@the-tavern
+claude plugin install raven@the-tavern
 ```
 
-**Why these two.** They are unattended in two different shapes and neither
-substitutes for the other. [Sellsword](../plugins/sellsword/README.md) owns one gnarly
-problem to a finish line, usually one that crosses the repo boundary into
-deploy config or a box you have to SSH into. [Ranger](../plugins/ranger/README.md)
+**Why these three.** Sellsword and Ranger are unattended in two different shapes
+and neither substitutes for the other. [Sellsword](../plugins/sellsword/README.md)
+owns one hard problem to a finish line. [Ranger](../plugins/ranger/README.md)
 owns a standing quality sweep with no particular finish line, finding its own
-work and shipping one local commit per item.
+work and shipping one local commit per item. [Raven](../plugins/raven/README.md)
+posts to Slack when a Claude Code session finishes a reply or is waiting for
+you, which is the message you want from a session you walked away from.
 
-**What it leaves out.** Smith and Tinker, which are autonomous but do a different
-job: they build a spec you already have, in your session, under your normal
-permissions.
-If that is what you want, take [`pipeline`](#pipeline). Warden is out because
-neither of these runs its work in your session, so a per-turn gate has little
-to act on.
+**What it leaves out.** Smith, Tinker and Squire, which are autonomous but do a
+different job: they build a spec you already have, in your session, under your
+normal permissions. If that is what you want, take [`builder`](#builder) or
+[`lean`](#lean). Warden is out because neither of these runs its work in your
+session, so a per-turn gate has little to act on.
 
-**The honest cost.** Every agent in the Sellsword crew is Opus. `/sellsword:do` is five
-spawns minimum with recon capped at 30 tool calls and the builder at 120.
-`/sellsword:goal` defaults to 15 cycles or 6 hours. Ranger dispatches up to fifteen
-agents per cycle to produce one commit, and cycles that do not land work still
-spend. Both want a git repo, and Ranger wants a project with tests or a linter
-the assessor can actually run, because verification degrades to reading the
-diff without one. Start with `/ranger:run <brief> --dry-run` and `/sellsword:do`
-before you touch the unattended modes.
+**The honest cost.** Every agent Sellsword hires is Opus. `/sellsword:goal`
+defaults to 15 cycles or 6 hours. Ranger dispatches up to fifteen agents per
+cycle to produce one commit, and cycles that do not land work still spend. Both
+want a git repo, and Ranger wants a project with tests or a linter the assessor
+can actually run, because verification degrades to reading the diff without
+one. Raven needs a Slack incoming webhook exported as `RAVEN_SLACK_WEBHOOK_URL`
+and sends nothing without it. Start with `/ranger:run <brief> --dry-run` and
+`/sellsword:do` before you touch the unattended modes.
 
 ---
 
-### all
+### full
 
-**Plugins:** sage, smith, tinker, warden, sellsword, cleric, scout, tactician, seer, ranger
+**Plugins:** sage, smith, tinker, squire, sellsword, ranger, warden, seer, cleric, scout, bard, tactician, scribe, raven, monk
 
-The whole crew. Reasonable if you are evaluating the marketplace and want to
-see everything, or if you already know these tools and want them present.
+Every regular in the tavern. Reasonable if you are evaluating the marketplace
+and want to see everything, or if you already know these tools and want them
+present.
 
 > [!WARNING]
 > This includes Sellsword and Ranger, which **run with permissions bypassed** in
-> their unattended modes, and Warden, which installs hooks that run on every turn
-> in every project from the moment it is installed. Read the
+> their unattended modes, and Warden, Monk and Raven, which install hooks that
+> run in every project from the moment they are installed. Read the
 > [`unattended`](#unattended) warning above. Nothing runs until you invoke it.
 
 ```bash
@@ -299,45 +351,49 @@ claude plugin marketplace add gshepptech/the-tavern
 claude plugin install sage@the-tavern
 claude plugin install smith@the-tavern
 claude plugin install tinker@the-tavern
-claude plugin install warden@the-tavern
+claude plugin install squire@the-tavern
 claude plugin install sellsword@the-tavern
+claude plugin install ranger@the-tavern
+claude plugin install warden@the-tavern
+claude plugin install seer@the-tavern
 claude plugin install cleric@the-tavern
 claude plugin install scout@the-tavern
+claude plugin install bard@the-tavern
 claude plugin install tactician@the-tavern
-claude plugin install seer@the-tavern
-claude plugin install ranger@the-tavern
+claude plugin install scribe@the-tavern
+claude plugin install raven@the-tavern
+claude plugin install monk@the-tavern
 ```
 
-**The honest cost.** Every command from all ten appears in your slash-command
-list at once, which is a real cost when you are learning them. Scout still needs
-per-project setup and a restart before she works (`/scout:init`). If you are new here, this is the wrong starting point. Take
-`daily` and add from there.
+**The honest cost.** Every command from all fifteen appears in your
+slash-command list at once, which is a real cost when you are learning them.
+Scout and Bard still need per-project browser setup, and Raven still needs a
+webhook. If you are new here, this is the wrong starting point. Take a smaller
+profile and add from there.
 
 ---
 
-## The plugins in no profile
+## The plugins in no smaller profile
 
-[Scout](../plugins/scout/README.md), [Tactician](../plugins/tactician/README.md) and
-[Tinker](../plugins/tinker/README.md) appear only in `all`, and that is
+[Scout](../plugins/scout/README.md), [Tactician](../plugins/tactician/README.md)
+and [Scribe](../plugins/scribe/README.md) appear only in `full`, and that is
 deliberate rather than an oversight.
 
-**Scout** is shaped by your project, not your habits. She needs `@playwright/test`
-installed, several hundred megabytes of browsers downloaded, an MCP server
-registered, Claude Code restarted, and a dev server running at a reachable
-`baseURL`. That is the correct amount of setup for a web app with flows worth
-covering, and pure overhead for anything else. Bundling it into a general
-profile would mean most people paying it for nothing. Install her when you have
-a web app in front of you: `claude plugin install scout@the-tavern`, then
+**Scout** is shaped by your project, not your habits. It needs
+`@playwright/test` installed, several hundred megabytes of browsers downloaded,
+an MCP server registered, Claude Code restarted, and a dev server running at a
+reachable `baseURL`. That is the correct amount of setup for a web app with
+flows worth covering, and pure overhead for anything else. Install it when you
+have a web app in front of you: `claude plugin install scout@the-tavern`, then
 `/scout:init` inside the project you want to test.
 
 **Tactician** is a meta-tool. It writes multi-agent Workflow scripts you then own
 and run, which is a thing you want occasionally and deliberately, never as a
-default. It costs nothing to have installed, spawns no subagents while
-authoring, and would still be noise in a starter set.
+default.
 
-**Tinker** is an alternative to Smith, not an addition to it. Both build a spec;
-Tinker uses fewer agents and suits a feature one builder can carry. Install
-whichever fits the size of your work, or swap it into `pipeline` by hand.
+**Scribe** is for the point where a project needs documentation, which is a
+task you take on once and revisit, not a habit. `/scribe:audit` is useful on any
+repository with docs, so it is worth one line when you get there.
 
 ## Changing your mind
 
