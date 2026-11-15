@@ -126,7 +126,6 @@ tinker-archive/<run>/
 
 ### Limits
 
-- **Not yet run end to end with real agents.** The harness tests the routing and the Python tests test the helpers.
 - **The single-or-split decision uses a proxy.** Code cannot know a build's new lines before it is planned, so it
   estimates 25 new lines per requirement ID (`gates.NEW_LOC_PER_REQUIREMENT`) and counts only the paths the spec
   names. A spec that names many files goes to the planner even when one builder could carry it.
