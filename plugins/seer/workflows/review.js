@@ -152,7 +152,7 @@ const REPORT_SCHEMA = {
 }
 
 // ---------------------------------------------------------------------------
-// Lens definitions — each is a blind, single-question design critic
+// Lens definitions - each is a blind, single-question design critic
 // ---------------------------------------------------------------------------
 
 const LENSES = [
@@ -333,7 +333,7 @@ const target = (typeof args === 'string' && args.trim())
   ? args.trim()
   : (args && args.target) ? args.target : 'the whole repository'
 
-// 1. MAP — grounded structural anchor
+// 1. MAP - grounded structural anchor
 phase('Map')
 log(`Mapping structure of: ${target}`)
 const map = await agent(mapPrompt(target), { schema: MAP_SCHEMA, phase: 'Map', label: 'map' })
@@ -358,7 +358,7 @@ const survived = reviewed.flat().filter(Boolean).filter((f) => f.verdict && f.ve
   .map((f) => ({ ...f, proposed_solution: (f.verdict.refined_solution || f.proposed_solution) }))
 log(`Lenses: ${reviewed.flat().filter(Boolean).length} candidates, ${survived.length} survived adversarial cross-examination`)
 
-// 4. CRITIC — one completeness pass that re-lenses uncovered areas (bounded)
+// 4. CRITIC - one completeness pass that re-lenses uncovered areas (bounded)
 phase('Critic')
 const critic = await agent(criticPrompt(map, survived, LENSES.map((l) => l.key)), {
   schema: CRITIC_SCHEMA, phase: 'Critic', label: 'critic',
@@ -386,7 +386,7 @@ if (gaps.length) {
   survived.push(...gapSurvived)
 }
 
-// 5. SYNTHESIZE — design narrative + ordered reshaping plan
+// 5. SYNTHESIZE - design narrative + ordered reshaping plan
 phase('Synthesize')
 if (!survived.length) {
   return {

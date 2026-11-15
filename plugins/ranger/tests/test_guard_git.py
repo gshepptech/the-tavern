@@ -1,4 +1,4 @@
-"""guard-git.py — the PreToolUse hook that keeps an unattended run local-only.
+"""guard-git.py - the PreToolUse hook that keeps an unattended run local-only.
 
 deny == exit code 2; allow == exit 0. The guard only acts while a run is armed
 and active; outside that it must never touch the user's own git commands.
@@ -75,7 +75,7 @@ def test_allowed_by_default(guard, cmd):
 # Every command below reached the network past the original guard, which only
 # inspected the outer command word and split on separators without regard for
 # quoting. The threat model is an unattended agent doing something unintended,
-# not a determined attacker — but a guardrail a stray `sh -c` walks through is
+# not a determined attacker - but a guardrail a stray `sh -c` walks through is
 # not a guardrail.
 
 @pytest.mark.parametrize(
@@ -184,7 +184,7 @@ def test_hardening_still_allows_ordinary_work(guard, cmd):
 # skip session scoping, so a dead one went on denying the USER's own pushes,
 # branches and PRs in that repo in every later session, with nothing on screen
 # explaining why. Two liveness signals now disarm it: a dead runner PID and a
-# stale state.json. Deliberately NOT a wall-clock signal — see
+# stale state.json. Deliberately NOT a wall-clock signal - see
 # test_over_cap_but_still_active_run_still_guards for why.
 
 def test_dead_headless_run_stops_policing_when_its_pid_is_gone(guard, tmp_path):
@@ -202,7 +202,7 @@ def test_over_cap_but_still_active_run_still_guards(guard):
     The lead enforces the cap at the top of the next cycle; between the deadline
     passing and that flip, the lead is still building and agents are still
     running Bash. A clock-based disarm would open the guard for the whole
-    over-cap cycle — allowing a push in exactly the past-its-budget-but-running
+    over-cap cycle - allowing a push in exactly the past-its-budget-but-running
     state the guard exists for. So an over-cap `active` run must still deny.
     """
     _arm(
