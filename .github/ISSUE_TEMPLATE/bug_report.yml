@@ -14,12 +14,14 @@ body:
       options:
         - sage
         - smith
+        - tinker
         - warden
         - sellsword
         - cleric
         - scout
         - tactician
         - seer
+        - ranger
         - marketplace / install
         - not sure
     validations:

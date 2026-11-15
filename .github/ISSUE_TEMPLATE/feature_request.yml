@@ -13,12 +13,14 @@ body:
       options:
         - sage
         - smith
+        - tinker
         - warden
         - sellsword
         - cleric
         - scout
         - tactician
         - seer
+        - ranger
         - a new plugin
         - the marketplace itself
     validations:
