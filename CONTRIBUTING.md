@@ -1,7 +1,6 @@
 # Contributing to The Tavern
 
-Pull up a chair. Whether you're fixing a typo, sharpening a plugin, or proposing a
-new regular for the tavern, contributions are welcome.
+Contributions are welcome, from typo fixes to new plugins.
 
 ## Ground rules
 
