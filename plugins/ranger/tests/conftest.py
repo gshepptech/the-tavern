@@ -1,6 +1,6 @@
 """Pytest fixtures for plugins/ranger tests.
 
-Run in an isolated, ephemeral environment (the project is PEP 668-managed — do
+Run in an isolated, ephemeral environment (the project is PEP 668-managed - do
 NOT pip-install pytest globally):
 
     uvx pytest plugins/ranger/tests/

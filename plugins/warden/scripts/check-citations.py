@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""warden Stop hook — methodical-mode enforcement gates (v0.4.0).
+"""warden Stop hook - methodical-mode enforcement gates.
 
 Reads the Stop hook event JSON from stdin, walks the conversation transcript
 to find the current turn's last assistant message and tool calls, then runs
@@ -7,19 +7,19 @@ five enforcement gates. Any gate firing blocks the Stop with a combined
 reason message that Claude reads on the continued turn.
 
 Gates:
-  (a) Citations  — file:line citations in the response must be backed by a
+  (a) Citations  - file:line citations in the response must be backed by a
                    Read/Grep call Claude made directly in this turn. One block
                    per turn (honors stop_hook_active liveness).
 
-  (b) Uncertainty — response must NOT contain self-flagged uncertainty
+  (b) Uncertainty - response must NOT contain self-flagged uncertainty
                     tells like "not verified", "haven't checked", "I assumed".
                     One block per turn.
 
-  (c) Grounding  — if the user's prompt looks codebase-shaped, the response
+  (c) Grounding  - if the user's prompt looks codebase-shaped, the response
                    requires at least one Read/Grep/Glob call this turn.
                    No general-knowledge fallback. One block per turn.
 
-  (d) Iterative Critic — substantive responses must pass an iterative
+  (d) Iterative Critic - substantive responses must pass an iterative
                          critic-dialog: rounds 1-3 use warden:fast-critic
                          (Haiku), rounds 4-6 escalate to warden:pre-stop-critic
                          (opus). Each critic runs a 10-item rule compliance
@@ -29,7 +29,7 @@ Gates:
                          consumed. Round counter replaces stop_hook_active
                          honoring for this gate ONLY.
 
-  (e) Completion  — "see it through" / Fable-mode gate. The response must
+  (e) Completion  - "see it through" / Fable-mode gate. The response must
                     NOT end by PROMISING work it then declines to do. If the
                     closing prose states a first-person intent to act
                     ("I'll implement…", "let me run…", "now I'll…") but the
@@ -50,9 +50,9 @@ Mode files (all under ~/.claude/):
   .warden-fable-mode         (e)  absent/"default" / "off"
   .warden-trust-me           one-shot bypass file for (c)+(d), consumed on read
 
-Liveness model (v0.4.0):
+Liveness model:
   - Gates (a)/(b)/(c) honor stop_hook_active: one block per turn each
-    (preserves v0.2.0 anti-loop safety)
+    so a gate can never trap a turn in a loop
   - Gate (d) uses transcript-based round counter: up to MAX_CRITIC_ROUNDS=6
     block-rounds per turn, then HARD block at round 6
   - Trust-me file consumed before any gate runs; if present, (c)+(d) skip
@@ -77,15 +77,15 @@ FABLE_MODE_FILE = HOME / ".claude" / ".warden-fable-mode"
 TRUST_ME_FILE = HOME / ".claude" / ".warden-trust-me"
 # /warden:trust-me writes TRUST_ME_FILE; the UserPromptSubmit hook promotes it to
 # this armed marker at the start of the NEXT turn. Only the armed marker is
-# honoured here — see consume_trust_me() for why.
+# honoured here - see consume_trust_me() for why.
 TRUST_ME_ARMED_FILE = HOME / ".claude" / ".warden-trust-me-armed"
 LOG_FILE = HOME / ".claude" / ".warden-citations-log.jsonl"
 
-# Critic agent identifiers — two tiers
+# Critic agent identifiers - two tiers
 FAST_CRITIC_AGENT_TYPE = "warden:fast-critic"
 DEEP_CRITIC_AGENT_TYPE = "warden:pre-stop-critic"
 
-# Sentinel markers — first line of each critic's output. Recursion guard.
+# Sentinel markers - first line of each critic's output. Recursion guard.
 FAST_CRITIC_SENTINEL = "[warden:fast-critic-output]"
 DEEP_CRITIC_SENTINEL = "[warden:pre-stop-critic-output]"
 CRITIC_SENTINELS = (FAST_CRITIC_SENTINEL, DEEP_CRITIC_SENTINEL)
@@ -98,7 +98,7 @@ FAST_CRITIC_LAST_ROUND = 3  # rounds 1..3 use fast-critic; rounds 4..6 escalate
 
 # Length thresholds (chars)
 GROUNDING_MIN_RESPONSE_CHARS = 240
-CRITIC_MIN_RESPONSE_CHARS = 240  # v0.4.0: catch short ritual responses, slightly above the citation-shaped floor
+CRITIC_MIN_RESPONSE_CHARS = 240  # catch short ritual responses, slightly above the citation-shaped floor
 CLARIFYING_GATE_LENGTH = 1200  # asks shorter than this skip critic gate
 
 # Code-file extensions (used by both citation regex and grounding heuristic)
@@ -121,7 +121,7 @@ DIFF_LINE_RE = re.compile(r"^[+\-@]{1,3}\s")
 VERIFICATION_TOOLS = {"Read", "Grep", "Glob"}
 AGENT_TOOLS = {"Task", "Agent"}
 
-# (b) Uncertainty-tell scanner — narrow regex, only the specific failure mode
+# (b) Uncertainty-tell scanner - narrow regex, only the specific failure mode
 UNCERTAINTY_TELLS_RE = re.compile(
     r"\b("
     r"not\s+yet\s+verified|"
@@ -138,7 +138,7 @@ UNCERTAINTY_TELLS_RE = re.compile(
     re.IGNORECASE,
 )
 
-# (c) Grounding — three independent signals that a prompt is "codebase-shaped"
+# (c) Grounding - three independent signals that a prompt is "codebase-shaped"
 CODEBASE_PATH_RE = re.compile(r"\b[\w\-.]+/[\w\-./]+\b")
 CODEBASE_EXT_RE = re.compile(rf"\.(?:{CODE_EXT})\b", re.IGNORECASE)
 CODEBASE_ACTION_RE = re.compile(
@@ -158,7 +158,7 @@ CODEBASE_ACTION_RE = re.compile(
     re.IGNORECASE,
 )
 
-# (c) Grounding — markers that the assistant is asking, not answering
+# (c) Grounding - markers that the assistant is asking, not answering
 CLARIFYING_QUESTION_RE = re.compile(
     r"\b("
     r"want\s+me\s+to|"
@@ -171,7 +171,7 @@ CLARIFYING_QUESTION_RE = re.compile(
     re.IGNORECASE,
 )
 
-# (e) Completion — first-person intent-to-act in the closing prose. Two clauses
+# (e) Completion - first-person intent-to-act in the closing prose. Two clauses
 # must both hit: a first-person promise opener AND an action verb after it. The
 # first clause is anchored to first-person so "next time you can run X" (advice,
 # not a dodge) does not match. Scanned only in the closing window of the prose.
@@ -186,30 +186,30 @@ COMPLETION_PROMISE_RE = re.compile(
     re.IGNORECASE,
 )
 
-# (e) Completion — minimum prose length below which the gate stays quiet.
+# (e) Completion - minimum prose length below which the gate stays quiet.
 COMPLETION_MIN_RESPONSE_CHARS = 40
-# (e) Completion — only the closing prose is a "promise instead of doing it".
+# (e) Completion - only the closing prose is a "promise instead of doing it".
 COMPLETION_TAIL_CHARS = 600
 
-# (d) Critic — verdict extraction from critic output (used for gate decision)
+# (d) Critic - verdict extraction from critic output (used for gate decision)
 CRITIC_VERDICT_RE = re.compile(
     r"^###\s+Verdict\s*\n\s*(CONCUR(?:\s+WITH\s+CAVEATS)?|PUSH\s+BACK|WRONG\s+SHAPE)\b",
     re.IGNORECASE | re.MULTILINE,
 )
 
-# (d) Critic — round number extraction
+# (d) Critic - round number extraction
 CRITIC_ROUND_RE = re.compile(
     r"^###\s+Round\s*\n\s*(\d+)\b",
     re.IGNORECASE | re.MULTILINE,
 )
 
-# (d) Critic — "Specific feedback for Claude" section extraction
+# (d) Critic - "Specific feedback for Claude" section extraction
 CRITIC_FEEDBACK_RE = re.compile(
     r"^###\s+Specific\s+feedback\s+for\s+Claude\s*\n(.*?)(?=^###\s|\Z)",
     re.IGNORECASE | re.MULTILINE | re.DOTALL,
 )
 
-# (d) Critic — "Compliance audit" section extraction
+# (d) Critic - "Compliance audit" section extraction
 CRITIC_AUDIT_RE = re.compile(
     r"^###\s+Compliance\s+audit\s*\n(.*?)(?=^###\s|\Z)",
     re.IGNORECASE | re.MULTILINE | re.DOTALL,
@@ -232,12 +232,10 @@ def consume_trust_me() -> bool:
     """Check and delete the ARMED one-shot trust-me flag.
 
     Deliberately reads TRUST_ME_ARMED_FILE, not the marker /warden:trust-me
-    writes. This hook fires at the end of EVERY turn, including the turn that
-    ran /warden:trust-me — so consuming the raw marker here spent the bypass
-    before the user's next prompt arrived, and the gates fired anyway. The
-    UserPromptSubmit hook promotes the raw marker to the armed one at the start
-    of the following turn, which is the turn the user actually meant to
-    protect. Same mechanism that makes /warden:casual correct.
+    writes. The Stop hook also fires at the end of the turn that ran
+    /warden:trust-me, so consuming the raw marker here would spend the bypass
+    before the user's next prompt. The UserPromptSubmit hook promotes it to the
+    armed marker, and only the armed marker is consumed.
     """
     if not TRUST_ME_ARMED_FILE.exists():
         return False
@@ -571,7 +569,7 @@ def slice_current_turn(messages: list[dict]) -> tuple[list[dict], dict | None]:
 
     A "genuine user prompt" is a user-role message containing real text content
     (the user typed something). User-role messages containing only tool_result
-    blocks are INTERNAL to Claude's response process — they belong to the same
+    blocks are INTERNAL to Claude's response process - they belong to the same
     turn and must be included in the slice, or multi-round critic counting
     breaks.
     """
@@ -712,12 +710,12 @@ def check_uncertainty(response_text: str) -> tuple[bool, str, list]:
 def check_completion(
     response_text: str, last_had_tool: bool
 ) -> tuple[bool, str, dict]:
-    """Layer (e) — "see it through" / Fable-mode completion gate.
+    """Layer (e) - "see it through" / Fable-mode completion gate.
 
     Blocks a turn that ends by PROMISING first-person work without doing it.
     Skips when the turn is still working (ended on a tool call), when the
     response is a clarifying question (a legitimate stop), or when the prose is
-    too short to carry a promise. Only the closing window is scanned — a "let me
+    too short to carry a promise. Only the closing window is scanned - a "let me
     check X" mid-response followed by actually checking does not match, because
     the promise will not sit in the tail.
     """
@@ -805,7 +803,7 @@ def check_critic(
     strict_off: bool,
     trust_me_consumed: bool,
 ) -> tuple[bool, str, dict]:
-    """Layer (d) — iterative two-tier critic gate-dialog.
+    """Layer (d) - iterative two-tier critic gate-dialog.
 
     Up to MAX_CRITIC_ROUNDS rounds per turn:
       - Rounds 1..FAST_CRITIC_LAST_ROUND: require warden:fast-critic call
@@ -999,7 +997,7 @@ def main() -> int:
     strict_off = read_mode(STRICT_MODE_FILE) == "off"
     # Consume unconditionally, even when strict is off. The flag is only USED
     # by the strict gates below, but if it were left unconsumed while strict is
-    # off it would strand — a stale armed marker would then bypass some future
+    # off it would strand - a stale armed marker would then bypass some future
     # turn once strict is re-enabled. Clearing it here can't weaken anything:
     # with strict off, the gates it feeds are skipped anyway.
     trust_me_consumed = consume_trust_me() and not strict_off
@@ -1107,7 +1105,7 @@ if __name__ == "__main__":
         sys.exit(main())
     except Exception as exc:  # noqa: BLE001 - deliberate catch-all, see above
         # Fail open, but leave a trace. A silently-crashing gate looks
-        # identical to a working one — the user believes they are protected
+        # identical to a working one - the user believes they are protected
         # while nothing fires. Record it so a persistent break is findable.
         try:
             log_event({

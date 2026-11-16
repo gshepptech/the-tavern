@@ -99,10 +99,6 @@ def now() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
 
-def sha256_file(path: Path) -> str:
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest() if Path(path).is_file() else ""
-
-
 def read_json(path: Path, default=None):
     try:
         return json.loads(Path(path).read_text(encoding="utf-8"))

@@ -253,7 +253,7 @@ def check_plan(root: Path, rdir: Path, index: dict) -> dict:
                     if overlaps(fa, fb):
                         errors.append(f"{a} and {b} both own {fa if len(fa) >= len(fb) else fb}")
     # A docs slice describes what the behaviour slices build, so it starts after all of them. Left in an early
-    # wave, its builder sits polling for files that do not exist yet (47 minutes of sleep loops in one P1.1 run).
+    # wave, its builder sits polling for files that do not exist yet.
     behaviour = [x for x, s in slices.items() if s.get("kind", "behaviour") == "behaviour"]
     for sid, s in slices.items():
         if s.get("kind") == "docs":

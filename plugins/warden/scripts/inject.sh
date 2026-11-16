@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# warden — UserPromptSubmit hook
+# warden - UserPromptSubmit hook
 # Injects a methodical pre-response checklist into every user turn,
 # unless the session has been silenced via /warden:off or /warden:casual.
 #
@@ -16,24 +16,21 @@ TRUST_ME_ARMED_FILE="${HOME}/.claude/.warden-trust-me-armed"
 
 # Arm a pending /warden:trust-me for THIS turn.
 #
-# The strict gates live in the Stop hook, which fires at the END of every turn
-# — including the end of the turn that ran /warden:trust-me and created the
-# marker. Consuming the marker there spent the bypass one turn early, before
-# the user's next prompt ever arrived, so the gates still fired and the escape
-# hatch never worked.
+# The Stop hook also fires at the end of the turn that ran /warden:trust-me,
+# so consuming the raw marker there would spend the bypass before the user's
+# next prompt. This UserPromptSubmit hook promotes it to the armed marker, and
+# only the armed marker is consumed.
 #
-# Promotion happens here instead, at UserPromptSubmit, which is the same
-# mechanism that makes /warden:casual correct: this hook already ran for the
+# This is the same mechanism /warden:casual uses: this hook already ran for the
 # trust-me turn before the marker existed, so the first prompt to see it is the
-# one the user actually meant to protect. The Stop hook consumes the *armed*
-# marker only. Runs before the state check below because /warden:off silences the
-# preamble but leaves the Stop gates firing — a bypass must still arm.
+# one the user meant to protect. Runs before the state check below because /warden:off silences the
+# preamble but leaves the Stop gates firing - a bypass must still arm.
 #
 # Only a FRESH marker is promoted. /warden:trust-me means "bypass my NEXT turn";
 # if the user ran it and then never submitted another prompt that session, the
 # raw marker would otherwise sit around and silently bypass the first turn of
 # some later, unrelated session. A marker older than a few minutes is stale
-# intent — discard it rather than honour it.
+# intent - discard it rather than honour it.
 if [[ -f "${TRUST_ME_FILE}" ]]; then
   if find "${TRUST_ME_FILE}" -mmin -5 2>/dev/null | grep -q .; then
     mv -f "${TRUST_ME_FILE}" "${TRUST_ME_ARMED_FILE}" 2>/dev/null || rm -f "${TRUST_ME_FILE}"
@@ -54,7 +51,7 @@ case "${state}" in
     exit 0
     ;;
   casual)
-    # One-shot bypass — clear the flag so the next turn is methodical again.
+    # One-shot bypass - clear the flag so the next turn is methodical again.
     rm -f "${STATE_FILE}"
     exit 0
     ;;

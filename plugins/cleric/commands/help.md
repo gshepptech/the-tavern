@@ -10,9 +10,9 @@ Render this help text to the user verbatim.
 
 ---
 
-# Cleric — careful low-risk codebase cleanup
+# Cleric: careful low-risk codebase cleanup
 
-Cleric is the careful cleanup pass from The Tavern. Seven focused tracks. Each inspects, ranks proposals by confidence, applies ONLY HIGH-confidence LOW-risk changes, and runs all checks after each batch. Atomic commits per batch — any failing check is one `git revert` away.
+Cleric is the careful cleanup pass from The Tavern. Seven focused tracks. Each inspects, ranks proposals by confidence, applies ONLY HIGH-confidence LOW-risk changes, and runs all checks after each batch. Atomic commits per batch, so any failing check is one `git revert` away.
 
 ## Commands
 
@@ -28,35 +28,35 @@ Cleric is the careful cleanup pass from The Tavern. Seven focused tracks. Each i
 
 ## The seven tracks
 
-### 1. `dedup` — Deduplication
+### 1. `dedup`: Deduplication
 Finds repeated logic, copy-pasted functions, redundant abstractions. Consolidates where it genuinely reduces complexity. **Never** merges code that just looks similar but serves different purposes. Refuses to use comments as the source of truth.
 
-### 2. `type-consolidate` — Type consolidation
-Finds type definitions scattered across files. Surfaces drift (same name, different shape — usually a bug). Merges only what's truly identical and serves the same purpose.
+### 2. `type-consolidate`: Type consolidation
+Finds type definitions scattered across files. Surfaces drift (same name, different shape, which is usually a bug). Merges only what's truly identical and serves the same purpose.
 
-### 3. `dead-code` — Dead code removal
+### 3. `dead-code`: Dead code removal
 Runs language-appropriate static analysis (knip, ts-prune, golangci-lint unused, vulture, etc.). Then **manually verifies** each candidate against dynamic imports, config references, framework conventions, code generation, and external consumers. Only removes what is CONFIRMED dead.
 
-### 4. `circular-deps` — Circular dependency untangling
+### 4. `circular-deps`: Circular dependency untangling
 Maps the dependency graph (madge, go vet, pycycle). Prioritizes cycles by impact: maintainability, testability, correctness. Untangles by extracting shared logic to **neutral modules**. Never introduces new abstractions just to break a cycle.
 
-### 5. `type-strengthen` — Type strengthening
-Finds `any`, `unknown`, `interface{}`, weak generics. Researches the real type from call sites + runtime usage. Replaces with strong types — but **preserves legitimate boundary types** (JSON parsing, external APIs, FFI, dynamic dispatch). Type check runs after every batch.
+### 5. `type-strengthen`: Type strengthening
+Finds `any`, `unknown`, `interface{}`, weak generics. Researches the real type from call sites + runtime usage. Replaces with strong types, but **preserves legitimate boundary types** (JSON parsing, external APIs, FFI, dynamic dispatch). Type check runs after every batch.
 
-### 6. `error-cleanup` — Error-handling cleanup
+### 6. `error-cleanup`: Error-handling cleanup
 Finds try/catch and equivalent defense patterns. Removes silent swallows, default-on-error fallbacks, generic re-throws that lose context. **Keeps** real boundaries, real recovery, real logging, real cleanup, and user-facing error reporting.
 
-### 7. `deprecated-slop` — Deprecated code + AI slop
+### 7. `deprecated-slop`: Deprecated code + AI slop
 Removes legacy/deprecated code only when CLEARLY obsolete (no callers, no live state, no public consumers). Removes AI artifacts: edit-narration comments, AI voice, restating-code comments, empty TODOs, unimplemented stubs. Rewrites useful comments so a NEW engineer understands WHY the code exists.
 
 ## Confidence ranking
 
 Every track classifies each proposed change:
 
-- **HIGH** — clearly safe, no edge cases, checks will pass -> auto-apply on `--apply`
-- **MEDIUM** — probably safe but has dependencies or trade-offs -> surfaced for your decision
-- **LOW** — risky, ambiguous, or actively a bad idea -> flagged, NOT changed
-- **UNCERTAIN** — couldn't determine -> flagged for review
+- **HIGH**: clearly safe, no edge cases, checks will pass -> auto-apply on `--apply`
+- **MEDIUM**: probably safe but has dependencies or trade-offs -> surfaced for your decision
+- **LOW**: risky, ambiguous, or actively a bad idea -> flagged, NOT changed
+- **UNCERTAIN**: couldn't determine -> flagged for review
 
 Only HIGH auto-applies. Everything else is shown to you.
 
@@ -79,7 +79,7 @@ Only HIGH auto-applies. Everything else is shown to you.
    │
    ├─ PHASE 3: Consolidated assessment rendered in chat
    │
-   ├─ [Checkpoint — apply HIGH only / review MEDIUM first / cancel]
+   ├─ [Checkpoint: apply HIGH only / review MEDIUM first / cancel]
    │
    ├─ PHASE 4: Apply (sequential per track order, atomic commits + checks)
    │
@@ -103,13 +103,13 @@ Only HIGH auto-applies. Everything else is shown to you.
 ## Where state lives
 
 `.cleric/runs/<run-id>/`:
-- `state.json` — phase, status, configuration
-- `tooling.json` — detected language tools
-- `tracks/<name>/assessment.md` — per-track findings
-- `tracks/<name>/applied.md` — what actually got applied per track
-- `elevations.json` — MEDIUM/LOW items you elevated to HIGH for this run, if you chose "review MEDIUM/LOW first"
-- `summary.md` — final cross-track summary
-- `checks.md` — final check matrix output
+- `state.json`: phase, status, configuration
+- `tooling.json`: detected language tools
+- `tracks/<name>/assessment.md`: per-track findings
+- `tracks/<name>/applied.md`: what actually got applied per track
+- `elevations.json`: MEDIUM/LOW items you elevated to HIGH for this run, if you chose "review MEDIUM/LOW first"
+- `summary.md`: final cross-track summary
+- `checks.md`: final check matrix output
 
 You don't need to read any of these. Assessments and the debrief render in chat. Files exist for resume, audit, and revert.
 

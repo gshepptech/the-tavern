@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Ranger headless runner — one cycle per process, fresh context every time.
+# Ranger headless runner - one cycle per process, fresh context every time.
 #
 # The in-session loop (/ranger:run) keeps its lead thin so context grows slowly,
 # but it still grows. This runner is the unbounded variant: each iteration is a
@@ -44,7 +44,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-# `.git` is a file, not a directory, in worktrees and submodules — ask git.
+# `.git` is a file, not a directory, in worktrees and submodules - ask git.
 if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
   echo "ranger: run this from inside a git repository." >&2
   exit 1
@@ -126,8 +126,8 @@ follows this one.'
 
 echo "ranger: entering the loop. /ranger:stop to end it."
 
-# A cycle that fails for a reason retrying cannot fix — expired auth, no
-# network, a bad flag — would otherwise spin forever, and every spin is a fresh
+# A cycle that fails for a reason retrying cannot fix - expired auth, no
+# network, a bad flag - would otherwise spin forever, and every spin is a fresh
 # `claude -p`. Consecutive failures back off and then stop; any success resets
 # the counter, so a single flaky cycle costs nothing.
 MAX_CONSECUTIVE_FAILURES="${RANGER_MAX_FAILURES:-5}"

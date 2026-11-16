@@ -10,9 +10,9 @@ Render this help text to the user verbatim.
 
 ---
 
-# tactician — write really good dynamic Workflow scripts
+# tactician: write really good dynamic Workflow scripts
 
-Claude's **Workflow tool** fans out subagents deterministically — `agent()`, `pipeline()`,
+Claude's **Workflow tool** fans out subagents deterministically: `agent()`, `pipeline()`,
 `parallel()`, budget-driven loops. Writing a *good* one is mostly knowing the rules: pipeline
 by default, barrier only when a stage truly needs all prior results, schema'd returns instead
 of parsing JSON-as-text, adversarial verification for findings, loop-until-dry for unknown-size
@@ -42,9 +42,9 @@ Examples:
 
 Flags:
 
-- `--run` — after authoring + validating, actually run the workflow (explicit opt-in).
-- `--save=<name>` — name the saved file (otherwise derived from the task).
-- `--args=<json>` — JSON passed verbatim as the workflow's `args` input.
+- `--run`: after authoring + validating, actually run the workflow (explicit opt-in).
+- `--save=<name>`: name the saved file (otherwise derived from the task).
+- `--args=<json>`: JSON passed verbatim as the workflow's `args` input.
 
 ## What you get
 
@@ -63,10 +63,10 @@ paused run, re-invoke the Workflow tool with `{scriptPath, resumeFromRunId}`.
 | **migrate** | discover sites -> transform each in a worktree -> verify |
 | **generic** | loop-until-dry / loop-until-budget for unknown-size work |
 
-The full generation procedure lives in `references/rulebook.md` — hard rules, archetype
+The full generation procedure lives in `references/rulebook.md`: hard rules, archetype
 skeletons, schema authoring, and the 14-point pre-flight audit.
 
 ## Note
 
-Running a workflow can spawn many agents and use a lot of tokens — that's why `/tactician:make`
+Running a workflow can spawn many agents and use a lot of tokens. That's why `/tactician:make`
 writes and saves by default and only *runs* when you pass `--run` or say so.
