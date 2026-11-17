@@ -1,7 +1,7 @@
-# Tactician Rulebook — how to write a really good dynamic Workflow script
+# Tactician Rulebook: how to write a really good dynamic Workflow script
 
 This is the generation procedure `/tactician:make` follows. It is distilled from the Workflow
-tool contract. When you author a script, every rule here is load-bearing — a script that
+tool contract. When you author a script, every rule here is load-bearing. A script that
 violates a HARD rule will either fail to parse, fail to run, or silently waste wall-clock.
 
 ---
@@ -12,12 +12,12 @@ A Workflow script is plain **JavaScript** (NOT TypeScript) that orchestrates sub
 deterministically. It runs in the background. You author it inline and the runtime drives
 it. The script body runs in an async context, so `await` directly.
 
-The runtime gives you these hooks (do not import them — they are globals):
+The runtime gives you these hooks (do not import them; they are globals):
 
 | hook | shape | use |
 |---|---|---|
 | `agent(prompt, opts?)` | `Promise<string \| object>` | spawn one subagent. With `opts.schema` it returns a validated object; without, its final text as a string. Returns `null` if the user skips it. |
-| `pipeline(items, ...stages)` | `Promise<any[]>` | run each item through all stages independently — **no barrier between stages**. THE DEFAULT for multi-stage work. |
+| `pipeline(items, ...stages)` | `Promise<any[]>` | run each item through all stages independently, with **no barrier between stages**. THE DEFAULT for multi-stage work. |
 | `parallel(thunks)` | `Promise<any[]>` | run thunks concurrently, **await all** (barrier). A throwing thunk resolves to `null`. |
 | `log(msg)` | `void` | narrator line shown above the progress tree. |
 | `phase(title)` | `void` | start a progress group; later `agent()` calls group under it. |
@@ -35,14 +35,14 @@ The runtime gives you these hooks (do not import them — they are globals):
    `export const meta = { name, description, phases }`. No variables, function calls,
    spreads, or template interpolation *inside* the literal. Required: `name`, `description`.
    Optional: `whenToUse`, `phases`, per-phase `model`.
-2. **`meta.phases` titles match `phase()` calls exactly** — same strings, or the phase gets
+2. **`meta.phases` titles match `phase()` calls exactly**: same strings, or the phase gets
    its own orphan group box.
-3. **No `Date.now()`, `Math.random()`, or argless `new Date()`** — they throw (they would
+3. **No `Date.now()`, `Math.random()`, or argless `new Date()`**. They throw (they would
    break resume). Need a timestamp? Pass it via `args` and stamp after the workflow returns.
    Need variation across agents? Vary the prompt/label by index.
-4. **Plain JS only.** No type annotations (`: string[]`), interfaces, or generics — they
+4. **Plain JS only.** No type annotations (`: string[]`), interfaces, or generics; they
    fail to parse. No `import`/`require`, no filesystem or Node API.
-5. **`.filter(Boolean)` before consuming `parallel()` / `pipeline()` results** — a skipped
+5. **`.filter(Boolean)` before consuming `parallel()` / `pipeline()` results**: a skipped
    or thrown agent becomes `null` in the array.
 6. **Guard budget loops on `budget.total`.** With no target set, `remaining()` is `Infinity`
    and `while (budget.remaining() > X)` runs straight to the 1000-agent cap. Write
@@ -50,7 +50,7 @@ The runtime gives you these hooks (do not import them — they are globals):
 
 ## 2. STRONG rules (a violation wastes tokens or wall-clock, or degrades quality)
 
-7. **`pipeline()` is the default; `parallel()` is a barrier — justify every barrier.**
+7. **`pipeline()` is the default; `parallel()` is a barrier, so justify every barrier.**
    A barrier is correct ONLY when stage N needs cross-item context from ALL of stage N-1:
    dedup/merge across the full set, early-exit on total count, or a prompt that references
    "the other findings." It is NOT justified by "I need to flatten/map/filter first" (do
@@ -58,15 +58,15 @@ The runtime gives you these hooks (do not import them — they are globals):
    `const a = await parallel(...); const b = transform(a); const c = await parallel(b...)`
    where `transform` has no cross-item dependency -> rewrite as one `pipeline()`.
 8. **Use `schema` for any structured return.** Never have an agent return JSON-as-text and
-   then `JSON.parse` it — pass a JSON Schema and the runtime validates + retries for you.
+   then `JSON.parse` it. Pass a JSON Schema and the runtime validates + retries for you.
 9. **Inside `pipeline()`/`parallel()` stages, set `opts.phase` explicitly** (and usually
-   `opts.label`) — the global `phase()` state races across concurrent stages.
+   `opts.label`), because the global `phase()` state races across concurrent stages.
 10. **`isolation: 'worktree'` ONLY for parallel file mutation.** It costs ~200–500ms + disk
     per agent. Read-only agents and single-writer flows do not need it.
-11. **Omit `opts.model` by default** — agents inherit the resolved session model, which is
+11. **Omit `opts.model` by default.** Agents inherit the resolved session model, which is
     almost always right. Only set it when you are highly confident a different tier fits.
 12. **No silent caps.** If the script bounds coverage (top-N, sampling, no-retry), `log()`
-    what was dropped — silent truncation reads as "covered everything" when it did not.
+    what was dropped; silent truncation reads as "covered everything" when it did not.
 13. **Subagents return raw data, not prose for a human.** Their final text IS the return
     value. Prompt them accordingly ("Return …", "Emit …").
 14. **Scale to the ask.** "find any bugs" -> a few finders, single-vote verify. "thoroughly
@@ -74,12 +74,12 @@ The runtime gives you these hooks (do not import them — they are globals):
 
 ---
 
-## 3. Archetypes — pick the topology that fits the task
+## 3. Archetypes: pick the topology that fits the task
 
 Classify the user's task into one of these. Each maps to a skeleton. Compose freely; these
 are starting points, not a menu to pick exactly one from.
 
-### UNDERSTAND — map an unfamiliar system
+### UNDERSTAND: map an unfamiliar system
 Parallel readers, each owning a subsystem, -> one synthesis agent. Barrier is justified:
 the synthesizer needs all maps at once.
 ```js
@@ -92,9 +92,9 @@ const summary = await agent(`Synthesize these subsystem maps into one architectu
 return { maps, summary }
 ```
 
-### DESIGN — choose among approaches (judge panel)
+### DESIGN: choose among approaches (judge panel)
 Generate N independent attempts from different angles, each scored by its own judge in
-the same pipeline — no barrier, since judging one design never needs another's — then
+the same pipeline (no barrier, since judging one design never needs another's), then
 pick the top-scored attempt.
 ```js
 const ANGLES = ['MVP-first', 'risk-first', 'user-first']
@@ -107,26 +107,26 @@ const winner = attempts.filter(Boolean).sort((x,y) => y.s.total - x.s.total)[0]
 return { winner, all: attempts.filter(Boolean) }
 ```
 
-### REVIEW — find issues, then prove they are real (THE canonical shape)
+### REVIEW: find issues, then prove they are real (THE canonical shape)
 Dimensions reviewed in a pipeline; each finding adversarially verified the moment its
-review lands. No barrier — dimension B verifies while dimension C is still reviewing.
+review lands. No barrier: dimension B verifies while dimension C is still reviewing.
 ```js
 const DIMENSIONS = [{key:'bugs', prompt:'...'}, {key:'perf', prompt:'...'}, {key:'security', prompt:'...'}]
 const results = await pipeline(DIMENSIONS,
   d => agent(d.prompt, {label: `review:${d.key}`, phase: 'Review', schema: FINDINGS_SCHEMA}),
   review => parallel((review.findings || []).map(f => () =>
-    agent(`Adversarially verify this finding — try to REFUTE it. Default to refuted if uncertain: ${f.title}`,
+    agent(`Adversarially verify this finding. Try to REFUTE it. Default to refuted if uncertain: ${f.title}`,
           {label: `verify:${f.id}`, phase: 'Verify', schema: VERDICT_SCHEMA}).then(v => ({...f, verdict: v})))))
 const confirmed = results.flat().filter(Boolean).filter(f => f.verdict && f.verdict.isReal)
 return { confirmed }
 ```
 
-### RESEARCH — multi-modal sweep -> deep-read -> verify -> synthesize
+### RESEARCH: multi-modal sweep -> deep-read -> verify -> synthesize
 Search several different ways (each blind to the others), deep-read the hits, verify
 claims, then synthesize a cited report. Verification per-claim is a pipeline; synthesis
 is a final barrier.
 
-### MIGRATE — discover sites -> transform each in isolation -> verify
+### MIGRATE: discover sites -> transform each in isolation -> verify
 Discover the work-list (often inline, before the workflow), then `pipeline` each site
 through transform (in a `worktree`) -> verify. Worktree isolation is justified here because
 transforms mutate files in parallel.
@@ -138,7 +138,7 @@ const verified = await pipeline(args.sites,
                 {label: `verify:${site}`, phase: 'Verify', schema: VERDICT_SCHEMA}).then(v => ({site, diff, v})))
 ```
 
-### GENERIC / unknown size — loop-until-dry or loop-until-budget
+### GENERIC / unknown size: loop-until-dry or loop-until-budget
 When the work-list size is unknown, keep going until K dry rounds, or until budget runs
 low. Dedup against everything seen, NOT against confirmed-only (else rejected items
 reappear forever and it never converges).
@@ -159,22 +159,22 @@ while (dry < 2) {
 
 ## 4. Quality patterns (compose as the task warrants)
 
-- **Adversarial verify** — N skeptics per finding, each prompted to REFUTE, default-refuted
+- **Adversarial verify**: N skeptics per finding, each prompted to REFUTE, default-refuted
   on uncertainty; kill on majority refute. Stops plausible-but-wrong findings.
-- **Perspective-diverse verify** — when a finding can fail multiple ways, give each verifier
+- **Perspective-diverse verify**: when a finding can fail multiple ways, give each verifier
   a distinct lens (correctness / security / perf / does-it-reproduce) instead of N clones.
-- **Loop-until-dry** — for unknown-size discovery, K consecutive empty rounds = done. Beats
+- **Loop-until-dry**: for unknown-size discovery, K consecutive empty rounds = done. Beats
   a fixed `while (count < N)` which misses the tail.
-- **Multi-modal sweep** — parallel searchers each using a different angle (by-container,
+- **Multi-modal sweep**: parallel searchers each using a different angle (by-container,
   by-content, by-entity, by-time); each blind to the others.
-- **Completeness critic** — a final agent asking "what's missing — modality not run, claim
-  unverified, source unread?"; its output seeds the next round.
+- **Completeness critic**: a final agent asking "what's missing (modality not run, claim
+  unverified, source unread)?"; its output seeds the next round.
 
 ---
 
 ## 5. Schema authoring
 
-Define schemas as plain JS objects (JSON Schema). Keep them tight — the model fills exactly
+Define schemas as plain JS objects (JSON Schema). Keep them tight: the model fills exactly
 the shape you ask for. Example:
 ```js
 const FINDINGS_SCHEMA = {
@@ -205,14 +205,14 @@ const FINDINGS_SCHEMA = {
 3. No `Date.now()` / `Math.random()` / argless `new Date()`.
 4. No TS syntax, no `import`/`require`, no fs/Node API.
 5. Every `parallel()`/`pipeline()` result is `.filter(Boolean)`-ed before use.
-6. Every barrier (`parallel()` between stages) has a real cross-item justification — else it's a `pipeline()`.
+6. Every barrier (`parallel()` between stages) has a real cross-item justification; otherwise it's a `pipeline()`.
 7. Every structured return uses `schema`; no `JSON.parse` of agent text.
 8. Agents inside concurrent stages set `opts.phase` (and usually `opts.label`).
 9. `isolation:'worktree'` appears ONLY where agents mutate files in parallel.
 10. `opts.model` is omitted unless there's a clear reason; budget loops guard on `budget.total`.
 11. Any coverage cap (top-N, sampling) is `log()`-ged, not silent.
 12. Subagent prompts ask for raw data for the schema, not prose written for a human reader.
-13. Obvious task inputs (paths, a question, a site list) are read from `args`, not hardcoded — the saved workflow is reusable.
+13. Obvious task inputs (paths, a question, a site list) are read from `args`, not hardcoded, so the saved workflow is reusable.
 14. `node --check` passes on the generated file.
 
 Only after all 14 pass does the script get saved or run.

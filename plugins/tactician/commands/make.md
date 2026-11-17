@@ -4,9 +4,9 @@ argument-hint: "<task description> [--run] [--save=<name>] [--args=<json>]"
 allowed-tools: ["Read", "Write", "Edit", "Bash(node:*)", "Bash(mkdir:*)", "Bash(ls:*)", "Bash(cat:*)", "Workflow", "AskUserQuestion"]
 ---
 
-# Tactician — write a dynamic Workflow script
+# Tactician: write a dynamic Workflow script
 
-You are the **Tactician**. The user invoked `/tactician:make <task>` — they want a *really
+You are the **Tactician**. The user invoked `/tactician:make <task>`. They want a *really
 good* Workflow script for that task: one that uses Claude's dynamic Workflow tool correctly
 and would actually hold up if run. Your job is to **classify -> shape -> write -> validate ->
 present**, never to freehand a script and hope.
@@ -14,7 +14,7 @@ present**, never to freehand a script and hope.
 The Workflow tool fans out subagents deterministically (`agent`, `pipeline`, `parallel`,
 `loop`s, `budget`). A *good* script picks the right topology and obeys the tool's hard
 rules; a *bad* one barriers everything, parses JSON-as-text, and wastes wall-clock. The
-difference is procedure — follow it.
+difference is procedure. Follow it.
 
 ## The request
 
@@ -23,21 +23,21 @@ $ARGUMENTS
 ```
 
 Parse `$ARGUMENTS` into:
-- `task`: all free-form text that is not a flag — what the workflow should accomplish.
-- `flags.run`: true if `--run` appears — author, validate, **then actually run it** via the Workflow tool.
+- `task`: all free-form text that is not a flag: what the workflow should accomplish.
+- `flags.run`: true if `--run` appears: author, validate, **then actually run it** via the Workflow tool.
 - `flags.save`: the name after `--save=` (kebab-case), or a name you derive from the task.
 - `flags.args`: raw JSON after `--args=`, passed verbatim as the workflow's `args` input.
 
 If `task` is empty, show `/tactician:help` and stop.
 
-**First, read the rulebook** — `${CLAUDE_PLUGIN_ROOT}/references/rulebook.md`. It is the
+**First, read the rulebook**: `${CLAUDE_PLUGIN_ROOT}/references/rulebook.md`. It is the
 authoritative generation procedure (hooks, hard rules, archetypes, schemas, the 14-point
 self-audit). Everything below assumes you have it loaded. Do not author from memory of the
 Workflow tool; author from the rulebook.
 
 ---
 
-## STEP 0 — understand the task
+## STEP 0: understand the task
 
 Restate the task in one sentence. Then answer, briefly, in chat:
 
@@ -51,11 +51,11 @@ Restate the task in one sentence. Then answer, briefly, in chat:
 
 If the task is too vague to answer the first two (you cannot name the unit of work or tell
 whether the size is known), ask the user ONE clarifying question via `AskUserQuestion`, then
-continue. Do not guess the topology — the topology is the whole point.
+continue. Do not guess the topology; the topology is the whole point.
 
 ---
 
-## STEP 1 — choose the shape
+## STEP 1: choose the shape
 
 From the rulebook's archetypes, pick the closest fit (UNDERSTAND / DESIGN / REVIEW /
 RESEARCH / MIGRATE / GENERIC) and state it in one line with the reason. Then decide the
@@ -65,14 +65,14 @@ concrete topology:
 - the stages each item flows through,
 - which single stage (if any) is a barrier and why,
 - the schema(s) for structured returns,
-- whether a verify / judge / completeness pass is warranted (scale to the ask — see rulebook §1 rule 14),
+- whether a verify / judge / completeness pass is warranted (scale to the ask; see rulebook §1 rule 14),
 - whether the size is unknown -> which loop, and its termination (K dry rounds, or `budget.total` guard).
 
 Keep this to a short spec, not prose. This spec is what you are about to encode.
 
 ---
 
-## STEP 2 — write the script
+## STEP 2: write the script
 
 Write the script to `${CLAUDE_PLUGIN_ROOT}/../../.claude/workflows/<save-name>.js` (create
 `.claude/workflows/` if missing). Follow the rulebook exactly:
@@ -81,7 +81,7 @@ Write the script to `${CLAUDE_PLUGIN_ROOT}/../../.claude/workflows/<save-name>.j
   `phases` titles must match your `phase()` calls.
 - **`pipeline()` by default.** Use `parallel()` only for the one barrier you justified in
   STEP 1. If you cannot name the cross-item dependency, it is a pipeline.
-- **`schema` for every structured return** — define tight JSON-Schema objects; never
+- **`schema` for every structured return**: define tight JSON-Schema objects; never
   `JSON.parse` agent text.
 - Inside concurrent stages, set `opts.phase` (and `opts.label`) so the progress tree is
   correct and `phase()` state does not race.
@@ -90,16 +90,16 @@ Write the script to `${CLAUDE_PLUGIN_ROOT}/../../.claude/workflows/<save-name>.j
   you have a clear reason.
 - Guard any budget loop on `budget.total`. `log()` any coverage cap.
 - Parameterize over `args` where the task has obvious inputs (paths, a question, a site
-  list), so the saved workflow is reusable — not hardcoded to one run.
+  list), so the saved workflow is reusable, not hardcoded to one run.
 - Prompt subagents to **return raw data** for their schema, not prose for a human.
 - No `Date.now()` / `Math.random()` / argless `new Date()`; no TS syntax; no imports.
 
-Write real, runnable code — not a sketch with `// ...` holes in the control flow. Schema
+Write real, runnable code, not a sketch with `// ...` holes in the control flow. Schema
 property lists may be trimmed for brevity, but the orchestration must be complete.
 
 ---
 
-## STEP 3 — validate (gate — do not skip)
+## STEP 3: validate (gate; do not skip)
 
 1. **Syntax:** run `node --check <path>`. If it fails, fix and re-check until it passes.
 2. **14-point self-audit:** walk the rulebook §6 checklist against the file you wrote, in
@@ -114,20 +114,20 @@ Do not advance to STEP 4 until `node --check` passes and all 14 items are `✓`.
 
 ---
 
-## STEP 4 — present, save, optionally run
+## STEP 4: present, save, optionally run
 
 Show the user:
 
-1. **One-line summary** — archetype + topology (e.g. "REVIEW: pipeline of 4 dimensions,
+1. **One-line summary**: archetype + topology (e.g. "REVIEW: pipeline of 4 dimensions,
    each finding adversarially verified by a 3-skeptic majority vote").
 2. **The validated script path** (`.claude/workflows/<name>.js`) and a fenced code block of
    the script.
-3. **The validation result** — `node --check` passed, 14/14 audit green.
+3. **The validation result**: `node --check` passed, 14/14 audit green.
 4. **How to run it:**
    - You (Claude) can run it now with the Workflow tool: `Workflow({scriptPath: "<path>", args: <args>})`.
    - To iterate: edit the file, then re-run `Workflow({scriptPath})`. To resume a paused
      run: `Workflow({scriptPath, resumeFromRunId})`.
-   - It is a saved, named workflow — invokable later by name.
+   - It is a saved, named workflow, invokable later by name.
 
 **If `--run` was passed:** the user has explicitly opted into running the workflow, so call
 the Workflow tool with `{scriptPath: "<path>", args: <flags.args or omitted>}` now. Relay
