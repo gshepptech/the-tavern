@@ -116,11 +116,11 @@ CYCLE_PROMPT='Run exactly ONE cycle of the active Ranger loop, then stop.
 Read .ranger/active-run.json for the run directory, then that run directory'"'"'s
 state.json, backlog.json and the tail of journal.md. Resume at the recorded
 phase and carry the loop through to the next local commit (or to the item being
-quarantined, or to a dry cycle that rotates on). Dispatch the read-only pools —
-scouts, planners, plan reviewers — as parallel batches in a single message, as
+quarantined, or to a dry cycle that rotates on). Dispatch the read-only pools
+(scouts, planners, plan reviewers) as parallel batches in a single message, as
 commands/run.md STEP 3 describes; build one item at a time. Update state.json
 before you finish. Follow the Ranger orchestration rules in the ranger
-plugin'"'"'s commands/run.md — you are the lead: you spawn agents and manage
+plugin'"'"'s commands/run.md. You are the lead: you spawn agents and manage
 state, you never read or edit code yourself. Do not debrief; another cycle
 follows this one.'
 
@@ -136,7 +136,7 @@ failures=0
 while :; do
   status="$(run_status)"
   if [[ "$status" != "active" ]]; then
-    echo "ranger: run status is '$status' — exiting."
+    echo "ranger: run status is '$status', exiting."
     break
   fi
 

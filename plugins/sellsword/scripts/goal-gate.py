@@ -163,7 +163,7 @@ def main() -> int:
     elapsed_min = int(elapsed // 60) if elapsed is not None else "?"
     max_min = max_seconds // 60 if max_seconds > 0 else "?"
     reason = (
-        "[sellsword:goal] Goal NOT met — the Sellsword goal loop is still active. "
+        "[sellsword:goal] Goal NOT met: the Sellsword goal loop is still active. "
         "Do NOT stop.\n"
         f"  Condition: {state.get('condition') or '(unspecified)'}\n"
         f"  Cycle: {cycle}/{max_cycles or '?'}    "
@@ -176,7 +176,7 @@ def main() -> int:
         "re-run dual verification.\n"
         "  - The goal is met ONLY when auditor AND fresh-eyes BOTH return "
         "'pass'.\n"
-        "  - If the builder declared stuck, run multi-angle retry — do not "
+        "  - If the builder declared stuck, run multi-angle retry; do not "
         "stop.\n"
         "  - Update <run_dir>/state.json (cycle, last_auditor_verdict, "
         "last_fresh_eyes_verdict) after every cycle so this gate sees "

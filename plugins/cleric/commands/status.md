@@ -26,7 +26,7 @@ Render the full status of that run:
 - tracks: <list>
 - pre-sweep sha: <sha>
 - started: <created_at>
-- finished: <completed_at or —>
+- finished: <completed_at or "none">
 
 **Per-track summary:**
 | track | candidates | HIGH | MEDIUM | LOW | UNCERTAIN | applied |

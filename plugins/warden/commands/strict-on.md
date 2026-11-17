@@ -2,7 +2,7 @@
 description: Enable the warden Stop hook strict gates (grounding audit + critic-agent gate)
 ---
 
-The user wants to enable the warden strict gates: the zero-tool-call grounding audit (codebase-shaped questions require a Read/Grep/Glob call this turn — no general-knowledge fallback) and the pre-Stop critic-agent gate (substantive responses must pass an `warden:pre-stop-critic` subagent verdict before landing).
+The user wants to enable the warden strict gates: the zero-tool-call grounding audit (codebase-shaped questions require a Read/Grep/Glob call this turn, with no general-knowledge fallback) and the pre-Stop critic-agent gate (substantive responses must pass an `warden:pre-stop-critic` subagent verdict before landing).
 
 Run exactly this Bash command:
 

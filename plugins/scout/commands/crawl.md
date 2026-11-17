@@ -8,29 +8,29 @@ The user wants a smoke test per discoverable route. Base URL is in $ARGUMENTS (d
 
 1. `playwright.config.ts` must exist. If not, route them to `/scout:init`.
 2. Dev server must be reachable. `curl -sI $BASE_URL`.
-3. Playwright MCP must be loaded (for the dynamic crawl phase) — check that `browser_navigate`/`browser_snapshot` are available. If they aren't, tell the user to restart Claude Code and STOP.
+3. Playwright MCP must be loaded (for the dynamic crawl phase): check that `browser_navigate`/`browser_snapshot` are available. If they aren't, tell the user to restart Claude Code and STOP.
 
-## Route discovery — two passes, both run
+## Route discovery: two passes, both run
 
-### Pass 1: Static — read the router config
+### Pass 1 (static): read the router config
 
 Detect the framework by what's in the repo:
 
 | Framework | Where routes live |
 |---|---|
-| Next.js (app router) | `app/**/page.{ts,tsx,js,jsx}` — route = path from `app/` minus `/page.*`, with `[param]` -> `:param` |
+| Next.js (app router) | `app/**/page.{ts,tsx,js,jsx}`; route = path from `app/` minus `/page.*`, with `[param]` -> `:param` |
 | Next.js (pages router) | `pages/**/*.{ts,tsx,js,jsx}` excluding `_app`, `_document`, `api/` |
 | React Router | grep for `<Route path=` and `createBrowserRouter` |
-| Vue Router | `router/index.{ts,js}` — read the `routes` array |
+| Vue Router | `router/index.{ts,js}`; read the `routes` array |
 | SvelteKit | `src/routes/**/+page.{svelte,ts}` |
 | Remix | `app/routes/**/*.{ts,tsx,jsx}` |
 | Astro | `src/pages/**/*.{astro,md,mdx}` |
 
-Use Grep/Glob. List every static route. For dynamic routes with params, generate a smoke spec only if the user can give you a sample value — otherwise note them as "dynamic — needs sample data" and skip generation.
+Use Grep/Glob. List every static route. For dynamic routes with params, generate a smoke spec only if the user can give you a sample value; otherwise note them as "dynamic, needs sample data" and skip generation.
 
-### Pass 2: Dynamic — BFS crawl from baseURL via MCP
+### Pass 2 (dynamic): BFS crawl from baseURL via MCP
 
-`browser_navigate` to baseURL, `browser_snapshot`, extract all anchor `href`s pointing to same-origin paths, enqueue. Visit each, repeat. Depth limit 4, total page limit 60 — bail with a count if hit.
+`browser_navigate` to baseURL, `browser_snapshot`, extract all anchor `href`s pointing to same-origin paths, enqueue. Visit each, repeat. Depth limit 4, total page limit 60; bail with a count if hit.
 
 Union the two passes. Static catches routes hidden behind auth or feature flags; dynamic catches routes that exist but aren't in the obvious router config (e.g., generated, lazy-loaded). Deduplicate.
 

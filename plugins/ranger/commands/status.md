@@ -15,19 +15,19 @@ Read-only. Never changes a run.
 3. Report:
 
 ```
-**<status>** — <run_id> · cycle <cycle><cap> · <elapsed>
+**<status>**: <run_id> · cycle <cycle><cap> · <elapsed>
 Brief: <brief>
-Phase: <phase> · In flight: <item, with its tier, or "—"> · Stalls: <stall_count>
+Phase: <phase> · In flight: <item, with its tier, or "none"> · Stalls: <stall_count>
 Team: <scouts> scouts · <planners> planners · 1 builder
 Pipeline: <ready> ready · <planned> planned · <approved> approved (watermark <backlog_watermark>, cap <backlog_cap>)
-Economics: floor <floor> · <lean_cycles> lean cycles<" — nothing above floor lately; it keeps sweeping until you stop it" if lean_cycles >= 5>
+Economics: floor <floor> · <lean_cycles> lean cycles<" (nothing above floor lately; it keeps sweeping until you stop it)" if lean_cycles >= 5>
 Branch: <current git branch> · flags: <the flags that are on, or "defaults (local commits, current branch, never asks)">
 
 **Last 5 shipped**
 <the last five journal lines>
 
 **Plans ready to build**
-<approved items: score, title — or "none yet">
+<approved items: score, title; or "none yet">
 
 **Next up**
 <top 5 ready backlog items: score, title, tier>

@@ -5,7 +5,7 @@
   <circle cx="24" cy="21" r="6" fill="#ff5f56"/>
   <circle cx="44" cy="21" r="6" fill="#ffbd2e"/>
   <circle cx="64" cy="21" r="6" fill="#27c93f"/>
-  <text x="380" y="26" text-anchor="middle" fill="#8b949e">the-tavern — verify</text>
+  <text x="380" y="26" text-anchor="middle" fill="#8b949e">the-tavern: verify</text>
 
   <!-- guard demo: real verdicts from guard-git.py against an armed Ranger run -->
   <text x="24" y="76" fill="#8b949e"># an unattended Ranger run is armed. its guard, on every command:</text>
@@ -55,5 +55,5 @@
   <text x="180" y="506" fill="#c9d1d9">manifests · versions · docs · flags · profiles</text>
   <text x="640" y="506" fill="#3fb950">all green</text>
 
-  <text x="24" y="542" fill="#484f58" font-size="12">actual output — guard-git.py and the plugin test suites, this repository</text>
+  <text x="24" y="542" fill="#484f58" font-size="12">actual output from guard-git.py and the plugin test suites, this repository</text>
 </svg>

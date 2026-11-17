@@ -14,7 +14,7 @@ FILTER="$ARGUMENTS"
 
 Default filter: show all runs, most recent first.
 
-- `--active` -> only `status` in {initialized, scouting, recon_complete, executing, active} — the last one (`active`) is `/sellsword:goal`'s in-progress marker; `/sellsword:do` runs never use it.
+- `--active` -> only `status` in {initialized, scouting, recon_complete, executing, active}. The last one (`active`) is `/sellsword:goal`'s in-progress marker; `/sellsword:do` runs never use it.
 - `--completed` -> only `status` in {completed, goal_met}
 - `--all` -> everything including cancelled, capped, blocked, and stuck
 
@@ -36,8 +36,8 @@ Default filter: show all runs, most recent first.
 | run id | status | intent | started | finished |
 |---|---|---|---|---|
 | sellsword-20260512-143218-a3f9 | ✓ completed | deploy Keycloak to Azure on RHEL | 14:32:18 | 15:47:02 |
-| sellsword-20260512-131045-7c1e | ⚠ stuck | get the airgap bundle pulling all… | 13:10:45 | — |
-| sellsword-20260512-094500-2bd1 | ↻ executing | rotate the prod DB creds and upd… | 09:45:00 | — |
+| sellsword-20260512-131045-7c1e | ⚠ stuck | get the airgap bundle pulling all… | 13:10:45 | - |
+| sellsword-20260512-094500-2bd1 | ↻ executing | rotate the prod DB creds and upd… | 09:45:00 | - |
 ```
 
 Status icons:
@@ -45,7 +45,7 @@ Status icons:
 - ↻ in-progress (any active phase)
 - ⚠ stuck
 - ✗ cancelled
-- — failed / unknown
+- ? failed / unknown
 
 4. If there are active runs, remind the user they can resume with `/sellsword:resume <run-id>`.
 

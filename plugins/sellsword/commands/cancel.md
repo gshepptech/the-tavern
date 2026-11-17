@@ -6,7 +6,7 @@ allowed-tools: ["Bash(cat:*)", "Bash(ls:*)", "Bash(test:*)", "Bash(date:*)", "Re
 
 # Sellsword Cancel
 
-Mark a Sellsword run as cancelled. Does NOT kill running processes (the orchestrator is per-invocation, not a daemon) — it sets the on-disk status so subsequent runs/lists treat it as cancelled.
+Mark a Sellsword run as cancelled. Does NOT kill running processes (the orchestrator is per-invocation, not a daemon). It sets the on-disk status so subsequent runs/lists treat it as cancelled.
 
 ```
 RUN_ID="$ARGUMENTS"
@@ -21,9 +21,9 @@ If `$ARGUMENTS` is empty, list active runs (status not in {completed, cancelled*
 2. Read current status. If already `completed` or `cancelled*`, tell the user "nothing to do" and stop.
 
 3. Confirm with user via `AskUserQuestion`:
-   - **Cancel** — mark cancelled, leave artifacts for inspection
-   - **Cancel and delete** — mark cancelled, remove the run dir (only the run dir, never anything outside)
-   - **Never mind** — leave alone
+   - **Cancel**: mark cancelled, leave artifacts for inspection
+   - **Cancel and delete**: mark cancelled, remove the run dir (only the run dir, never anything outside)
+   - **Never mind**: leave alone
 
 4. On Cancel: update `state.json`:
 
@@ -42,7 +42,7 @@ If `$ARGUMENTS` is empty, list active runs (status not in {completed, cancelled*
 rm -rf ".sellsword/runs/$RUN_ID"
 ```
 
-(This is the only place in the plugin where the orchestrator itself does a destructive op — and it's gated by an explicit user confirmation.)
+(This is the only place in the plugin where the orchestrator itself does a destructive op, and it's gated by an explicit user confirmation.)
 
 6. Confirm to user:
 

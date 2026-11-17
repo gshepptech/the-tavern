@@ -2,7 +2,7 @@
 description: Disable warden methodical-mode injection until /warden:on is run
 ---
 
-The user wants to silence the warden UserPromptSubmit hook. This writes a marker file, so it persists across restarts and future sessions — it is not scoped to the current conversation — until `/warden:on` removes it.
+The user wants to silence the warden UserPromptSubmit hook. This writes a marker file, so it persists across restarts and future sessions (it is not scoped to the current conversation) until `/warden:on` removes it.
 
 Run exactly this Bash command:
 
