@@ -13,14 +13,14 @@ methodical="on"; [ -f ~/.claude/.warden-state ] && methodical=$(cat ~/.claude/.w
 After it succeeds, reply to the user with three short lines:
 
 - methodical-mode: explain the value
-  - `on` — methodical preamble fires every turn (default)
-  - `off` — silenced until `/warden:on` re-enables it (marker file — persists across restarts, not scoped to this session)
-  - `casual` — next turn skips, then auto-reverts to on
+  - `on`: methodical preamble fires every turn (default)
+  - `off`: silenced until `/warden:on` re-enables it (marker file: persists across restarts, not scoped to this session)
+  - `casual`: next turn skips, then auto-reverts to on
 - citation-verifier: explain the value
-  - `default` — Stop hook blocks responses with unverified file:line citations (default)
-  - `off` — hook disabled; `/warden:citations-on` re-enables
+  - `default`: Stop hook blocks responses with unverified file:line citations (default)
+  - `off`: hook disabled; `/warden:citations-on` re-enables
 - fable-mode: explain the value
-  - `default` — Stop hook blocks responses that end by promising work without doing it (default)
-  - `off` — gate disabled; `/warden:fable-on` re-enables
+  - `default`: Stop hook blocks responses that end by promising work without doing it (default)
+  - `off`: gate disabled; `/warden:fable-on` re-enables
 
-Keep it short — one line per state. Do not add anything else.
+Keep it short: one line per state. Do not add anything else.
