@@ -444,7 +444,7 @@ def _verdict(tokens: list[str], flags: dict) -> str | None:
     if sub in GIT_PUBLISH_VERBS:
         return (
             f"Ranger commits LOCALLY ONLY. `git {sub}` moves work off this "
-            "machine and is blocked for the whole run — there is no flag that "
+            "machine and is blocked for the whole run; there is no flag that "
             "enables it. Commit locally and let the user publish once they "
             "have reviewed the work."
         )
@@ -472,7 +472,7 @@ def _verdict(tokens: list[str], flags: dict) -> str | None:
 
     # send-email publishes work outside the repo just as effectively as a push.
     if sub == "send-email":
-        return "Ranger works locally only — `git send-email` sends work off the machine."
+        return "Ranger works locally only: `git send-email` sends work off the machine."
 
     if sub == "clean":
         # -x and -X both delete git-ignored files; -X deletes ONLY those, which
