@@ -32,7 +32,7 @@ Accept either `--tracks=1,3,5` or `--tracks=dedup,dead-code,type-strengthen`. De
 
 ---
 
-## PHASE 0 — preflight
+## PHASE 0: preflight
 
 ### 0.1 Verify git repo
 
@@ -90,7 +90,7 @@ Save both in state.json.
 
 ---
 
-## PHASE 1 — initialize the run
+## PHASE 1: initialize the run
 
 ```bash
 RUN_ID="cleric-$(date -u +%Y%m%d-%H%M%S)-$(printf '%04x' $((RANDOM)))"
@@ -125,7 +125,7 @@ Write `$RUN_DIR/state.json`:
 }
 ```
 
-`track_results` starts empty and is filled in per track as PHASE 2 and PHASE 4 complete — it's what `/cleric:status` reads to render the per-track table.
+`track_results` starts empty and is filled in per track as PHASE 2 and PHASE 4 complete. It's what `/cleric:status` reads to render the per-track table.
 
 Status line to user:
 
@@ -135,7 +135,7 @@ Cleric run <RUN_ID>. Mode: <dry-run | apply>. Tracks: <list>. Inspecting in para
 
 ---
 
-## PHASE 2 — inspection (parallel)
+## PHASE 2: inspection (parallel)
 
 Spawn all selected track agents in parallel. Use ONE message with multiple `Agent` calls.
 
@@ -154,18 +154,18 @@ Wait for all to return. Each writes its `assessment.md` under `<track_dir>` and 
 
 Validate each return parses correctly. If any track failed to produce JSON, log the failure and continue with the others (don't fail the whole run for one track).
 
-For each track that returned valid JSON, write its structured return into `state.json`'s `track_results.<track>` (candidates_total, by_confidence, assessment_path, etc.) — this is the data `/cleric:status` renders.
+For each track that returned valid JSON, write its structured return into `state.json`'s `track_results.<track>` (candidates_total, by_confidence, assessment_path, etc.). This is the data `/cleric:status` renders.
 
 Update state.json: `status: "inspection_complete"`, `phase: "review"`.
 
 ---
 
-## PHASE 3 — present consolidated assessment
+## PHASE 3: present consolidated assessment
 
 Read each track's structured return. Render a consolidated summary in chat:
 
 ```markdown
-**Cleric assessment — <RUN_ID>**
+**Cleric assessment: <RUN_ID>**
 
 Across <N> tracks, found <total candidates>. Of those:
 - HIGH-confidence (auto-applicable on `--apply`): <X>
@@ -195,9 +195,9 @@ Tell the user nothing was changed. Show how to apply: `/cleric:apply <RUN_ID>` t
 
 Call `AskUserQuestion` with:
 
-- **Apply HIGH-confidence only** — apply <X> changes across selected tracks, run checks after each batch (recommended)
-- **Review MEDIUM/LOW first** — show details, decide which to elevate, then apply
-- **Cancel** — stop here, no changes made
+- **Apply HIGH-confidence only**: apply <X> changes across selected tracks, run checks after each batch (recommended)
+- **Review MEDIUM/LOW first**: show details, decide which to elevate, then apply
+- **Cancel**: stop here, no changes made
 
 Branch:
 
@@ -216,7 +216,7 @@ Skip the question. Go directly to PHASE 4.
 
 ---
 
-## PHASE 4 — apply phase
+## PHASE 4: apply phase
 
 Update state.json: `status: "applying"`, `phase: "apply"`.
 
@@ -230,13 +230,13 @@ Applying HIGH-confidence changes across <N> tracks. Atomic commits per batch. Wi
 
 Apply tracks in this order (designed to minimize cross-track interference):
 
-1. **deprecated-slop** (comment changes first — lowest risk, removes noise that confuses other tracks)
+1. **deprecated-slop** (comment changes first: lowest risk, removes noise that confuses other tracks)
 2. **dead-code** (remove unused before deduplicating what remains)
 3. **dedup** (consolidate after dead code is gone)
 4. **type-consolidate** (merge types now that the surface is smaller)
 5. **type-strengthen** (strengthen types after consolidation, on the canonical types)
 6. **error-cleanup** (errors now that signatures are stable)
-7. **circular-deps** (last — depends on the structural reshuffling above)
+7. **circular-deps** (last; depends on the structural reshuffling above)
 
 Skip tracks not in `tracks_selected`. Skip tracks that returned 0 HIGH-confidence candidates.
 
@@ -269,14 +269,14 @@ Wait for the track to return. Read its structured return and merge it into `stat
 Append a status line per track:
 
 ```
-✓ dedup — applied 12 changes, 1 batch reverted (type check failed), checks: pass
-✓ dead-code — applied 8 removals, checks: pass
+✓ dedup: applied 12 changes, 1 batch reverted (type check failed), checks: pass
+✓ dead-code: applied 8 removals, checks: pass
 …
 ```
 
 ---
 
-## PHASE 5 — reviewer
+## PHASE 5: reviewer
 
 After all tracks have applied (or skipped), spawn the reviewer.
 
@@ -293,22 +293,22 @@ Wait for the reviewer to return.
 
 If `reviewer.status` is `failed` (checks failing in the final pass), surface to user with the failure details and ask:
 
-- **Revert everything** — `git reset --hard <PRE_SWEEP_SHA>` to start over
-- **Leave as-is** — keep partial changes; investigate manually
-- **Show me what failed** — render the failing check output
+- **Revert everything**: `git reset --hard <PRE_SWEEP_SHA>` to start over
+- **Leave as-is**: keep partial changes; investigate manually
+- **Show me what failed**: render the failing check output
 
 If `reviewer.status` is `all-pass` or `partial`, continue to PHASE 6.
 
 ---
 
-## PHASE 6 — debrief
+## PHASE 6: debrief
 
 Update state.json: `status: "completed"`, `phase: "debrief"`, `completed_at: "<ISO>"`.
 
 Render the debrief in chat from the reviewer's output:
 
 ```markdown
-**Cleric <status> — <RUN_ID>**
+**Cleric <status>: <RUN_ID>**
 
 **Net change**
 - Files: <N>

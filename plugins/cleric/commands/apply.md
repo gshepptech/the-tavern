@@ -18,7 +18,7 @@ If `$ARGUMENTS` is empty, list recent runs with status `inspection_complete` and
 
 1. Verify `.cleric/runs/$RUN_ID/state.json` exists. If not, fail with helpful message.
 
-2. Read state.json. Check `status` — must be `inspection_complete` or `cancelled_at_review`. If anything else, tell user the run is in an unexpected state (point them at the run dir).
+2. Read state.json. Check `status`: it must be `inspection_complete` or `cancelled_at_review`. If anything else, tell user the run is in an unexpected state (point them at the run dir).
 
 3. Verify the working tree is still clean:
 
@@ -34,15 +34,15 @@ If dirty: refuse, instruct user to stash/commit/branch first.
 git rev-parse "$PRE_SWEEP_SHA" >/dev/null 2>&1
 ```
 
-If not, the historical baseline is gone — tell the user the run cannot be applied because the baseline was rewritten. Suggest re-running `/cleric:run --apply` fresh.
+If not, the historical baseline is gone. Tell the user the run cannot be applied because the baseline was rewritten. Suggest re-running `/cleric:run --apply` fresh.
 
 5. Read each track's `assessment.md`. Present a brief summary to the user:
 
 ```
 Cleric run <RUN_ID> inspection found:
 - HIGH-confidence (will apply): <X> total across N tracks
-- MEDIUM-confidence (will skip — needs review): <Y>
-- LOW (will skip — flagged): <Z>
+- MEDIUM-confidence (will skip, needs review): <Y>
+- LOW (will skip, flagged): <Z>
 
 Last inspected: <created_at>
 Tracks: <list>
@@ -51,11 +51,11 @@ Proceed with apply?
 ```
 
 6. Call `AskUserQuestion`:
-   - **Apply** — proceed
-   - **Review HIGH list first** — render the HIGH-confidence items from each assessment, then re-ask
-   - **Cancel** — stop, no changes made
+   - **Apply**: proceed
+   - **Review HIGH list first**: render the HIGH-confidence items from each assessment, then re-ask
+   - **Cancel**: stop, no changes made
 
-7. On Apply: invoke the apply phase from `commands/run.md` PHASE 4 onward — same logic, same track-application order, same reviewer pass. The orchestrator code in run.md is the canonical implementation; this command is a re-entry point.
+7. On Apply: invoke the apply phase from `commands/run.md` PHASE 4 onward, with the same logic, same track-application order, same reviewer pass. The orchestrator code in run.md is the canonical implementation; this command is a re-entry point.
 
 8. Update state.json: `mode: "apply"`, `applied_at: "<ISO>"`.
 
