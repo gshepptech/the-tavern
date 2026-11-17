@@ -52,7 +52,7 @@ def test_init_blocks_when_the_integration_check_cannot_start(repo, monkeypatch):
     write(repo, "Makefile", "build:\n\ttrue\n\ntest:\n\tpython3 tests/run.py\n\ne2e:\n\tdocker compose up\n")
     write(repo, "spec.md", "- FR-1: x\n- AC-1: the end-to-end check `make e2e` passes.\n")
     git(repo, "add", "-A"); git(repo, "commit", "-qm", "e2e")
-    monkeypatch.setenv("PATH", "/usr/bin:/bin")  # make is in /usr/bin; docker is not
+    monkeypatch.setenv("DOCKER_HOST", "unix:///nonexistent/docker.sock")  # no reachable daemon, even where docker is installed
     r = j(repo, "init", "--spec", "spec.md", "--run", "e")
     assert r["ok"] and r["integration"]["command"] == "make e2e"
     assert "The build cannot start here." in r["blocked"] and "docker info" in r["blocked"]
@@ -64,7 +64,7 @@ def test_preflight_on_resume_names_the_check_again_from_the_changed_repository(r
     write(repo, "Makefile", "build:\n\ttrue\n\ntest:\n\tpython3 tests/run.py\n\ne2e:\n\tdocker compose up\n")
     write(repo, "spec.md", "- FR-1: x\n- AC-1: the end-to-end check `make e2e` passes.\n")
     git(repo, "add", "-A"); git(repo, "commit", "-qm", "e2e")
-    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    monkeypatch.setenv("DOCKER_HOST", "unix:///nonexistent/docker.sock")
     assert "docker info" in j(repo, "init", "--spec", "spec.md", "--run", "g")["blocked"]
     write(repo, "Makefile", "build:\n\ttrue\n\ntest:\n\tpython3 tests/run.py\n\ne2e:\n\tpython3 tests/e2e.py\n")
     git(repo, "add", "-A"); git(repo, "commit", "-qm", "no docker")
