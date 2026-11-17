@@ -92,7 +92,7 @@ Subagent (`Task`/`Agent`) reads never satisfy the citation gate. A subagent's su
 
 ### What it looks like
 
-There's nothing to invoke; Warden acts on ordinary prompts. The samples below are abbreviated, but the wording is the gates' own, from `scripts/check-citations.py`.
+There's nothing to invoke; Warden acts on ordinary prompts. The samples below are abbreviated, but the wording is the gates' own, from `scripts/warden_gates/`.
 
 **1. Claude answers about code it didn't open.** You ask a question about a repo you've been working in all session:
 
@@ -107,7 +107,7 @@ Claude answers from what it remembers of the session rather than re-reading, and
 Grep'd by you in this turn:
   - internal/middleware/ratelimit.go:88
   - internal/router/routes.go:142
-Subagent (Task/Agent) calls do NOT count as direct verification - their internal
+Subagent (Task/Agent) calls do NOT count as direct verification; their internal
 Reads are not visible here. For each unverified citation, either:
   1. Read the file yourself now and confirm the line is correct, or
   2. Remove the citation from your response.
@@ -128,9 +128,9 @@ Claude diagnoses the missing index, writes a convincing paragraph, and signs off
 [warden:completion] Your response ends by stating an intent to do work ("I'll add
 the missing index and re-run the migration") without actually doing it. This is
 the race-to-a-promise pattern Fable-mode exists to catch. Do that work NOW with
-tool calls - do not hand back a plan you could execute. End the turn only when
+tool calls; do not hand back a plan you could execute. End the turn only when
 the task is complete (with evidence from a tool result this turn) or you are
-genuinely blocked on input that only the user can provide - in which case ASK a
+genuinely blocked on input that only the user can provide, in which case ASK a
 direct question instead of promising.
 (To disable this check: /warden:fable-off)
 ```
@@ -254,7 +254,7 @@ Warden keeps small marker files under `~/.claude/`. The hooks read them before f
 | `~/.claude/.warden-citations-log.jsonl` | Log of every gate decision, for tuning. Redacted and size-capped (see below) |
 
 > [!TIP]
-> Tail `~/.claude/.warden-citations-log.jsonl` after real use. Blocks against citations that turn out to be correct are a signal to widen `CITATION_RE` in `scripts/check-citations.py`; missed blocks are a signal to tighten it. The preamble itself lives in `scripts/inject.sh` if you want to soften, sharpen, or shorten it.
+> Tail `~/.claude/.warden-citations-log.jsonl` after real use. Blocks against citations that turn out to be correct are a signal to widen `CITATION_RE` in `scripts/warden_gates/config.py`; missed blocks are a signal to tighten it. The preamble itself lives in `scripts/inject.sh` if you want to soften, sharpen, or shorten it.
 
 **What the log does and does not contain.** It is one file in your home directory that accumulates across every project you use Warden in, so it records only what tuning needs: which gate fired, counts, lengths, and the *basename* of a cited file. Response prose and matched phrases are reduced to their length, and absolute paths are reduced to a filename, so the directory structure of a private repo never lands in it. It rotates at 2 MB rather than growing forever. If you would rather it did not exist at all, delete it; nothing reads it back.
 
@@ -275,7 +275,7 @@ Warden doesn't need any of these; it's built to stand alone. If you've installed
 
 ## Development
 
-The hooks are [`scripts/inject.sh`](scripts/inject.sh) (UserPromptSubmit) and [`scripts/check-citations.py`](scripts/check-citations.py) (Stop), both wired in [`hooks/hooks.json`](hooks/hooks.json). Run the tests from the plugin directory:
+The hooks are [`scripts/inject.sh`](scripts/inject.sh) (UserPromptSubmit) and [`scripts/check-citations.py`](scripts/check-citations.py) (Stop), both wired in [`hooks/hooks.json`](hooks/hooks.json). The Stop hook is a thin entry point; the gates live in [`scripts/warden_gates/`](scripts/warden_gates/): `config.py` (mode files, thresholds, regexes), `transcript.py` (turn slicing and critic-output parsing), `gates.py` (citations, uncertainty, grounding, completion), `critic.py` (the critic dialog) and `state.py` (mode reads, trust-me, the tuning log). Run the tests from the plugin directory:
 
 ```bash
 cd plugins/warden

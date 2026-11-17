@@ -284,7 +284,7 @@ def test_trust_me_survives_its_own_turn():
 
     assert raw.exists(), (
         "the raw .warden-trust-me marker was consumed by the Stop hook on the turn "
-        "that created it — the bypass is spent before the user's next prompt"
+        "that created it, so the bypass is spent before the user's next prompt"
     )
     print("  ✓ trust_me_survives_its_own_turn")
 
@@ -306,7 +306,7 @@ def test_trust_me_armed_marker_is_consumed():
     _run_hook_with_home(t, home)
 
     assert not armed.exists(), (
-        "the armed marker survived the Stop hook — the bypass would leak into "
+        "the armed marker survived the Stop hook, so the bypass would leak into "
         "later turns instead of being one-shot"
     )
     print("  ✓ trust_me_armed_marker_is_consumed")
@@ -631,9 +631,9 @@ def main() -> int:
             failed += 1
     print()
     if failed:
-        print(f"FAIL — {failed} of {len(tests)} tests failed")
+        print(f"FAIL: {failed} of {len(tests)} tests failed")
         return 1
-    print(f"PASS — all {len(tests)} tests passed")
+    print(f"PASS: all {len(tests)} tests passed")
     return 0
 
 

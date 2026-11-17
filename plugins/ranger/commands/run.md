@@ -81,7 +81,7 @@ Run without --dry-run to execute. A real run is uncapped: it works until you sto
 
 An unattended/looped run cannot survive an interactive block. Warden installs strict `Stop`-hook gates that HARD-block and need an interactive `/warden:trust-me` to clear, and that would **deadlock** a `/loop` run.
 
-**A missing marker means strict is ON, not off.** Warden reads an absent marker as `default`, and `default` enforces (see `warden/scripts/check-citations.py`: `read_mode` returns `"default"` when the file is absent, and only a literal `"off"` clears the gate). A freshly installed plugin writes no marker at all, so "no file" is the *most* likely enforcing state, not a safe one. Only an explicit `off` is safe, and the check only applies when Warden is actually enabled:
+**A missing marker means strict is ON, not off.** Warden reads an absent marker as `default`, and `default` enforces (see `warden/scripts/warden_gates/state.py`: `read_mode` returns `"default"` when the file is absent, and only a literal `"off"` clears the gate). A freshly installed plugin writes no marker at all, so "no file" is the *most* likely enforcing state, not a safe one. Only an explicit `off` is safe, and the check only applies when Warden is actually enabled:
 
 ```bash
 python3 - <<'PY'
