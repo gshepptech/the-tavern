@@ -1,26 +1,26 @@
 ---
 name: author
-description: Rules for writing Playwright *.spec.ts files that don't flake — selector hygiene, auto-wait discipline, idempotent fixtures, readable trace output. Used by /scout:write, /scout:record, and the scout:spec-writer subagent.
+description: Rules for writing Playwright *.spec.ts files that don't flake (selector hygiene, auto-wait discipline, idempotent fixtures, readable trace output). Used by /scout:write, /scout:record, and the scout:spec-writer subagent.
 user_invocable: false
 ---
 
-# scout:author — Playwright Spec Authoring Rules
+# scout:author: Playwright Spec Authoring Rules
 
-You are about to write or modify a Playwright spec. These rules are non-negotiable unless the user explicitly overrides one — they encode lessons that took the Playwright community years to learn.
+You are about to write or modify a Playwright spec. These rules are non-negotiable unless the user explicitly overrides one. They encode lessons that took the Playwright community years to learn.
 
 ## 1. Locators
 
-**Priority order — use the first that works:**
+**Priority order (use the first that works):**
 
-1. `page.getByRole(role, { name })` — matches accessibility tree. Survives most refactors.
-2. `page.getByLabel(text)` — for form fields with `<label>` association.
-3. `page.getByText(text, { exact })` — for prose, headings, links by visible text.
-4. `page.getByTestId(id)` — only if the team uses `data-testid` and is committed to keeping them stable.
-5. `page.locator('css')` — last resort. Comment why nothing above worked.
+1. `page.getByRole(role, { name })`: matches accessibility tree. Survives most refactors.
+2. `page.getByLabel(text)`: for form fields with `<label>` association.
+3. `page.getByText(text, { exact })`: for prose, headings, links by visible text.
+4. `page.getByTestId(id)`: only if the team uses `data-testid` and is committed to keeping them stable.
+5. `page.locator('css')`: last resort. Comment why nothing above worked.
 
 **Never:**
 - XPath (unless wrapping a known-stable third-party widget)
-- CSS class names that look like Tailwind/utility classes (`.bg-blue-500`) — they're transient
+- CSS class names that look like Tailwind/utility classes (`.bg-blue-500`), which are transient
 - Nth-child indexing into a list without anchoring on a sibling's text
 
 **Always:**
@@ -31,12 +31,12 @@ You are about to write or modify a Playwright spec. These rules are non-negotiab
 
 **Never write `page.waitForTimeout(ms)`.** It is always wrong. Replace with one of:
 
-- `await expect(locator).toBeVisible({ timeout })` — wait for the element to appear
-- `await expect(locator).toHaveText(value)` — wait for the content to settle
-- `await page.waitForURL(predicate)` — wait for navigation
-- `await page.waitForResponse(url)` — wait for a specific API call
+- `await expect(locator).toBeVisible({ timeout })`: wait for the element to appear
+- `await expect(locator).toHaveText(value)`: wait for the content to settle
+- `await page.waitForURL(predicate)`: wait for navigation
+- `await page.waitForResponse(url)`: wait for a specific API call
 
-Auto-wait is built into `expect()` against locators — `await expect(page.getByRole('button')).toBeEnabled()` polls until true or times out. Use it.
+Auto-wait is built into `expect()` against locators: `await expect(page.getByRole('button')).toBeEnabled()` polls until true or times out. Use it.
 
 The only exception: a documented animation that has no observable end state (no class change, no aria-hidden flip). In that case, comment WHY the timeout is unavoidable.
 
@@ -63,7 +63,7 @@ test.describe('<feature or page>', () => {
 ```
 
 - One `test.describe` per spec file. Name it after the feature or page.
-- One `test()` per concrete behavior. Don't bundle "login, add todo, delete todo" into one test — three tests.
+- One `test()` per concrete behavior. Don't bundle "login, add todo, delete todo" into one test; write three tests.
 - `test.step()` makes the trace.zip readable. Use it for any test with more than 3 actions.
 
 ## 4. Assertions
@@ -92,9 +92,9 @@ A test that passes while the console is screaming is a test that lies.
 Each `test()` must:
 - Set up the state it needs (don't depend on prior test runs)
 - Tear down or use unique data (don't leave database rows that affect siblings)
-- Use unique identifiers — `const todoText = \`test-todo-${Date.now()}\`` — so reruns don't collide
+- Use unique identifiers (`const todoText = \`test-todo-${Date.now()}\``) so reruns don't collide
 
-The Playwright default is `fullyParallel: true`. If a test only passes when run alone, it's broken — fix the test, don't disable parallelism.
+The Playwright default is `fullyParallel: true`. If a test only passes when run alone, it's broken. Fix the test, don't disable parallelism.
 
 ## 6. Fixtures over beforeEach for shared setup
 
@@ -114,7 +114,7 @@ The `/scout:matrix` command handles this for role-based auth. For other expensiv
 - No `console.log` left in committed specs (Playwright has its own trace; logs are noise).
 - No `.only` left in committed specs (`forbidOnly: true` in CI config catches this, but don't even author them).
 
-## 9. When in doubt — what does the trace say?
+## 9. When in doubt: what does the trace say?
 
 After writing a spec, run it with `--trace=on`:
 

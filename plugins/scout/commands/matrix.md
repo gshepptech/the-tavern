@@ -7,8 +7,8 @@ The user wants every route × every role tested. Roles and login flow come from 
 ## Preflight
 
 1. `playwright.config.ts` exists.
-2. Smoke specs from `/scout:crawl` exist at `tests/smoke/` — if not, ask the user to run `/scout:crawl` first. The matrix builds on the route inventory; don't redo discovery here.
-3. `.auth/` is in `.gitignore` — verify, refuse to proceed if missing (auth artifacts must never be committed).
+2. Smoke specs from `/scout:crawl` exist at `tests/smoke/`; if not, ask the user to run `/scout:crawl` first. The matrix builds on the route inventory; don't redo discovery here.
+3. `.auth/` is in `.gitignore`: verify, and refuse to proceed if missing (auth artifacts must never be committed).
 
 ## Determine roles
 
@@ -31,15 +31,15 @@ Look for `scout.config.json` at the cwd root. If absent, ask the user for the ro
 }
 ```
 
-The `anon` role has `null` credentials — used for unauthenticated traffic. Never invent credentials. If the user hasn't provided them, ask.
+The `anon` role has `null` credentials and is used for unauthenticated traffic. Never invent credentials. If the user hasn't provided them, ask.
 
-If `scout.config.json` didn't already exist, write the collected answers to it at the cwd root, in the scaffold's shape — the setup specs generated below `import` it directly, so it must be a real file before they run.
+If `scout.config.json` didn't already exist, write the collected answers to it at the cwd root, in the scaffold's shape. The setup specs generated below `import` it directly, so it must be a real file before they run.
 
 ## Generate authenticated storageState (once per role)
 
 For each non-anon role:
 
-1. Write `tests/auth/<role>.setup.ts` — a setup spec that logs in and saves `storageState` to `.auth/<role>.json`:
+1. Write `tests/auth/<role>.setup.ts`, a setup spec that logs in and saves `storageState` to `.auth/<role>.json`:
 
 ```ts
 import { test as setup } from '@playwright/test';
@@ -73,7 +73,7 @@ projects: [
 ],
 ```
 
-Read the existing config first and merge — don't replace the user's project list.
+Read the existing config first and merge; don't replace the user's project list.
 
 ## Generate matrix specs
 
@@ -100,7 +100,7 @@ test.describe('matrix: <role> @ <route>', () => {
 });
 ```
 
-The matrix is **observation-first** — first run captures what actually happens for each (role, route). The user then reviews and tightens assertions to lock in correct behavior. Don't pretend you know the access policy without the user telling you.
+The matrix is **observation-first**: the first run captures what actually happens for each (role, route). The user then reviews and tightens assertions to lock in correct behavior. Don't pretend you know the access policy without the user telling you.
 
 ## Run
 
@@ -115,11 +115,11 @@ For each role:
 - A coverage table: route × role × observed status
 
 Tell the user:
-- Review the matrix output and tighten assertions per cell — replace the permissive `[200, 302, 401, 403, 404]` array with the actual expected status for each (route, role) pair
+- Review the matrix output and tighten assertions per cell: replace the permissive `[200, 302, 401, 403, 404]` array with the actual expected status for each (route, role) pair
 - After tightening, the matrix becomes a regression net against access-control drift
 
 ## What you do NOT do
 
-- Do not commit `.auth/*.json` — they contain session tokens
+- Do not commit `.auth/*.json`; they contain session tokens
 - Do not invent role names or credentials the user didn't provide
-- Do not assume the access policy — observe first, ask the user to lock it
+- Do not assume the access policy: observe first, ask the user to lock it

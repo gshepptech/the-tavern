@@ -6,10 +6,10 @@ The user wants to initialize Playwright E2E testing in the current project.
 
 ## Preflight (read before doing anything)
 
-1. Run `pwd` — confirm you are in the project the user wants to set up. If this is the the-tavern repo itself (cwd ends in `the-tavern`), STOP and ask the user which app to set up — this plugin is not meant to test itself.
+1. Run `pwd` and confirm you are in the project the user wants to set up. If this is the the-tavern repo itself (cwd ends in `the-tavern`), STOP and ask the user which app to set up; this plugin is not meant to test itself.
 2. Check for `package.json` at the cwd root. If missing, ask whether to `npm init -y` or whether they want a different workspace root.
 3. Check for existing `playwright.config.ts` / `playwright.config.js`. If present, STOP and ask: append-to-existing, or abort? Never overwrite without explicit ack.
-4. Check for existing `.mcp.json`. If present and already has a `playwright` server entry, skip the MCP step — don't clobber their config.
+4. Check for existing `.mcp.json`. If present and already has a `playwright` server entry, skip the MCP step; don't clobber their config.
 
 ## Steps
 
@@ -20,11 +20,11 @@ npm install --save-dev @playwright/test
 npx playwright install
 ```
 
-Both must succeed. `playwright install` downloads Chromium/Firefox/WebKit — it's a multi-hundred-MB step; tell the user it may take a minute.
+Both must succeed. `playwright install` downloads Chromium/Firefox/WebKit. It's a multi-hundred-MB step; tell the user it may take a minute.
 
 ### 2. Write `playwright.config.ts`
 
-Use this generic template — works for any framework. Do NOT bake in Next.js/Vite assumptions unless the user has confirmed the stack.
+Use this generic template; it works for any framework. Do NOT bake in Next.js/Vite assumptions unless the user has confirmed the stack.
 
 ```ts
 import { defineConfig, devices } from '@playwright/test';
@@ -48,7 +48,7 @@ export default defineConfig({
 });
 ```
 
-Single browser project by default — add Firefox/WebKit only when the user asks. Multi-browser is a 3x cost multiplier for diminishing return.
+Single browser project by default; add Firefox/WebKit only when the user asks. Multi-browser is a 3x cost multiplier for diminishing return.
 
 ### 3. Register Playwright MCP
 
@@ -67,7 +67,7 @@ If `.mcp.json` does not exist, create it with:
 
 If `.mcp.json` exists but has no `playwright` server, merge the `playwright` entry in (preserve all other servers).
 
-Default mode is HEADED (no `--headless` flag) per plugin convention — Claude needs to watch the browser when authoring specs. Users on CI/headless servers can swap to:
+Default mode is HEADED (no `--headless` flag) per plugin convention: Claude needs to watch the browser when authoring specs. Users on CI/headless servers can swap to:
 
 ```json
 "args": ["@playwright/mcp@latest", "--headless", "--caps", "vision,devtools"]
@@ -92,7 +92,7 @@ playwright-report/
 .auth/
 ```
 
-`.auth/` is for `storageState` files written by `/scout:matrix`. Never commit them — they contain session tokens.
+`.auth/` is for `storageState` files written by `/scout:matrix`. Never commit them; they contain session tokens.
 
 ### 6. Verify
 
@@ -100,7 +100,7 @@ playwright-report/
 npx playwright test --list
 ```
 
-Should run without error and report `0 tests in 0 files`. If it errors, the config is wrong — diagnose before declaring success.
+Should run without error and report `0 tests in 0 files`. If it errors, the config is wrong; diagnose before declaring success.
 
 ## Report
 
